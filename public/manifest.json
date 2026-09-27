@@ -1,0 +1,13 @@
+{
+  "name": "Nimar Patidar Sangathan – Indore",
+  "short_name": "NPS Indore",
+  "description": "Nimar Patidar Sangathan, Indore – Patidar Samaj digital community platform for family registration, membership, events and announcements.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#102A43",
+  "theme_color": "#102A43",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

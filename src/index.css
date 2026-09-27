@@ -1,0 +1,241 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 33% 98%;
+    --foreground: 215 45% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 45% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 45% 14%;
+    --primary: 215 60% 18%;
+    --primary-foreground: 40 30% 98%;
+    --secondary: 215 30% 93%;
+    --secondary-foreground: 215 45% 14%;
+    --muted: 215 25% 95%;
+    --muted-foreground: 215 15% 42%;
+    --accent: 43 68% 46%;
+    --accent-foreground: 215 60% 18%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 215 25% 90%;
+    --input: 215 25% 90%;
+    --ring: 215 60% 18%;
+    --success: 150 55% 30%;
+    --radius: 0.625rem;
+    --font-heading: "Poppins", ui-sans-serif, system-ui, sans-serif;
+    --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+
+  .dark {
+    --background: 215 45% 8%;
+    --foreground: 210 30% 95%;
+    --card: 215 42% 11%;
+    --card-foreground: 210 30% 95%;
+    --popover: 215 42% 11%;
+    --popover-foreground: 210 30% 95%;
+    --primary: 210 50% 22%;
+    --primary-foreground: 210 30% 95%;
+    --secondary: 215 30% 16%;
+    --secondary-foreground: 210 30% 95%;
+    --muted: 215 30% 16%;
+    --muted-foreground: 210 20% 65%;
+    --accent: 43 65% 50%;
+    --accent-foreground: 215 45% 10%;
+    --destructive: 0 55% 45%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 215 25% 20%;
+    --input: 215 25% 20%;
+    --ring: 43 65% 50%;
+  }
+
+  /*
+   * The brand palette (maroon/cream) is used as literal Tailwind utility
+   * classes (text-maroon, bg-cream, focus:border-maroon, ...) across ~100
+   * page files instead of the semantic bg-background/text-foreground
+   * tokens. Rather than touching every file, we repoint just these
+   * generated utility classes under .dark so every heading, card surface,
+   * and form-focus state site-wide stays readable in dark mode. bg-maroon
+   * (buttons) and text-cream (button/pass-card text) are deliberately left
+   * untouched — they're always paired together as brand CTAs and already
+   * contrast correctly in both themes.
+   */
+  .dark .text-maroon,
+  .dark .text-maroon-dark {
+    color: hsl(var(--foreground));
+  }
+  .dark .hover\:text-maroon:hover,
+  .dark .hover\:text-maroon-dark:hover,
+  .dark .group:hover .group-hover\:text-maroon {
+    color: hsl(var(--accent));
+  }
+  .dark .bg-cream {
+    background-color: hsl(var(--card));
+  }
+  .dark .bg-cream\/5 {
+    background-color: hsl(var(--card) / 0.05);
+  }
+  .dark .bg-cream\/10 {
+    background-color: hsl(var(--card) / 0.1);
+  }
+  .dark .bg-cream\/15 {
+    background-color: hsl(var(--card) / 0.15);
+  }
+  .dark .bg-cream\/50 {
+    background-color: hsl(var(--card) / 0.5);
+  }
+  .dark .bg-cream\/60 {
+    background-color: hsl(var(--card) / 0.6);
+  }
+  .dark .focus\:border-maroon:focus {
+    border-color: hsl(var(--accent));
+  }
+  .dark .focus\:ring-maroon:focus {
+    --tw-ring-color: hsl(var(--accent));
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+    margin: 0;
+    min-width: 320px;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  img,
+  video,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  li,
+  span,
+  div {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .text-monumental {
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    line-height: 1.05;
+  }
+  .gold-hairline {
+    border: 1px solid hsl(var(--accent) / 0.4);
+  }
+  .micro-grid {
+    background-image: linear-gradient(hsl(var(--border) / 0.5) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.5) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  .gold-badge {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-accent/50 bg-accent/10 px-3 py-1 text-xs font-semibold tracking-wide text-accent;
+  }
+  .maroon-pass {
+    background: linear-gradient(135deg, #102A43 0%, #0A1F33 50%, #081726 100%);
+  }
+  .premium-card {
+    @apply rounded-2xl border border-gold/20 bg-card;
+    box-shadow: 0 1px 2px hsl(215 45% 14% / 0.04), 0 12px 32px -16px hsl(215 45% 14% / 0.18);
+  }
+  .premium-card-flat {
+    @apply rounded-2xl border border-border bg-card;
+  }
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-gold;
+  }
+  .section-title {
+    @apply font-display text-2xl font-semibold tracking-tight text-maroon sm:text-3xl;
+    word-break: break-word;
+  }
+  .btn-navy {
+    @apply inline-flex items-center gap-2 rounded-full bg-maroon px-5 py-2.5 text-sm font-semibold text-cream transition hover:bg-maroon-dark;
+  }
+  .btn-gold-outline {
+    @apply inline-flex items-center gap-2 rounded-full border border-gold/50 bg-card px-5 py-2.5 text-sm font-semibold text-maroon transition hover:bg-gold/10;
+  }
+  .hero-band {
+    background:
+      radial-gradient(120% 120% at 0% 0%, rgba(212, 175, 55, 0.12) 0%, transparent 45%),
+      linear-gradient(135deg, #0F2A47 0%, #102A43 45%, #0A1F33 100%);
+  }
+  .shell-grid {
+    background-image:
+      linear-gradient(hsl(215 25% 90% / 0.6) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(215 25% 90% / 0.6) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .marquee-track {
+    animation: community-marquee 28s linear infinite;
+  }
+
+  @keyframes community-marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .section-title {
+      font-size: clamp(1.6rem, 7vw, 2.25rem);
+      line-height: 1.2;
+    }
+
+    .btn-navy,
+    .btn-gold-outline {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+      animation-play-state: paused;
+    }
+  }
+}
