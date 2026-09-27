@@ -1,0 +1,125 @@
+# Deploys the frontend to npsindore.org (Hostinger static site) after a manual approval.
+#
+# Push to main (or "Run workflow" in the Actions tab) -> build check -> the deploy
+# job waits on the "production" environment until a required reviewer approves
+# -> builds with the production VITE_* values -> uploads dist as a zip ->
+# Hostinger replaces public_html with it -> checks the live site serves the new build.
+#
+# Needs, on the "production" environment:
+#   secret   HOSTINGER_API_TOKEN      hPanel -> Account -> API
+#   variable VITE_API_BASE_URL        e.g. https://api.npsindore.org
+#   variable VITE_RECAPTCHA_SITE_KEY  reCAPTCHA v3 site key (public)
+name: Deploy frontend
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  HOSTINGER_API: https://developers.hostinger.com/api/hosting/v1
+  HOSTINGER_USERNAME: u465324772
+  HOSTINGER_DOMAIN: npsindore.org
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+  deploy:
+    needs: check
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: production
+      url: https://npsindore.org
+    env:
+      TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Build with production settings
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_RECAPTCHA_SITE_KEY: ${{ vars.VITE_RECAPTCHA_SITE_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$TOKEN" || { echo "::error::HOSTINGER_API_TOKEN secret is not set on the production environment"; exit 1; }
+          test -n "$VITE_API_BASE_URL" || { echo "::error::VITE_API_BASE_URL variable is not set on the production environment"; exit 1; }
+          test -n "$VITE_RECAPTCHA_SITE_KEY" || { echo "::error::VITE_RECAPTCHA_SITE_KEY variable is not set on the production environment"; exit 1; }
+          npm run build
+          test -f dist/.htaccess || { echo "::error::dist/.htaccess missing (needed for page routing)"; exit 1; }
+
+      - name: Zip build
+        id: zip
+        run: |
+          set -euo pipefail
+          name="frontend-${GITHUB_SHA::7}.zip"
+          (cd dist && zip -qr "../$name" .)
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "entry=$(grep -oE '/assets/index-[^"]+\.js' dist/index.html | head -1)" >> "$GITHUB_OUTPUT"
+          ls -l "$name"
+
+      - name: Upload zip to Hostinger
+        env:
+          FILE: ${{ steps.zip.outputs.name }}
+        run: |
+          set -euo pipefail
+          curl -sS -f -X POST "$HOSTINGER_API/files/upload-urls" -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" -H "Accept: application/json" \
+            -d "{\"username\":\"$HOSTINGER_USERNAME\",\"domain\":\"$HOSTINGER_DOMAIN\"}" -o creds.json
+          url=$(jq -r '.url // .data.url' creds.json); auth=$(jq -r '.auth_key // .data.auth_key' creds.json); rest=$(jq -r '.rest_auth_key // .data.rest_auth_key' creds.json)
+          echo "::add-mask::$auth"; echo "::add-mask::$rest"
+          size=$(stat -c%s "$FILE"); target="${url%/}/$FILE?override=true"
+          curl -sS -f -X POST "$target" -H "X-Auth: $auth" -H "X-Auth-Rest: $rest" -H "Tus-Resumable: 1.0.0" \
+            -H "Upload-Length: $size" -H "Upload-Offset: 0" -o /dev/null
+          curl -sS -f -X PATCH "$target" -H "X-Auth: $auth" -H "X-Auth-Rest: $rest" -H "Tus-Resumable: 1.0.0" \
+            -H "Content-Type: application/offset+octet-stream" -H "Upload-Offset: 0" --data-binary "@$FILE" -D headers.txt -o /dev/null
+          offset=$(grep -i '^upload-offset:' headers.txt | tr -dc '0-9')
+          [ "$offset" = "$size" ] || { echo "::error::Upload incomplete ($offset of $size bytes)"; exit 1; }
+          rm -f creds.json
+
+      - name: Deploy archive
+        env:
+          FILE: ${{ steps.zip.outputs.name }}
+        run: |
+          set -euo pipefail
+          status=$(curl -sS -o response.json -w '%{http_code}' -X POST "$HOSTINGER_API/accounts/$HOSTINGER_USERNAME/websites/$HOSTINGER_DOMAIN/deploy" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -H "Accept: application/json" \
+            -d "{\"archive_path\":\"$FILE\"}")
+          cat response.json; echo
+          [ "$status" -lt 300 ] || { echo "::error::Hostinger rejected the deploy (HTTP $status)"; exit 1; }
+
+      - name: Verify live site serves the new build
+        env:
+          ENTRY: ${{ steps.zip.outputs.entry }}
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sS -m 10 -H 'Cache-Control: no-cache' "https://$HOSTINGER_DOMAIN/?v=$GITHUB_SHA" | grep -q "$ENTRY"; then
+              code=$(curl -sS -m 10 -o /dev/null -w '%{http_code}' "https://$HOSTINGER_DOMAIN/login")
+              [ "$code" = 200 ] || { echo "::error::/login returned $code (page routing broken?)"; exit 1; }
+              echo "Live site serves $ENTRY and page routing works"; exit 0
+            fi
+            echo "waiting for new build to go live..."; sleep 10
+          done
+          echo "::error::Live site did not switch to $ENTRY within 10 minutes"; exit 1
