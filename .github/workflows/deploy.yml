@@ -148,7 +148,7 @@ jobs:
               status="new build ($ENTRY) not live yet"
             elif code=$(curl -sS -m 10 "${auth[@]}" -o /dev/null -w '%{http_code}' "https://$HOSTINGER_DOMAIN/login"); [ "$code" != 200 ]; then
               status="/login returned $code (page routing not active yet?)"
-            elif [ "$GITHUB_REF_NAME" = test ] && anon=$(curl -sS -m 10 -o /dev/null -w '%{http_code}' "https://$HOSTINGER_DOMAIN/"); [ "$anon" != 401 ]; then
+            elif [ "$GITHUB_REF_NAME" = test ] && { anon=$(curl -sS -m 10 -o /dev/null -w '%{http_code}' "https://$HOSTINGER_DOMAIN/"); [ "$anon" != 401 ]; }; then
               status="test site answered $anon without login (expected 401)"
             else
               echo "Live site serves $ENTRY and page routing works"; exit 0
