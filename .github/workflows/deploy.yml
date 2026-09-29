@@ -137,18 +137,22 @@ jobs:
       - name: Verify live site serves the new build
         env:
           ENTRY: ${{ steps.zip.outputs.entry }}
+        # Hostinger unpacks the archive file by file, so the new index.html can be live
+        # before the new .htaccess (page routing, test login). Keep polling until every
+        # check passes at once instead of failing on the first in-between state.
         run: |
           auth=(); [ "$GITHUB_REF_NAME" = test ] && auth=(-u "$SITE_USER:$SITE_PASSWORD")
+          status="not checked yet"
           for i in $(seq 1 60); do
-            if curl -sS -m 10 "${auth[@]}" -H 'Cache-Control: no-cache' "https://$HOSTINGER_DOMAIN/?v=$GITHUB_SHA" | grep -q "$ENTRY"; then
-              code=$(curl -sS -m 10 "${auth[@]}" -o /dev/null -w '%{http_code}' "https://$HOSTINGER_DOMAIN/login")
-              [ "$code" = 200 ] || { echo "::error::/login returned $code (page routing broken?)"; exit 1; }
-              if [ "$GITHUB_REF_NAME" = test ]; then
-                anon=$(curl -sS -m 10 -o /dev/null -w '%{http_code}' "https://$HOSTINGER_DOMAIN/")
-                [ "$anon" = 401 ] || { echo "::error::Test site answered $anon without login (expected 401)"; exit 1; }
-              fi
+            if ! curl -sS -m 10 "${auth[@]}" -H 'Cache-Control: no-cache' "https://$HOSTINGER_DOMAIN/?v=$GITHUB_SHA" | grep -q "$ENTRY"; then
+              status="new build ($ENTRY) not live yet"
+            elif code=$(curl -sS -m 10 "${auth[@]}" -o /dev/null -w '%{http_code}' "https://$HOSTINGER_DOMAIN/login"); [ "$code" != 200 ]; then
+              status="/login returned $code (page routing not active yet?)"
+            elif [ "$GITHUB_REF_NAME" = test ] && anon=$(curl -sS -m 10 -o /dev/null -w '%{http_code}' "https://$HOSTINGER_DOMAIN/"); [ "$anon" != 401 ]; then
+              status="test site answered $anon without login (expected 401)"
+            else
               echo "Live site serves $ENTRY and page routing works"; exit 0
             fi
-            echo "waiting for new build to go live..."; sleep 10
+            echo "waiting: $status"; sleep 10
           done
-          echo "::error::Live site did not switch to $ENTRY within 10 minutes"; exit 1
+          echo "::error::Not live after 10 minutes: $status"; exit 1
