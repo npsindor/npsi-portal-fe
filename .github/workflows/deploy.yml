@@ -1,32 +1,40 @@
-# Deploys the frontend to npsindore.org (Hostinger static site) after a manual approval.
+# Deploys the frontend to its Hostinger static site.
 #
-# Push to main (or "Run workflow" in the Actions tab) -> build check -> the deploy
-# job waits on the "production" environment until a required reviewer approves
-# -> builds with the production VITE_* values -> uploads dist as a zip ->
-# Hostinger replaces public_html with it -> checks the live site serves the new build.
+#   main -> "production" environment (waits for a required reviewer to approve) -> npsindore.org
+#   test -> "test" environment (no approval, deploys automatically) -> test.npsindore.org,
+#           behind a browser login (user npsitest, password from TEST_SITE_PASSWORD)
 #
-# Needs, on the "production" environment:
+# Push (or "Run workflow" in the Actions tab) -> build check -> builds with the
+# environment's VITE_* values -> uploads dist as a zip -> Hostinger replaces
+# public_html with it -> checks the live site serves the new build.
+#
+# Needs, on each environment:
 #   secret   HOSTINGER_API_TOKEN      hPanel -> Account -> API
 #   variable VITE_API_BASE_URL        e.g. https://api.npsindore.org
 #   variable VITE_RECAPTCHA_SITE_KEY  reCAPTCHA v3 site key (public)
+# and on "test" only:
+#   secret   TEST_SITE_PASSWORD       password for the test site login
 name: Deploy frontend
 
 on:
   push:
-    branches: [main]
+    branches: [main, test]
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# One deploy per branch at a time; a newer run replaces an older one still
+# waiting for approval, but never cancels a deploy that is already running.
 concurrency:
-  group: production-deploy
+  group: deploy-${{ github.ref_name }}
   cancel-in-progress: false
 
 env:
   HOSTINGER_API: https://developers.hostinger.com/api/hosting/v1
   HOSTINGER_USERNAME: u465324772
-  HOSTINGER_DOMAIN: npsindore.org
+  HOSTINGER_DOMAIN: ${{ github.ref_name == 'main' && 'npsindore.org' || 'test.npsindore.org' }}
+  SITE_USER: npsitest
 
 jobs:
   check:
@@ -42,14 +50,15 @@ jobs:
 
   deploy:
     needs: check
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:
-      name: production
-      url: https://npsindore.org
+      name: ${{ github.ref_name == 'main' && 'production' || 'test' }}
+      url: https://${{ github.ref_name == 'main' && 'npsindore.org' || 'test.npsindore.org' }}
     env:
       TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+      SITE_PASSWORD: ${{ secrets.TEST_SITE_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -58,17 +67,32 @@ jobs:
           cache: npm
       - run: npm ci
 
-      - name: Build with production settings
+      - name: Build with ${{ github.ref_name == 'main' && 'production' || 'test' }} settings
         env:
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
           VITE_RECAPTCHA_SITE_KEY: ${{ vars.VITE_RECAPTCHA_SITE_KEY }}
         run: |
           set -euo pipefail
-          test -n "$TOKEN" || { echo "::error::HOSTINGER_API_TOKEN secret is not set on the production environment"; exit 1; }
-          test -n "$VITE_API_BASE_URL" || { echo "::error::VITE_API_BASE_URL variable is not set on the production environment"; exit 1; }
-          test -n "$VITE_RECAPTCHA_SITE_KEY" || { echo "::error::VITE_RECAPTCHA_SITE_KEY variable is not set on the production environment"; exit 1; }
+          test -n "$TOKEN" || { echo "::error::HOSTINGER_API_TOKEN secret is not set on this environment"; exit 1; }
+          test -n "$VITE_API_BASE_URL" || { echo "::error::VITE_API_BASE_URL variable is not set on this environment"; exit 1; }
+          test -n "$VITE_RECAPTCHA_SITE_KEY" || { echo "::error::VITE_RECAPTCHA_SITE_KEY variable is not set on this environment"; exit 1; }
           npm run build
           test -f dist/.htaccess || { echo "::error::dist/.htaccess missing (needed for page routing)"; exit 1; }
+
+      # Test site only: put the whole site behind a browser login. This lives in the
+      # build (not hPanel) because every deploy replaces public_html, .htaccess included.
+      - name: Add test site login
+        if: github.ref_name == 'test'
+        run: |
+          set -euo pipefail
+          test -n "$SITE_PASSWORD" || { echo "::error::TEST_SITE_PASSWORD secret is not set on the test environment"; exit 1; }
+          printf '%s:%s\n' "$SITE_USER" "$(openssl passwd -apr1 "$SITE_PASSWORD")" > dist/.htpasswd
+          { printf 'AuthType Basic\nAuthName "NPS Indore test site"\n'
+            printf 'AuthUserFile /home/%s/domains/%s/public_html/.htpasswd\n' "$HOSTINGER_USERNAME" "$HOSTINGER_DOMAIN"
+            printf 'Require valid-user\n\n'
+            cat dist/.htaccess; } > dist/.htaccess.new
+          mv dist/.htaccess.new dist/.htaccess
+          printf 'User-agent: *\nDisallow: /\n' > dist/robots.txt
 
       - name: Zip build
         id: zip
@@ -114,10 +138,15 @@ jobs:
         env:
           ENTRY: ${{ steps.zip.outputs.entry }}
         run: |
+          auth=(); [ "$GITHUB_REF_NAME" = test ] && auth=(-u "$SITE_USER:$SITE_PASSWORD")
           for i in $(seq 1 60); do
-            if curl -sS -m 10 -H 'Cache-Control: no-cache' "https://$HOSTINGER_DOMAIN/?v=$GITHUB_SHA" | grep -q "$ENTRY"; then
-              code=$(curl -sS -m 10 -o /dev/null -w '%{http_code}' "https://$HOSTINGER_DOMAIN/login")
+            if curl -sS -m 10 "${auth[@]}" -H 'Cache-Control: no-cache' "https://$HOSTINGER_DOMAIN/?v=$GITHUB_SHA" | grep -q "$ENTRY"; then
+              code=$(curl -sS -m 10 "${auth[@]}" -o /dev/null -w '%{http_code}' "https://$HOSTINGER_DOMAIN/login")
               [ "$code" = 200 ] || { echo "::error::/login returned $code (page routing broken?)"; exit 1; }
+              if [ "$GITHUB_REF_NAME" = test ]; then
+                anon=$(curl -sS -m 10 -o /dev/null -w '%{http_code}' "https://$HOSTINGER_DOMAIN/")
+                [ "$anon" = 401 ] || { echo "::error::Test site answered $anon without login (expected 401)"; exit 1; }
+              fi
               echo "Live site serves $ENTRY and page routing works"; exit 0
             fi
             echo "waiting for new build to go live..."; sleep 10
