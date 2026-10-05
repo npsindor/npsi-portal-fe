@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0"
+    "preview": "vite preview --host 0.0.0.0",
+    "lint": "eslint .",
+    "test": "node --test --test-reporter=spec src/api/endpoints.test.js"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",

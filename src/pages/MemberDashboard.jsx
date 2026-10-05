@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { CalendarDays, Bell, Users, ArrowRight, QrCode, UserPlus } from "lucide-react";
+import { CalendarDays, Bell, Users, ArrowRight, UserPlus } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import MembershipPass from "@/components/MembershipPass";
 import RequestTransferModal from "@/components/RequestTransferModal";

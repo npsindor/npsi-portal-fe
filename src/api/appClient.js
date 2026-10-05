@@ -1,3 +1,5 @@
+import { API } from './endpoints';
+
 const localApiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
 const sanitizeDateStrings = (value) => {
@@ -38,14 +40,14 @@ const request = async (path, options = {}) => {
 
 const createLocalEntities = () => new Proxy({}, {
   get: (_target, entity) => ({
-    list: (order = '-createdAt', limit = 100) => request(`/api/entities/${entity}?order=${encodeURIComponent(order)}&limit=${limit}`),
-    filter: (filters = {}, order = '-createdAt', limit = 100) => request(`/api/entities/${entity}?filter=${encodeURIComponent(JSON.stringify(filters))}&order=${encodeURIComponent(order)}&limit=${limit}`),
-    create: (data) => request(`/api/entities/${entity}`, { method: 'POST', body: JSON.stringify(data) }),
-    update: (id, data) => request(`/api/entities/${entity}/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
-    delete: (id) => request(`/api/entities/${entity}/${id}`, { method: 'DELETE' }),
+    list: (order = '-createdAt', limit = 100) => request(`${API.entities.collection(entity)}?order=${encodeURIComponent(order)}&limit=${limit}`),
+    filter: (filters = {}, order = '-createdAt', limit = 100) => request(`${API.entities.collection(entity)}?filter=${encodeURIComponent(JSON.stringify(filters))}&order=${encodeURIComponent(order)}&limit=${limit}`),
+    create: (data) => request(API.entities.collection(entity), { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => request(API.entities.item(entity, id), { method: 'PATCH', body: JSON.stringify(data) }),
+    delete: (id) => request(API.entities.item(entity, id), { method: 'DELETE' }),
     deleteMany: async (filters = {}) => {
-      const records = await request(`/api/entities/${entity}?filter=${encodeURIComponent(JSON.stringify(filters))}&limit=500`);
-      await Promise.all(records.map((record) => request(`/api/entities/${entity}/${record.id}`, { method: 'DELETE' })));
+      const records = await request(`${API.entities.collection(entity)}?filter=${encodeURIComponent(JSON.stringify(filters))}&limit=500`);
+      await Promise.all(records.map((record) => request(API.entities.item(entity, record.id), { method: 'DELETE' })));
       return records;
     },
   }),
@@ -53,33 +55,33 @@ const createLocalEntities = () => new Proxy({}, {
 
 const createLocalAuth = () => ({
   loginViaEmailPassword: async (email, password) => {
-    const result = await request('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+    const result = await request(API.auth.sessions, { method: 'POST', body: JSON.stringify({ email, password }) });
     localStorage.setItem('base44_access_token', result.access_token);
     return result;
   },
   register: (emailOrData, password) => {
     const data = typeof emailOrData === 'object' ? emailOrData : { email: emailOrData, password };
-    return request('/api/auth/register', { method: 'POST', body: JSON.stringify(data) });
+    return request(API.auth.registrations, { method: 'POST', body: JSON.stringify(data) });
   },
   verifyOtp: async (data) => {
-    const result = await request('/api/auth/verify-otp', { method: 'POST', body: JSON.stringify(data) });
+    const result = await request(API.auth.otpVerifications, { method: 'POST', body: JSON.stringify(data) });
     if (result.access_token) localStorage.setItem('base44_access_token', result.access_token);
     return result;
   },
-  resendOtp: (email) => request('/api/auth/resend-otp', { method: 'POST', body: JSON.stringify({ email }) }),
-  resetPasswordRequest: (email) => request('/api/auth/reset-request', { method: 'POST', body: JSON.stringify({ email }) }),
-  resetPassword: (data) => request('/api/auth/reset-password', { method: 'POST', body: JSON.stringify(data) }),
-  changePassword: (data) => request('/api/auth/change-password', {
-    method: 'POST',
+  resendOtp: (email) => request(API.auth.otps, { method: 'POST', body: JSON.stringify({ email }) }),
+  resetPasswordRequest: (email) => request(API.auth.passwordResets, { method: 'POST', body: JSON.stringify({ email }) }),
+  resetPassword: (data) => request(API.auth.passwordResetConfirmations, { method: 'POST', body: JSON.stringify(data) }),
+  changePassword: (data) => request(API.auth.password, {
+    method: 'PUT',
     headers: { Authorization: `Bearer ${localStorage.getItem('base44_access_token') || ''}` },
     body: JSON.stringify(data),
   }),
-  me: () => request('/api/auth/me', {
+  me: () => request(API.auth.me, {
     headers: { Authorization: `Bearer ${localStorage.getItem('base44_access_token') || ''}` },
   }),
   logout: async () => {
-    await request('/api/auth/logout', {
-      method: 'POST',
+    await request(API.auth.currentSession, {
+      method: 'DELETE',
       headers: { Authorization: `Bearer ${localStorage.getItem('base44_access_token') || ''}` },
     }).catch(() => {});
     localStorage.removeItem('base44_access_token');
@@ -96,7 +98,7 @@ const createLocalAuth = () => ({
 });
 
 const createLocalUsers = () => ({
-  inviteUser: (email, role = 'user', extra = {}) => request('/api/auth/invite', { method: 'POST', body: JSON.stringify({ email, role, ...extra }) }),
+  inviteUser: (email, role = 'user', extra = {}) => request(API.auth.invitations, { method: 'POST', body: JSON.stringify({ email, role, ...extra }) }),
 });
 
 export const appClient = {
