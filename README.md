@@ -35,7 +35,8 @@ Vite loads `.env.local` over `.env`. Env values are baked into the bundle at bui
 | `npm run dev` | Vite dev server on port 5173 (also exposed on your LAN) |
 | `npm run build` | Production build into `dist/` |
 | `npm run preview` | Serve the production build locally |
-| `npx eslint .` | Lint pages and components |
+| `npm run lint` | Lint pages and components (ESLint) |
+| `npm test` | API URL map tests (`src/api/endpoints.test.js`) |
 
 ## Project layout
 

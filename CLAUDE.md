@@ -4,16 +4,19 @@ Frontend for the NPS Indore portal: React 18 + Vite 8, Tailwind 3, shadcn/ui (Ra
 
 ## Commands
 
-- `npm run dev`: dev server on http://localhost:5173 (needs the `nps-be` API, default `http://localhost:4000`)
+- `npm run dev`: dev server on http://localhost:5173 (needs the `nps-be` API, default `http://localhost:4000`; set `VITE_API_BASE_URL` to point elsewhere)
 - `npm run build`: production build; run it to verify changes compile
-- `npx eslint .`: lint (config covers `src/pages`, `src/components`, excluding `components/ui`)
+- `npm run lint`: ESLint (config covers `src/pages`, `src/components`, excluding `components/ui`); must have 0 errors
+- `npm test`: Node's built-in test runner on `src/api/endpoints.test.js` (API URL map vs the backend's paths, and no hard-coded API paths elsewhere)
 
-No test suite exists; verify UI changes in the running app.
+There are no UI tests; verify UI changes in the running app. Backend API docs (Swagger): `<API base>/api/docs`.
 
 ## Architecture notes
 
-- All backend calls go through `src/api/base44Client.js`, which mimics the Base44 SDK (`base44.entities.<Entity>.list/filter/create/update/delete`, `base44.auth.*`). Reuse it; don't call `fetch` directly from pages. `src/api/appClient.js` is an older, unused copy.
-- Entity names map to backend tables in `nps-be/server/entityConfig.js`; a new entity needs a backend change too.
+- All backend calls go through `src/api/base44Client.js`, which mimics the Base44 SDK (`base44.entities.<Entity>.list/filter/create/bulkCreate/update/delete`, `base44.auth.*`). Reuse it; don't call `fetch` directly from pages. `src/api/appClient.js` is an older, unused copy.
+- Every backend URL lives in `src/api/endpoints.js` (`API` map). The backend serves `/api/v1/...` with plural kebab-case resources and no verbs (login `POST /auth/sessions`, logout `DELETE /auth/sessions/current`, change password `PUT /auth/password`). Never hard-code an `/api/...` path elsewhere; `npm test` fails if you do.
+- Entity names map to REST resources in `ENTITY_RESOURCES` (`endpoints.js`), e.g. `FamilyMember` → `/api/v1/family-members`. A new entity needs a backend change too (`nps-be/src/modules/entities/entity-definitions.ts`) and an entry here.
+- Backend errors are always `{ error: "<message>" }`; `request()` turns them into thrown `Error`s with `status`.
 - Routes are declared in `src/App.jsx` with lazy-loaded pages from `src/pages/`. Admin pages are prefixed `Admin*` and wrapped in `AdminLayout`/`ProtectedRoute`.
 - Auth state lives in `src/lib/AuthContext.jsx`. UI text is bilingual (English/Hindi) via `src/lib/i18n.jsx`; add strings for both languages.
 - Admin tables share helpers: `src/lib/useTableControls.js` (search/sort/paging), `src/lib/dateRangeFilter.js` + `components/admin/DateRangeFilter.jsx`, and `src/lib/exportTable.js` + `components/ExportMenu.jsx` for export. Reuse them on new admin pages.
