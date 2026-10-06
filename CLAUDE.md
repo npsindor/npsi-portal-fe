@@ -8,6 +8,7 @@ Frontend for the NPS Indore portal: React 18 + Vite 8, Tailwind 3, shadcn/ui (Ra
 - `npm run build`: production build; run it to verify changes compile
 - `npm run lint`: ESLint (config covers `src/pages`, `src/components`, excluding `components/ui`); must have 0 errors
 - `npm test`: Node's built-in test runner on `src/api/endpoints.test.js` (API URL map vs the backend's paths, and no hard-coded API paths elsewhere)
+- `src/api/openapi.json` is the backend API description (refresh it with the backend's `npm run openapi -- ../npsi-portal-fe/src/api/openapi.json` whenever the API changes); `npm test` fails if an endpoint the client calls is missing from it
 - `npm run test:browser`: Playwright browser tests (`tests/browser/`) against the built app with the API mocked (`mock-api.js`); first run `npx playwright install chromium`
 
 There are no UI tests; verify UI changes in the running app. Backend API docs (Swagger): `<API base>/api/docs`.
