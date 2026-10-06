@@ -23,7 +23,7 @@ describe('API endpoints', () => {
       me: '/api/v1/auth/me',
       invitations: '/api/v1/auth/invitations',
     });
-    assert.deepEqual(API.me, { family: '/api/v1/me/family', feedback: '/api/v1/me/feedback' });
+    assert.deepEqual(API.me, { family: '/api/v1/me/family', feedback: '/api/v1/me/feedback', eventRegistrations: '/api/v1/me/event-registrations' });
     assert.equal(API.uploads, '/api/v1/uploads');
     assert.equal(API.stats, '/api/v1/stats');
   });
@@ -78,8 +78,7 @@ describe('API usage', () => {
   });
 
   test('no backend path is hard-coded outside endpoints.js', () => {
-    // OAuthConsent.jsx talks to the Base44 platform (/api/apps/...), not this backend.
-    const allowed = new Set(['api/endpoints.js', 'api/endpoints.test.js', 'pages/OAuthConsent.jsx']);
+    const allowed = new Set(['api/endpoints.js', 'api/endpoints.test.js']);
     const offenders = files(srcDir)
       .filter((file) => !allowed.has(path.relative(srcDir, file)))
       .filter((file) => /['"`]\/api\//.test(fs.readFileSync(file, 'utf8')));

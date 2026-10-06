@@ -140,14 +140,13 @@ export const base44 = {
       UploadPublicFile: uploadPublicFile,
     },
   },
-  app: {
-    getPublicSettings: async () => ({ id: 'local-app', public_settings: {} }),
-  },
   // Narrow, purpose-built endpoints that replace fetching a whole sensitive
   // table client-side just to filter/search it.
   me: {
     family: () => request(API.me.family),
     feedback: () => request(API.me.feedback),
+    // The family's event registrations, cancelled ones included.
+    eventRegistrations: () => request(API.me.eventRegistrations),
   },
   verifyFamily: (familyId) => request(API.familyVerification(familyId)),
   trackApplication: (applicationId, mobile) =>

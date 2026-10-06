@@ -24,6 +24,7 @@ const L = {
     successDesc: "member(s) registered for",
     payPending: "payment pending",
     regFailed: "Registration failed",
+    registered: "Registered",
   },
   hi: {
     title: "कार्यक्रम",
@@ -41,6 +42,7 @@ const L = {
     successDesc: "सदस्य इस कार्यक्रम के लिए रजिस्टर हुए:",
     payPending: "भुगतान लंबित",
     regFailed: "रजिस्ट्रेशन विफल",
+    registered: "रजिस्टर्ड",
   },
 };
 
@@ -55,6 +57,8 @@ export default function MemberEvents() {
   const [family, setFamily] = useState(null);
   const [members, setMembers] = useState([]);
   const [selected, setSelected] = useState([]);
+  // Events the family is already registered for (a family registers once per event).
+  const [registeredIds, setRegisteredIds] = useState(new Set());
 
   useEffect(() => {
     (async () => {
@@ -64,6 +68,8 @@ export default function MemberEvents() {
         const { family: mine, members: mems } = await resolveMyFamily(user);
         setFamily(mine);
         setMembers(mems);
+        const registrations = await base44.me.eventRegistrations();
+        setRegisteredIds(new Set(registrations.filter((r) => r.status !== "CANCELLED").map((r) => r.eventId)));
       } catch (e) {} finally { setLoading(false); }
     })();
   }, [user]);
@@ -87,6 +93,7 @@ export default function MemberEvents() {
         lang,
       });
       const isFree = registration.paymentStatus === "SUCCESS";
+      setRegisteredIds((ids) => new Set([...ids, registering.id]));
       toast({ title: t.success, description: `${chosen.length} ${t.successDesc} ${registering.title}${isFree ? "" : ` — ${t.payPending}`}.` });
       setRegistering(null);
       setSelected([]);
@@ -122,9 +129,15 @@ export default function MemberEvents() {
               <h3 className="mt-2 font-display text-lg font-semibold text-maroon">{localizedText(ev, "title", lang)}</h3>
               <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3.5 w-3.5" /> {ev.venue}</div>
               <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{localizedText(ev, "description", lang)}</p>
-              <button onClick={() => setRegistering(ev)} className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-maroon px-4 py-2 text-xs font-semibold text-cream hover:bg-maroon-dark">
-                {t.registerMembers} <ArrowRight className="h-3.5 w-3.5" />
-              </button>
+              {registeredIds.has(ev.id) ? (
+                <div className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-green-600/10 px-4 py-2 text-xs font-semibold text-green-700">
+                  <Check className="h-3.5 w-3.5" /> {t.registered}
+                </div>
+              ) : (
+                <button onClick={() => setRegistering(ev)} className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-maroon px-4 py-2 text-xs font-semibold text-cream hover:bg-maroon-dark">
+                  {t.registerMembers} <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
           </div>
         ))}

@@ -43,6 +43,7 @@ export const API = {
   me: {
     family: `${API_PREFIX}/me/family`,
     feedback: `${API_PREFIX}/me/feedback`,
+    eventRegistrations: `${API_PREFIX}/me/event-registrations`,
   },
   familyVerification: (familyId) => `${API_PREFIX}/family-verifications/${encodeURIComponent(familyId)}`,
   applicationStatus: (applicationId, mobile) =>

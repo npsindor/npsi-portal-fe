@@ -2,10 +2,10 @@
 // `routes` maps "METHOD /path" (path without query) to a response body or to
 // { status, body }; anything else returns an empty list (GET) or 404.
 export const mockApi = async (page, routes = {}) => {
-  // A returning visitor: the launch curtain, Garba video popup and feedback
-  // prompt were already shown this session, so nothing covers the page.
+  // A returning visitor: the launch curtain and Garba video popup were already
+  // shown this session, so nothing covers the page.
   await page.addInitScript(() => {
-    for (const key of ['nps_curtain_opened', 'nps_garba_popup_seen', 'pss_feedback_shown']) sessionStorage.setItem(key, '1');
+    for (const key of ['nps_curtain_opened', 'nps_garba_popup_seen']) sessionStorage.setItem(key, '1');
   });
   const calls = [];
   await page.route('**/api/v1/**', async (route) => {
@@ -26,4 +26,5 @@ export const mockApi = async (page, routes = {}) => {
 };
 
 export const ADMIN = { id: 'u-admin', email: 'admin@example.com', fullName: 'Admin', phone: null, role: 'admin', photoUrl: null };
+export const MEMBER = { id: 'u-member', email: 'ram@example.com', fullName: 'Ram Patidar', phone: '9876500001', role: 'user', photoUrl: null };
 export const NOT_LOGGED_IN = { status: 401, body: { error: 'Authentication required.' } };

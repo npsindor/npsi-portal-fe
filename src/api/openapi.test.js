@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { test } from 'node:test';
-import { API, ENTITY_RESOURCES } from './endpoints.js';
+import { API, API_PREFIX, ENTITY_RESOURCES } from './endpoints.js';
 
 const spec = JSON.parse(fs.readFileSync(new URL('./openapi.json', import.meta.url), 'utf8'));
 
@@ -33,6 +33,7 @@ const CALLS = [
   ['POST', API.auth.invitations],
   ['GET', API.me.family],
   ['GET', API.me.feedback],
+  ['GET', API.me.eventRegistrations],
   ['GET', API.familyVerification('NPSI-FAM-000001')],
   ['GET', API.applicationStatus('NPSI-APP-2026-000001', '9876543210')],
   ['GET', API.mobileAvailability('9876543210')],
@@ -56,4 +57,108 @@ test('every endpoint the frontend calls exists in the backend API', () => {
 test('the spec is the backend API (sanity check)', () => {
   assert.equal(spec.info.title, 'NPS Indore portal API');
   assert.ok(Object.keys(spec.paths).length > 40);
+});
+
+// ---- What the pages send, checked against the spec ----
+// The backend drops unknown body fields and query parameters without an error,
+// so a renamed field or filter would silently do nothing (an ignored familyId
+// filter would even return every family's rows). These read the page sources.
+
+const srcDir = new URL('../', import.meta.url);
+const sources = (dir = srcDir) =>
+  fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.isDirectory()) return entry.name === 'api' ? [] : sources(new URL(`${entry.name}/`, dir));
+    return /\.jsx?$/.test(entry.name) ? [[new URL(entry.name, dir).pathname.split('/src/')[1], fs.readFileSync(new URL(entry.name, dir), 'utf8')]] : [];
+  });
+const schema = (ref) => (ref?.$ref ? spec.components.schemas[ref.$ref.split('/').pop()] : ref);
+const collectionPath = (entity) => spec.paths[`${API_PREFIX}/${ENTITY_RESOURCES[entity]}`];
+// The object literal starting at `start` (a "{"), and its top-level `key: value` pairs.
+const objectAt = (text, start) => {
+  let depth = 0;
+  for (let i = start; i < text.length; i++) {
+    if ('{(['.includes(text[i])) depth++;
+    if ('})]'.includes(text[i]) && --depth === 0) return text.slice(start + 1, i);
+  }
+  return '';
+};
+const topLevelEntries = (body) => {
+  const entries = [];
+  let depth = 0;
+  let part = '';
+  for (const char of `${body},`) {
+    if ('{(['.includes(char)) depth++;
+    if ('})]'.includes(char)) depth--;
+    if (char === ',' && depth === 0) {
+      const match = part.trim().match(/^(\w+)\s*(?::\s*([\s\S]*))?$/);
+      if (match) entries.push([match[1], match[2]?.trim() ?? match[1]]);
+      part = '';
+    } else part += char;
+  }
+  return entries;
+};
+
+test('list calls use sort orders and filters the backend accepts', () => {
+  const problems = [];
+  for (const [file, text] of sources()) {
+    for (const call of text.matchAll(/entities\.(\w+)\.(list|listAll|filter|deleteMany)\(/g)) {
+      const [, entity, method] = call;
+      const params = collectionPath(entity)?.get?.parameters ?? [];
+      const orders = schema(params.find((p) => p.name === 'order')?.schema)?.enum ?? [];
+      const filters = params.map((p) => p.name).filter((name) => !['order', 'limit', 'offset'].includes(name));
+      const args = objectAt(text, call.index + call[0].length - 1);
+      const filterObject = args.trimStart().startsWith('{') ? objectAt(args, args.indexOf('{')) : '';
+      const rest = filterObject ? args.slice(args.indexOf(filterObject) + filterObject.length) : args;
+      const order = rest.match(/['"]([-\w]+)['"]/)?.[1] ?? '-createdAt';
+      if (method !== 'deleteMany' && !orders.includes(order)) problems.push(`${file}: ${entity}.${method} order "${order}"`);
+      for (const [key] of topLevelEntries(filterObject)) if (!filters.includes(key)) problems.push(`${file}: ${entity}.${method} filter "${key}"`);
+    }
+  }
+  assert.deepEqual(problems, []);
+});
+
+test('create/update bodies written in the page use fields and values the backend accepts', () => {
+  const problems = [];
+  for (const [file, text] of sources()) {
+    for (const call of text.matchAll(/entities\.(\w+)\.(create|update)\(/g)) {
+      const [, entity, method] = call;
+      const args = objectAt(text, call.index + call[0].length - 1);
+      const open = method === 'create' ? (args.trimStart().startsWith('{') ? args.indexOf('{') : -1) : args.search(/,\s*\{/);
+      if (open < 0) continue; // a payload variable: built elsewhere
+      const dto = spec.components.schemas[`${method === 'create' ? 'Create' : 'Update'}${entity}Dto`];
+      for (const [key, value] of topLevelEntries(objectAt(args, args.indexOf('{', open)))) {
+        if (key.startsWith('...')) continue;
+        const property = schema(dto?.properties?.[key]);
+        if (!property) problems.push(`${file}: ${entity}.${method} field "${key}"`);
+        const literal = value.match(/^['"]([^'"]*)['"]$/)?.[1];
+        if (property?.enum && literal !== undefined && !property.enum.includes(literal)) problems.push(`${file}: ${entity}.${method} ${key} "${literal}"`);
+      }
+    }
+  }
+  assert.deepEqual(problems, []);
+});
+
+test('dropdown values are values the backend accepts', () => {
+  // [page, constant, request schema, field]; "All"/"Archived" are view filters, not values.
+  const DROPDOWNS = [
+    ['pages/AdminApplications.jsx', 'STATUSES', 'CreateApplicationDto', 'status'],
+    ['pages/AdminStudents.jsx', 'STATUSES', 'CreateStudentApplicationDto', 'status'],
+    ['pages/AdminFamilies.jsx', 'STATUSES', 'CreateFamilyDto', 'status'],
+    ['pages/AdminTransactions.jsx', 'TYPES', 'CreateTransactionDto', 'type'],
+    ['pages/AdminTransactions.jsx', 'STATUSES', 'CreateTransactionDto', 'paymentStatus'],
+    ['pages/AdminEventRegistrations.jsx', 'STATUSES', 'UpdateEventRegistrationDto', 'status'],
+    ['pages/AdminNotifications.jsx', 'TYPES', 'CreateNotificationDto', 'type'],
+    ['pages/AdminFeedback.jsx', 'STATUS_FLOW', 'UpdateFeedbackDto', 'status'],
+    ['pages/AdminFeedback.jsx', 'FILTERS', 'UpdateFeedbackDto', 'status'],
+    ['pages/AdminTransferRequests.jsx', 'FILTERS', 'UpdateTransferRequestDto', 'status'],
+    ['pages/Feedback.jsx', 'TYPES', 'CreateFeedbackDto', 'feedbackType'],
+  ];
+  const files = Object.fromEntries(sources());
+  const problems = [];
+  for (const [file, name, dto, field] of DROPDOWNS) {
+    const list = files[file]?.match(new RegExp(`const ${name} = \\[([^\\]]*)\\]`))?.[1];
+    assert.ok(list, `${file}: ${name} not found`);
+    const allowed = schema(spec.components.schemas[dto].properties[field]).enum;
+    for (const [, value] of list.matchAll(/['"]([^'"]+)['"]/g)) if (!['All', 'Archived'].includes(value) && !allowed.includes(value)) problems.push(`${file}: ${name} "${value}"`);
+  }
+  assert.deepEqual(problems, []);
 });
