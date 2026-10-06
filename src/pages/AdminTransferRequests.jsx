@@ -33,7 +33,7 @@ export default function AdminTransferRequests() {
   const load = async () => {
     setLoading(true);
     try {
-      const list = await base44.entities.TransferRequest.list("-requestedDate", 200);
+      const list = await base44.entities.TransferRequest.listAll("-requestedDate");
       setAll(list);
     } catch (e) {} finally { setLoading(false); }
   };

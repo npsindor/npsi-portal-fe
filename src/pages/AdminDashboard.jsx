@@ -51,13 +51,13 @@ export default function AdminDashboard() {
     (async () => {
       try {
         const [fams, mems, apps, evs, txns, stuApps, students] = await Promise.all([
-          base44.entities.Family.list(),
-          base44.entities.FamilyMember.list(),
+          base44.entities.Family.listAll(),
+          base44.entities.FamilyMember.listAll(),
           base44.entities.Application.list("-submittedDate", 5),
-          base44.entities.Event.list(),
-          base44.entities.Transaction.list(),
-          base44.entities.StudentApplication.list(),
-          base44.entities.Student.list(),
+          base44.entities.Event.listAll(),
+          base44.entities.Transaction.listAll(),
+          base44.entities.StudentApplication.listAll(),
+          base44.entities.Student.listAll(),
         ]);
         const activeMembers = mems.filter((m) => m.status === "ACTIVE").length;
         const pending = apps.filter((a) => a.status === "PENDING_VERIFICATION" || a.status === "SUBMITTED").length;

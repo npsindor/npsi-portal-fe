@@ -145,7 +145,7 @@ export default function AdminFamilies() {
 
   const load = async () => {
     setLoading(true);
-    try { setFamilies(await base44.entities.Family.list()); }
+    try { setFamilies(await base44.entities.Family.listAll()); }
     catch (e) {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);

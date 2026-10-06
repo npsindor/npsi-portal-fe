@@ -130,7 +130,7 @@ export default function AdminEvents() {
   const [photoUploading, setPhotoUploading] = useState(false);
 
   const load = async () => {
-    try { setEvents(await base44.entities.Event.list("-date", 100)); }
+    try { setEvents(await base44.entities.Event.listAll("-date")); }
     catch (e) {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);

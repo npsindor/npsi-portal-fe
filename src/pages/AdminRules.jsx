@@ -18,7 +18,7 @@ export default function AdminRules() {
   const load = async () => {
     setLoading(true);
     try {
-      const data = await base44.entities.Rule.list("sectionNumber");
+      const data = await base44.entities.Rule.listAll("sectionNumber");
       setRules(data);
     } catch (e) {
       toast({ title: "Failed to load rules", variant: "destructive" });

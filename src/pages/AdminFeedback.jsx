@@ -38,7 +38,7 @@ export default function AdminFeedback() {
   const load = async () => {
     setLoading(true);
     try {
-      const list = await base44.entities.Feedback.list("-submittedDate", 200);
+      const list = await base44.entities.Feedback.listAll("-submittedDate");
       setAll(list);
     } catch (e) {} finally { setLoading(false); }
   };

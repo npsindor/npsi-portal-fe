@@ -131,8 +131,8 @@ export default function AdminSamiti() {
     setLoading(true);
     try {
       const [sams, mems] = await Promise.all([
-        base44.entities.Samiti.list(),
-        base44.entities.SamitiMember.list(),
+        base44.entities.Samiti.listAll(),
+        base44.entities.SamitiMember.listAll(),
       ]);
       setSamitis(sams);
       setAllMembers(mems);

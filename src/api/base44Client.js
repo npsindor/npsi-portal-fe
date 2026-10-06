@@ -2,14 +2,13 @@ import { API } from './endpoints';
 
 const localApiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
+// The session is an httpOnly cookie set by the API on login; `credentials: 'include'`
+// sends it. The token is never stored where page scripts could read it.
 const request = async (path, options = {}) => {
-  const token = localStorage.getItem('base44_access_token');
-
   const response = await fetch(`${localApiBaseUrl}${path}`, {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {}),
     },
     ...options,
@@ -30,12 +29,11 @@ const request = async (path, options = {}) => {
 // automatically-generated multipart Content-Type (with boundary), so this
 // deliberately does not set one.
 const uploadPublicFile = async ({ file }) => {
-  const token = localStorage.getItem('base44_access_token');
   const formData = new FormData();
   formData.append('file', file);
   const response = await fetch(`${localApiBaseUrl}${API.uploads}`, {
     method: 'POST',
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    credentials: 'include',
     body: formData,
   });
   if (!response.ok) {
@@ -45,12 +43,23 @@ const uploadPublicFile = async ({ file }) => {
   return response.json();
 };
 
+const PAGE_SIZE = 500; // the backend's maximum limit
+
 const listQuery = (filters, order, limit) =>
   new URLSearchParams({ ...Object.fromEntries(Object.entries(filters).filter(([, value]) => value !== undefined && value !== null)), order, limit: String(limit) }).toString();
 
 const createLocalEntities = () => new Proxy({}, {
   get: (_target, entity) => ({
     list: (order = '-createdAt', limit = 100) => request(`${API.entities.collection(entity)}?${listQuery({}, order, limit)}`),
+    // Every row, fetched 500 at a time (admin tables: nothing is silently cut off).
+    listAll: async (order = '-createdAt', filters = {}) => {
+      const rows = [];
+      for (let offset = 0; ; offset += PAGE_SIZE) {
+        const page = await request(`${API.entities.collection(entity)}?${listQuery(filters, order, PAGE_SIZE)}&offset=${offset}`);
+        rows.push(...page);
+        if (page.length < PAGE_SIZE) return rows;
+      }
+    },
     // Each filter is a query parameter the resource accepts (e.g. familyId, status).
     filter: (filters = {}, order = '-createdAt', limit = 100) => request(`${API.entities.collection(entity)}?${listQuery(filters, order, limit)}`),
     create: (data) => request(API.entities.collection(entity), { method: 'POST', body: JSON.stringify(data) }),
@@ -69,30 +78,27 @@ const createLocalEntities = () => new Proxy({}, {
 
 const createLocalAuth = () => ({
   loginViaEmailPassword: async (email, password) => {
-    const result = await request(API.auth.sessions, { method: 'POST', body: JSON.stringify({ email, password }) });
-    localStorage.setItem('base44_access_token', result.accessToken);
-    return result;
+    // The API sets the session cookie.
+    return request(API.auth.sessions, { method: 'POST', body: JSON.stringify({ email, password }) });
   },
   register: (emailOrData, password) => {
     const data = typeof emailOrData === 'object' ? emailOrData : { email: emailOrData, password };
     return request(API.auth.registrations, { method: 'POST', body: JSON.stringify(data) });
   },
   verifyOtp: async (data) => {
-    const result = await request(API.auth.otpVerifications, { method: 'POST', body: JSON.stringify(data) });
-    if (result.accessToken) localStorage.setItem('base44_access_token', result.accessToken);
-    return result;
+    // The API sets the session cookie.
+    return request(API.auth.otpVerifications, { method: 'POST', body: JSON.stringify(data) });
   },
   resendOtp: (email) => request(API.auth.otps, { method: 'POST', body: JSON.stringify({ email }) }),
   resetPasswordRequest: (email) => request(API.auth.passwordResets, { method: 'POST', body: JSON.stringify({ email }) }),
   resetPassword: (data) => request(API.auth.passwordResetConfirmations, { method: 'POST', body: JSON.stringify(data) }),
   changePassword: (data) => request(API.auth.password, { method: 'PUT', body: JSON.stringify(data) }),
   me: () => request(API.auth.me),
+  // Own profile: { fullName, phone, photoUrl } (photoUrl from UploadPublicFile).
+  updateMe: (data) => request(API.auth.me, { method: 'PATCH', body: JSON.stringify(data) }),
   logout: async () => {
     await request(API.auth.currentSession, { method: 'DELETE' }).catch(() => {});
     localStorage.removeItem('base44_access_token');
-  },
-  setToken: (token) => {
-    if (token) localStorage.setItem('base44_access_token', token);
   },
   redirectToLogin: (returnTo = '/') => {
     // Never redirect to login from login itself, and never let the login

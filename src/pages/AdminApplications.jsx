@@ -193,7 +193,7 @@ export default function AdminApplications() {
   const load = async () => {
     setLoading(true);
     try {
-      const list = await base44.entities.Application.list("-submittedDate", 100);
+      const list = await base44.entities.Application.listAll("-submittedDate");
       setApps(list);
     } catch (e) {} finally { setLoading(false); }
   };

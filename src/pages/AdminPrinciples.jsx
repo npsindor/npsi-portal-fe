@@ -18,7 +18,7 @@ export default function AdminPrinciples() {
   const load = async () => {
     setLoading(true);
     try {
-      setPrinciples(await base44.entities.Principle.list("sectionNumber"));
+      setPrinciples(await base44.entities.Principle.listAll("sectionNumber"));
     } catch (error) {
       toast({ title: t("principlesAdmin.loadFailed"), description: error.message, variant: "destructive" });
     } finally {

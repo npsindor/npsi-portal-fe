@@ -121,7 +121,7 @@ export default function AdminTransactions() {
 
   const load = async () => {
     setLoading(true);
-    try { setTxns(await base44.entities.Transaction.list("-date", 200)); }
+    try { setTxns(await base44.entities.Transaction.listAll("-date")); }
     catch (e) {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);

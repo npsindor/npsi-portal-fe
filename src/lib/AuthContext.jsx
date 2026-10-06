@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { appParams } from '@/lib/app-params';
 
 const AuthContext = createContext();
 
@@ -26,14 +25,8 @@ export const AuthProvider = ({ children }) => {
         const publicSettings = await base44.app.getPublicSettings();
         setAppPublicSettings(publicSettings);
         
-        // If we got the app public settings successfully, check if user is authenticated
-        if (appParams.token) {
-          await checkUserAuth();
-        } else {
-          setIsLoadingAuth(false);
-          setIsAuthenticated(false);
-          setAuthChecked(true);
-        }
+        // The session lives in an httpOnly cookie the page can't see, so always ask the API.
+        await checkUserAuth();
         setIsLoadingPublicSettings(false);
       } catch (appError) {
         console.error('App state check failed:', appError);
@@ -92,14 +85,10 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(false);
       setAuthChecked(true);
       
-      // If user auth fails, it might be an expired/invalid token — clear it
-      // so it doesn't keep failing the same way on every later visit.
+      // 401/403 just means "not logged in" (public pages stay public; protected
+      // routes show their login prompt). Drop any token an older version stored.
       if (error.status === 401 || error.status === 403) {
         try { localStorage.removeItem('base44_access_token'); } catch {}
-        setAuthError({
-          type: 'auth_required',
-          message: 'Authentication required'
-        });
       }
     }
   };

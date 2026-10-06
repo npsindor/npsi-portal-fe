@@ -204,7 +204,7 @@ export default function AdminStudents() {
   const load = async () => {
     setLoading(true);
     try {
-      const list = await base44.entities.StudentApplication.list("-submittedDate", 100);
+      const list = await base44.entities.StudentApplication.listAll("-submittedDate");
       setApps(list);
     } catch (e) {} finally { setLoading(false); }
   };

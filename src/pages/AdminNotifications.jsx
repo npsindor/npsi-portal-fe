@@ -69,7 +69,7 @@ export default function AdminNotifications() {
 
   const load = async () => {
     setLoading(true);
-    try { setNotifs(await base44.entities.Notification.list("-date", 100)); }
+    try { setNotifs(await base44.entities.Notification.listAll("-date")); }
     catch (e) {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);

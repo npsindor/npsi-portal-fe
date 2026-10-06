@@ -54,10 +54,8 @@ export default function Register() {
     setError("");
     setLoading(true);
     try {
+      // Verifying starts the session (the API sets the session cookie).
       const result = await base44.auth.verifyOtp({ email, otpCode });
-      if (result?.accessToken) {
-        base44.auth.setToken(result.accessToken);
-      }
       const returnTo = safeReturnTo();
       const destination = returnTo !== "/" ? returnTo : result?.user?.role === "admin" ? "/admin" : "/portal";
       window.location.href = destination;

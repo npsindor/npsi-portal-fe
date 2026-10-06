@@ -34,8 +34,8 @@ export default function AdminEventRegistrations() {
     setLoading(true);
     try {
       const [list, evs] = await Promise.all([
-        base44.entities.EventRegistration.list("-registeredDate", 200),
-        base44.entities.Event.list(),
+        base44.entities.EventRegistration.listAll("-registeredDate"),
+        base44.entities.Event.listAll(),
       ]);
       setRegs(list);
       setEvents(evs);
