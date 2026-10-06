@@ -310,6 +310,9 @@ const translations = {
     "settings.changePasswordDesc": "Update your account password",
     "settings.currentPassword": "Current Password",
     "settings.pwdUpdated": "Password updated successfully",
+    "settings.logoutEverywhere": "Log out of all devices",
+    "settings.logoutEverywhereConfirm": "Log out of the portal on every device, including this one?",
+    "settings.logoutEverywhereFailed": "Could not log out of all devices",
     "settings.pwdUpdateFailed": "Failed to update password",
 
     // Admin nav
@@ -916,6 +919,9 @@ const translations = {
     "settings.changePasswordDesc": "अपने खाते का पासवर्ड अपडेट करें",
     "settings.currentPassword": "वर्तमान पासवर्ड",
     "settings.pwdUpdated": "पासवर्ड सफलतापूर्वक अपडेट हुआ",
+    "settings.logoutEverywhere": "सभी डिवाइस से लॉगआउट करें",
+    "settings.logoutEverywhereConfirm": "क्या आप इस डिवाइस सहित सभी डिवाइस पर पोर्टल से लॉगआउट करना चाहते हैं?",
+    "settings.logoutEverywhereFailed": "सभी डिवाइस से लॉगआउट नहीं हो सका",
     "settings.pwdUpdateFailed": "पासवर्ड अपडेट करने में विफल",
 
     "admin.dashboard": "डैशबोर्ड",

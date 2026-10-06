@@ -100,6 +100,11 @@ const createLocalAuth = () => ({
     await request(API.auth.currentSession, { method: 'DELETE' }).catch(() => {});
     localStorage.removeItem('base44_access_token');
   },
+  // Ends every session of this user, on all devices (this one included).
+  logoutEverywhere: async () => {
+    await request(API.auth.sessions, { method: 'DELETE' });
+    localStorage.removeItem('base44_access_token');
+  },
   redirectToLogin: (returnTo = '/') => {
     // Never redirect to login from login itself, and never let the login
     // page become the "return to" target — both would compound into an

@@ -262,6 +262,22 @@ export default function Settings() {
 
       <button
         onClick={async () => {
+          if (!window.confirm(t("settings.logoutEverywhereConfirm"))) return;
+          try {
+            await base44.auth.logoutEverywhere();
+            await logout();
+            navigate("/");
+          } catch (err) {
+            toast({ title: t("settings.logoutEverywhereFailed"), description: err.message, variant: "destructive" });
+          }
+        }}
+        className="flex w-full items-center justify-center gap-2 rounded-full border border-border py-3 text-sm font-semibold text-muted-foreground hover:bg-muted"
+      >
+        <LogOut className="h-4 w-4" /> {t("settings.logoutEverywhere")}
+      </button>
+
+      <button
+        onClick={async () => {
           await logout();
           navigate("/");
         }}

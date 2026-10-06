@@ -24,6 +24,7 @@ const CALLS = [
   ['POST', API.auth.otps],
   ['POST', API.auth.sessions],
   ['DELETE', API.auth.currentSession],
+  ['DELETE', API.auth.sessions],
   ['POST', API.auth.passwordResets],
   ['POST', API.auth.passwordResetConfirmations],
   ['PUT', API.auth.password],
