@@ -20,8 +20,6 @@ const L = {
     noMembers: "No family members found.",
     confirm: "Confirm Registration",
     selectOne: "Select at least one member",
-    regTitle: "Event Registration Confirmed",
-    regMsg: "You have been registered for",
     success: "Registered successfully!",
     successDesc: "member(s) registered for",
     payPending: "payment pending",
@@ -39,8 +37,6 @@ const L = {
     noMembers: "कोई परिवार सदस्य नहीं मिला।",
     confirm: "रजिस्ट्रेशन की पुष्टि करें",
     selectOne: "कम से कम एक सदस्य चुनें",
-    regTitle: "कार्यक्रम रजिस्ट्रेशन की पुष्टि",
-    regMsg: "आपको इस कार्यक्रम के लिए रजिस्टर किया गया है:",
     success: "सफलतापूर्वक रजिस्टर हो गए!",
     successDesc: "सदस्य इस कार्यक्रम के लिए रजिस्टर हुए:",
     payPending: "भुगतान लंबित",
@@ -79,53 +75,18 @@ export default function MemberEvents() {
     }
     try {
       const chosen = members.filter((m) => selected.includes(m.id));
-      const feePer = registering.fee || 0;
-      const total = feePer * chosen.length;
-      const txnId = `TXN-${Date.now()}`;
-      const regId = `EVT-REG-${Date.now()}`;
-      const now = new Date().toISOString();
-      const isFree = total === 0;
-
-      await base44.entities.Transaction.create({
-        transactionId: txnId,
-        type: "Event Registration",
-        amount: total,
-        paymentMethod: "UPI",
-        paymentStatus: isFree ? "SUCCESS" : "PENDING",
+      // One server call: the registration, its payment record and the family's
+      // confirmation are created together; the fee comes from the event.
+      const registration = await base44.entities.EventRegistration.create({
         eventId: registering.id,
-        familyId: family?.familyId,
-        memberId: chosen[0]?.membershipId,
-        referenceId: regId,
-        date: now,
-        remarks: `Event: ${registering.title} | Members: ${chosen.length}`,
-      });
-
-      await base44.entities.EventRegistration.create({
-        registrationId: regId,
-        eventId: registering.id,
-        eventTitle: registering.title,
         familyId: family?.familyId,
         memberIds: chosen.map((m) => m.id),
         memberNames: chosen.map((m) => m.name),
-        count: chosen.length,
-        feePerMember: feePer,
-        totalFee: total,
-        paymentStatus: isFree ? "SUCCESS" : "PENDING",
-        transactionId: txnId,
         status: "REGISTERED",
-        registeredById: user?.id,
-        registeredDate: now,
         registrantName: user?.fullName || family?.headName || "Member",
-        registrantEmail: user?.email || "",
+        lang,
       });
-
-      await base44.entities.Notification.create({
-        title: t.regTitle,
-        message: `${t.regMsg} ${registering.title}.`,
-        type: "Event",
-        recipientFamilyId: family?.familyId,
-        date: now,
-      });
+      const isFree = registration.paymentStatus === "SUCCESS";
       toast({ title: t.success, description: `${chosen.length} ${t.successDesc} ${registering.title}${isFree ? "" : ` — ${t.payPending}`}.` });
       setRegistering(null);
       setSelected([]);

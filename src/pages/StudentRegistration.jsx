@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, Check, Copy, Share2, PartyPopper, Camera, Upload
 import PublicNav from "@/components/PublicNav";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
 import { sanitizeMobile, sanitizePincode } from "@/lib/utils";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 
@@ -58,6 +58,7 @@ function SelectBox({ label, value, onChange, options, required, placeholder, t }
 
 export default function StudentRegistration() {
   const t = useT();
+  const { lang } = useLang();
   const navigate = useNavigate();
   const { toast } = useToast();
   const draft = loadDraft();
@@ -188,14 +189,8 @@ export default function StudentRegistration() {
         pincode: guardian.pincode,
         photoUrl: photo,
         submittedDate: new Date().toISOString(),
-      });
-
-      await base44.entities.Notification.create({
-        title: "Student Application Submitted",
-        message: `Your student registration application ${app.applicationId} has been submitted and is pending verification.`,
-        type: "Registration",
-        recipientFamilyId: app.applicationId,
-        date: new Date().toISOString(),
+        // The server also sends the "submitted" notification.
+        lang,
       });
 
       try { sessionStorage.removeItem(DRAFT_KEY); } catch {}

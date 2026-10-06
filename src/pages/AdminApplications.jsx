@@ -206,97 +206,12 @@ export default function AdminApplications() {
     }
     setProcessing(true);
     try {
-      if (action === "approve") {
-        const normalizedMembers = normalizeMembersPayload(selected.membersData);
-        const newFamily = await base44.entities.Family.create({
-          familyName: selected.familyName,
-          headName: selected.familyHeadName,
-          status: "ACTIVE",
-          address: selected.address,
-          city: selected.city,
-          district: selected.district,
-          state: selected.state,
-          pincode: selected.pincode,
-          gotra: selected.gotra,
-          nativePlace: selected.nativePlace,
-          village: selected.village,
-          contactNumber: selected.mobile,
-          email: selected.email,
-          registrationDate: new Date().toISOString(),
-          memberCount: normalizedMembers.length,
-          applicationId: selected.applicationId,
-        });
-        const famId = newFamily.familyId;
-        const memberRecords = normalizedMembers.map((m) => {
-          return {
-            familyId: famId,
-            name: m.name,
-            relationship: m.relationship,
-            gender: m.gender,
-            dob: m.dob,
-            mobile: m.mobile,
-            email: m.email,
-            education: m.education,
-            occupation: m.occupation,
-            address: m.address,
-            status: "ACTIVE",
-          };
-        });
-        if (memberRecords.length > 0) {
-          await base44.entities.FamilyMember.bulkCreate(memberRecords);
-        }
-        await base44.entities.Application.update(selected.id, {
-          status: "APPROVED",
-          reviewedDate: new Date().toISOString(),
-          resultingFamilyId: famId,
-        });
-        await base44.entities.Notification.create({
-          title: t.notifApprovedTitle,
-          message: `${t.notifApprovedMsg} ${famId}. ${t.notifApprovedMsg2}`,
-          type: "Approval",
-          recipientFamilyId: famId,
-          date: new Date().toISOString(),
-        });
-        try {
-          if (selected.email) {
-            await base44.users.inviteUser(selected.email, "user", {
-              fullName: selected.familyHeadName,
-              phone: selected.mobile,
-            });
-          }
-        } catch (e) {
-          console.error("Approval invite email failed:", e);
-        }
-        toast({ title: t.approvedToast, description: `${t.famIdGenerated}` });
-      } else if (action === "correction") {
-        await base44.entities.Application.update(selected.id, {
-          status: "CORRECTION_REQUIRED",
-          adminRemarks: remarks,
-          reviewedDate: new Date().toISOString(),
-        });
-        await base44.entities.Notification.create({
-          title: t.notifCorrectionTitle,
-          message: `${t.notifCorrectionMsg} ${remarks}`,
-          type: "Correction",
-          recipientFamilyId: selected.applicationId,
-          date: new Date().toISOString(),
-        });
-        toast({ title: t.correctionRequested });
-      } else if (action === "reject") {
-        await base44.entities.Application.update(selected.id, {
-          status: "REJECTED",
-          adminRemarks: remarks,
-          reviewedDate: new Date().toISOString(),
-        });
-        await base44.entities.Notification.create({
-          title: t.notifRejectedTitle,
-          message: `${t.notifRejectedMsg} ${remarks}`,
-          type: "Correction",
-          recipientFamilyId: selected.applicationId,
-          date: new Date().toISOString(),
-        });
-        toast({ title: t.rejectedToast });
-      }
+      // One server call: approving creates the family and its members, notifies
+      // them and invites the applicant; the others record the remarks and notify.
+      const decision = { approve: "APPROVED", correction: "CORRECTION_REQUIRED", reject: "REJECTED" }[action];
+      await base44.entities.Application.review(selected.id, { decision, remarks: remarks.trim() || undefined, lang });
+      if (decision === "APPROVED") toast({ title: t.approvedToast, description: t.famIdGenerated });
+      else toast({ title: decision === "REJECTED" ? t.rejectedToast : t.correctionRequested });
       setAction(null);
       setRemarks("");
       setSelected(null);

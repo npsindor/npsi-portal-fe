@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, Check, UserPlus, Trash2, Users, ShieldCheck, Cop
 import PublicNav from "@/components/PublicNav";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
 import { sanitizeMobile, sanitizePincode } from "@/lib/utils";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 
@@ -61,6 +61,7 @@ function SelectBox({ label, value, onChange, options, required, placeholder }) {
 
 export default function FamilyRegistration() {
   const t = useT();
+  const { lang } = useLang();
   const navigate = useNavigate();
   const { toast } = useToast();
   const draft = loadDraft();
@@ -235,25 +236,8 @@ export default function FamilyRegistration() {
         membersData: allMembers,
         submittedDate: new Date().toISOString(),
         recaptchaToken,
-      });
-
-      await base44.entities.Transaction.create({
-        transactionId: `TXN-${Date.now()}`,
-        type: "Family Registration",
-        amount: 500,
-        paymentMethod: "UPI",
-        paymentStatus: "SUCCESS",
-        referenceId: app.applicationId,
-        date: new Date().toISOString(),
-        remarks: "Family registration fee",
-      });
-
-      await base44.entities.Notification.create({
-        title: "Application Submitted",
-        message: `Your family registration application ${app.applicationId} has been submitted and is pending verification.`,
-        type: "Registration",
-        recipientFamilyId: app.applicationId,
-        date: new Date().toISOString(),
+        // The server also records the registration fee and the "submitted" notification.
+        lang,
       });
 
       try { sessionStorage.removeItem(DRAFT_KEY); } catch {}

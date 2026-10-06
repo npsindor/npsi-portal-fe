@@ -217,80 +217,12 @@ export default function AdminStudents() {
     }
     setProcessing(true);
     try {
-      if (action === "approve") {
-        const newStudent = await base44.entities.Student.create({
-          studentName: selected.studentName,
-          fatherName: selected.fatherName,
-          status: "ACTIVE",
-          mobile: selected.mobile,
-          email: selected.email,
-          dob: selected.dob,
-          gender: selected.gender,
-          course: selected.course,
-          institution: selected.institution,
-          academicYear: selected.academicYear,
-          guardianName: selected.guardianName,
-          guardianMobile: selected.guardianMobile,
-          address: selected.address,
-          city: selected.city,
-          district: selected.district,
-          state: selected.state,
-          pincode: selected.pincode,
-          photoUrl: selected.photoUrl,
-          registrationDate: new Date().toISOString(),
-          applicationId: selected.applicationId,
-        });
-        const stuId = newStudent.studentId;
-        await base44.entities.StudentApplication.update(selected.id, {
-          status: "APPROVED",
-          reviewedDate: new Date().toISOString(),
-          resultingStudentId: stuId,
-        });
-        await base44.entities.Notification.create({
-          title: t.notifApprovedTitle,
-          message: `${t.notifApprovedMsg} ${stuId}. ${t.notifApprovedMsg2}`,
-          type: "Approval",
-          recipientFamilyId: stuId,
-          date: new Date().toISOString(),
-        });
-        try {
-          if (selected.email) {
-            await base44.users.inviteUser(selected.email, "user", {
-              fullName: selected.studentName,
-              phone: selected.mobile || selected.guardianMobile,
-            });
-          }
-        } catch (e) { /* already invited */ }
-        toast({ title: t.approvedToast, description: t.stuIdGenerated });
-      } else if (action === "correction") {
-        await base44.entities.StudentApplication.update(selected.id, {
-          status: "CORRECTION_REQUIRED",
-          adminRemarks: remarks,
-          reviewedDate: new Date().toISOString(),
-        });
-        await base44.entities.Notification.create({
-          title: t.notifCorrectionTitle,
-          message: `${t.notifCorrectionMsg} ${remarks}`,
-          type: "Correction",
-          recipientFamilyId: selected.applicationId,
-          date: new Date().toISOString(),
-        });
-        toast({ title: t.correctionRequested });
-      } else if (action === "reject") {
-        await base44.entities.StudentApplication.update(selected.id, {
-          status: "REJECTED",
-          adminRemarks: remarks,
-          reviewedDate: new Date().toISOString(),
-        });
-        await base44.entities.Notification.create({
-          title: t.notifRejectedTitle,
-          message: `${t.notifRejectedMsg} ${remarks}`,
-          type: "Correction",
-          recipientFamilyId: selected.applicationId,
-          date: new Date().toISOString(),
-        });
-        toast({ title: t.rejectedToast });
-      }
+      // One server call: approving creates the student record, notifies and
+      // invites them; the others record the remarks and notify the applicant.
+      const decision = { approve: "APPROVED", correction: "CORRECTION_REQUIRED", reject: "REJECTED" }[action];
+      await base44.entities.StudentApplication.review(selected.id, { decision, remarks: remarks.trim() || undefined, lang });
+      if (decision === "APPROVED") toast({ title: t.approvedToast, description: t.stuIdGenerated });
+      else toast({ title: decision === "REJECTED" ? t.rejectedToast : t.correctionRequested });
       setAction(null);
       setRemarks("");
       setSelected(null);

@@ -57,6 +57,8 @@ const createLocalEntities = () => new Proxy({}, {
     bulkCreate: (records = []) => request(API.entities.batch(entity), { method: 'POST', body: JSON.stringify({ records }) }),
     update: (id, data) => request(API.entities.item(entity, id), { method: 'PATCH', body: JSON.stringify(data) }),
     delete: (id) => request(API.entities.item(entity, id), { method: 'DELETE' }),
+    // Admin decision on an application or transfer request: { decision: 'APPROVED' | 'REJECTED' | 'CORRECTION_REQUIRED', remarks, lang }.
+    review: (id, body) => request(API.entities.review(entity, id), { method: 'POST', body: JSON.stringify(body) }),
     deleteMany: async (filters = {}) => {
       const records = await request(`${API.entities.collection(entity)}?${listQuery(filters, '-createdAt', 500)}`);
       await Promise.all(records.map((record) => request(API.entities.item(entity, record.id), { method: 'DELETE' })));

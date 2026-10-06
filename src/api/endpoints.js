@@ -54,5 +54,6 @@ export const API = {
     collection: (entity) => resource(entity),
     batch: (entity) => `${resource(entity)}/batch`,
     item: (entity, id) => `${resource(entity)}/${id}`,
+    review: (entity, id) => `${resource(entity)}/${id}/review`,
   },
 };

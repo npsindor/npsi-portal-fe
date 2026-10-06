@@ -3,13 +3,14 @@ import { X, Loader2, ArrowRightLeft, Search } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
 
 // props: open, onClose
 // student: the logged-in user's Student record (for student_to_family)
 // family + membershipId + memberName: for family_to_family
 export default function RequestTransferModal({ open, onClose, student, family, membershipId, memberName }) {
   const t = useT();
+  const { lang } = useLang();
   const { user } = useAuth();
   const { toast } = useToast();
   const [targetFamilyId, setTargetFamilyId] = useState("");
@@ -71,14 +72,8 @@ export default function RequestTransferModal({ open, onClose, student, family, m
         reason: reason.trim(),
         requesterId: user?.id,
         requestedDate: new Date().toISOString(),
-      });
-
-      await base44.entities.Notification.create({
-        title: t("tr.notifTitle"),
-        message: t("tr.notifMsg", { id: created.requestId }),
-        type: "Approval",
-        recipientFamilyId: target.familyId,
-        date: new Date().toISOString(),
+        // The server notifies the target family.
+        lang,
       });
 
       toast({ title: t("tr.submitted"), description: created.requestId });

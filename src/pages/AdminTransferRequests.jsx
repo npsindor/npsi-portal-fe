@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { ArrowRightLeft, Eye, X, Loader2, Check, AlertCircle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { useAuth } from "@/lib/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { useT, useLang } from "@/lib/i18n";
 import StatusBadge from "@/components/StatusBadge";
-import { findExistingPerson } from "@/lib/findPerson";
 import SearchBox from "@/components/admin/SearchBox";
 import ExportMenu from "@/components/ExportMenu";
 import TablePagination from "@/components/admin/TablePagination";
@@ -17,7 +15,6 @@ const FILTERS = ["All", "PENDING", "CORRECTION_REQUIRED", "APPROVED", "REJECTED"
 export default function AdminTransferRequests() {
   const t = useT();
   const { lang } = useLang();
-  const { user } = useAuth();
   const { toast } = useToast();
   const locale = lang === "hi" ? "hi-IN" : "en-IN";
 
@@ -44,137 +41,24 @@ export default function AdminTransferRequests() {
 
   const open = (r) => { setSelected(r); setRemarks(r.adminRemarks || ""); };
 
-  const approve = async () => {
+  // One server call per decision: approving moves the member (or adds the
+  // student to the target family), updates both families' member counts and
+  // notifies the target family, all or nothing.
+  const decide = async (decision) => {
+    if (decision !== "APPROVED" && !remarks.trim()) { toast({ title: t("tr.remarksReq"), variant: "destructive" }); return; }
     setProcessing(true);
     try {
-      const targetFams = await base44.entities.Family.filter({ familyId: selected.targetFamilyId, status: "ACTIVE" });
-      if (targetFams.length === 0) { toast({ title: t("tr.targetNotFound"), variant: "destructive" }); setProcessing(false); return; }
-      const target = targetFams[0];
-
-      if (selected.requestType === "student_to_family") {
-        const students = await base44.entities.Student.list();
-        const stu = students.find((s) => s.studentId === selected.sourceStudentId);
-        if (!stu) { toast({ title: t("tr.sourceNotFound"), variant: "destructive" }); setProcessing(false); return; }
-
-        // duplicate check within target family
-        const dup = await findExistingPerson({ mobile: stu.mobile, email: stu.email });
-        if (dup.found && dup.type === "member") {
-          const existingMember = dup.record;
-          if (existingMember.familyId === target.familyId) {
-            toast({ title: t("tr.duplicateInTarget"), variant: "destructive" });
-            setProcessing(false);
-            return;
-          }
-        }
-
-        const newMember = await base44.entities.FamilyMember.create({
-          familyId: target.familyId,
-          name: stu.studentName,
-          relationship: "Other",
-          gender: stu.gender || "",
-          dob: stu.dob || "",
-          mobile: stu.mobile || "",
-          email: stu.email || "",
-          address: stu.address || "",
-          photoUrl: stu.photoUrl || "",
-          status: "ACTIVE",
-          linkedStudentId: stu.studentId,
-        });
-        const memId = newMember.membershipId;
-        await base44.entities.Student.update(stu.id, {
-          status: "TRANSFERRED",
-          linkedFamilyId: target.familyId,
-          linkedMembershipId: memId,
-        });
-        await base44.entities.Family.update(target.id, { memberCount: (target.memberCount || 0) + 1 });
-
-        await base44.entities.TransferRequest.update(selected.id, {
-          status: "APPROVED",
-          adminRemarks: remarks.trim(),
-          reviewedDate: new Date().toISOString(),
-          approvedById: user?.id,
-          resultingMembershipId: memId,
-          newFamilyId: target.familyId,
-        });
-        await base44.entities.Notification.create({
-          title: t("tr.approvedNotif"),
-          message: t("tr.approvedMsg", { fam: target.familyName, mem: memId }),
-          type: "Approval",
-          recipientFamilyId: target.familyId,
-          date: new Date().toISOString(),
-        });
-        toast({ title: t("tr.approved"), description: memId });
-      } else {
-        // family_to_family
-        const members = await base44.entities.FamilyMember.list();
-        const mem = members.find((m) => m.membershipId === selected.sourceMembershipId);
-        if (!mem) { toast({ title: t("tr.sourceNotFound"), variant: "destructive" }); setProcessing(false); return; }
-        const oldFamId = mem.familyId;
-        await base44.entities.FamilyMember.update(mem.id, { familyId: target.familyId, status: "ACTIVE" });
-
-        const oldFams = await base44.entities.Family.filter({ familyId: oldFamId });
-        if (oldFams[0]) await base44.entities.Family.update(oldFams[0].id, { memberCount: Math.max((oldFams[0].memberCount || 1) - 1, 0) });
-        await base44.entities.Family.update(target.id, { memberCount: (target.memberCount || 0) + 1 });
-
-        await base44.entities.TransferRequest.update(selected.id, {
-          status: "APPROVED",
-          adminRemarks: remarks.trim(),
-          reviewedDate: new Date().toISOString(),
-          approvedById: user?.id,
-          oldFamilyId: oldFamId,
-          newFamilyId: target.familyId,
-        });
-        await base44.entities.Notification.create({
-          title: t("tr.approvedNotif"),
-          message: t("tr.transferMsg", { from: oldFamId, to: target.familyName }),
-          type: "Approval",
-          recipientFamilyId: target.familyId,
-          date: new Date().toISOString(),
-        });
-        toast({ title: t("tr.approved") });
-      }
+      await base44.entities.TransferRequest.review(selected.id, { decision, remarks: remarks.trim() || undefined, lang });
+      toast({ title: t(decision === "APPROVED" ? "tr.approved" : decision === "REJECTED" ? "tr.rejected" : "tr.correctionRequested") });
       setSelected(null);
       load();
     } catch (e) {
       toast({ title: t("tr.actionFailed"), description: e.message, variant: "destructive" });
     } finally { setProcessing(false); }
   };
-
-  const reject = async () => {
-    if (!remarks.trim()) { toast({ title: t("tr.remarksReq"), variant: "destructive" }); return; }
-    setProcessing(true);
-    try {
-      await base44.entities.TransferRequest.update(selected.id, {
-        status: "REJECTED",
-        adminRemarks: remarks.trim(),
-        reviewedDate: new Date().toISOString(),
-        approvedById: user?.id,
-      });
-      toast({ title: t("tr.rejected") });
-      setSelected(null);
-      load();
-    } catch (e) {
-      toast({ title: t("tr.actionFailed"), description: e.message, variant: "destructive" });
-    } finally { setProcessing(false); }
-  };
-
-  const correction = async () => {
-    if (!remarks.trim()) { toast({ title: t("tr.remarksReq"), variant: "destructive" }); return; }
-    setProcessing(true);
-    try {
-      await base44.entities.TransferRequest.update(selected.id, {
-        status: "CORRECTION_REQUIRED",
-        adminRemarks: remarks.trim(),
-        reviewedDate: new Date().toISOString(),
-        approvedById: user?.id,
-      });
-      toast({ title: t("tr.correctionRequested") });
-      setSelected(null);
-      load();
-    } catch (e) {
-      toast({ title: t("tr.actionFailed"), description: e.message, variant: "destructive" });
-    } finally { setProcessing(false); }
-  };
+  const approve = () => decide("APPROVED");
+  const reject = () => decide("REJECTED");
+  const correction = () => decide("CORRECTION_REQUIRED");
 
   const visible = all.filter((r) => {
     if (filter !== "All" && r.status !== filter) return false;
