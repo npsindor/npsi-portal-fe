@@ -201,7 +201,6 @@ export default function AdminFamilies() {
         contactNumber: editing.contactNumber || "",
         email: editing.email || "",
         registrationDate: editing.registrationDate || new Date().toISOString(),
-        memberCount: editing.memberCount || 0,
         applicationId: editing.applicationId || "",
       };
       if (editing.id) {

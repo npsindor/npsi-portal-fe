@@ -235,8 +235,8 @@ export default function MyFamily() {
         await base44.entities.FamilyMember.update(editing.id, payload);
         toast({ title: t.updated, description: `${payload.name} ${t.updatedDesc}` });
       } else {
+        // The server keeps the family's member count.
         await base44.entities.FamilyMember.create({ ...payload, familyId: family.familyId });
-        await base44.entities.Family.update(family.id, { memberCount: (family.memberCount || 0) + 1 });
         toast({ title: t.added, description: `${payload.name} ${t.addedDesc}` });
       }
       setForm(emptyForm);
@@ -256,7 +256,6 @@ export default function MyFamily() {
     setSubmitting(true);
     try {
       await base44.entities.FamilyMember.delete(m.id);
-      await base44.entities.Family.update(family.id, { memberCount: Math.max((family.memberCount || 1) - 1, 0) });
       toast({ title: t.removed, description: `${m.name} ${t.removedDesc}` });
       setConfirmRemove(null);
       load();
