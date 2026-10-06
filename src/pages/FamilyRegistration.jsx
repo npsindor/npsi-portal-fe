@@ -87,8 +87,8 @@ export default function FamilyRegistration() {
     if (!file) return;
     setPhotoUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
-      setHeadPhoto(file_url);
+      const { fileUrl } = await base44.integrations.Core.UploadPublicFile({ file });
+      setHeadPhoto(fileUrl);
       toast({ title: t("reg.photoAdded") });
     } catch (err) {
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
@@ -213,46 +213,46 @@ export default function FamilyRegistration() {
           education: head.education,
           occupation: head.occupation,
           address: head.address,
-          photo_url: headPhoto,
+          photoUrl: headPhoto,
         },
         ...members.map((m) => ({ name: m.name, relationship: m.relationship, gender: m.gender, dob: m.dob, mobile: m.mobile, email: m.email, education: m.education, occupation: m.occupation, address: m.address })),
       ];
 
       const app = await base44.entities.Application.create({
         status: "PENDING_VERIFICATION",
-        family_head_name: headName,
+        familyHeadName: headName,
         mobile,
         email: head.email,
-        family_name: familyName,
+        familyName: familyName,
         address: family.address || head.address,
         city: family.city || head.city,
         district: family.district || head.district,
         state: family.state || head.state,
         pincode: family.pincode || head.pincode,
         gotra: family.gotra,
-        native_place: family.nativePlace,
+        nativePlace: family.nativePlace,
         village: family.village,
-        members_data: allMembers,
-        submitted_date: new Date().toISOString(),
+        membersData: allMembers,
+        submittedDate: new Date().toISOString(),
         recaptchaToken,
       });
 
       await base44.entities.Transaction.create({
-        transaction_id: `TXN-${Date.now()}`,
+        transactionId: `TXN-${Date.now()}`,
         type: "Family Registration",
         amount: 500,
-        payment_method: "UPI",
-        payment_status: "SUCCESS",
-        reference_id: app.application_id,
+        paymentMethod: "UPI",
+        paymentStatus: "SUCCESS",
+        referenceId: app.applicationId,
         date: new Date().toISOString(),
         remarks: "Family registration fee",
       });
 
       await base44.entities.Notification.create({
         title: "Application Submitted",
-        message: `Your family registration application ${app.application_id} has been submitted and is pending verification.`,
+        message: `Your family registration application ${app.applicationId} has been submitted and is pending verification.`,
         type: "Registration",
-        recipient_family_id: app.application_id,
+        recipientFamilyId: app.applicationId,
         date: new Date().toISOString(),
       });
 
@@ -278,18 +278,18 @@ export default function FamilyRegistration() {
             <p className="mt-2 text-sm text-muted-foreground">{t("reg.successSub")}</p>
             <div className="mt-6 rounded-2xl border border-gold/40 bg-cream p-5">
               <div className="text-xs uppercase tracking-wide text-muted-foreground">{t("reg.appId")}</div>
-              <div className="mt-1 font-display text-3xl font-bold tracking-wide text-maroon">{submittedApp.application_id}</div>
+              <div className="mt-1 font-display text-3xl font-bold tracking-wide text-maroon">{submittedApp.applicationId}</div>
               <div className="mt-3 flex justify-center gap-2">
                 <button
-                  onClick={() => navigator.clipboard.writeText(submittedApp.application_id)}
+                  onClick={() => navigator.clipboard.writeText(submittedApp.applicationId)}
                   className="inline-flex items-center gap-1.5 rounded-full border border-gold/50 px-4 py-2 text-xs font-semibold text-maroon hover:bg-gold/10"
                 >
                   <Copy className="h-3.5 w-3.5" /> {t("reg.copy")}
                 </button>
                 <button
                   onClick={() => {
-                    if (navigator.share) navigator.share({ title: "Application ID", text: submittedApp.application_id });
-                    else navigator.clipboard.writeText(submittedApp.application_id);
+                    if (navigator.share) navigator.share({ title: "Application ID", text: submittedApp.applicationId });
+                    else navigator.clipboard.writeText(submittedApp.applicationId);
                   }}
                   className="inline-flex items-center gap-1.5 rounded-full border border-gold/50 px-4 py-2 text-xs font-semibold text-maroon hover:bg-gold/10"
                 >

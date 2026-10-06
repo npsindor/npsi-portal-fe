@@ -13,7 +13,8 @@ There are no UI tests; verify UI changes in the running app. Backend API docs (S
 
 ## Architecture notes
 
-- All backend calls go through `src/api/base44Client.js`, which mimics the Base44 SDK (`base44.entities.<Entity>.list/filter/create/bulkCreate/update/delete`, `base44.auth.*`). Reuse it; don't call `fetch` directly from pages. `src/api/appClient.js` is an older, unused copy.
+- All backend calls go through `src/api/base44Client.js`, which mimics the Base44 SDK (`base44.entities.<Entity>.list/filter/create/bulkCreate/update/delete`, `base44.auth.*`). Reuse it; don't call `fetch` directly from pages.
+- API fields are camelCase in requests and responses (`familyName`, `createdAt`, `accessToken`); booleans are `true`/`false`, amounts are numbers, DATE fields are `YYYY-MM-DD`, date-times ISO strings (send ISO too; the client does no date conversion). `filter({ familyId, status })` sends each key as a query parameter, so only filters the backend resource declares work (`families`: familyId, status; `family-members`: familyId; `samiti-members`: samitiId). `order` must be a field of that resource (`-date`, `sectionNumber`), `limit` 1–500.
 - Every backend URL lives in `src/api/endpoints.js` (`API` map). The backend serves `/api/v1/...` with plural kebab-case resources and no verbs (login `POST /auth/sessions`, logout `DELETE /auth/sessions/current`, change password `PUT /auth/password`). Never hard-code an `/api/...` path elsewhere; `npm test` fails if you do.
 - Entity names map to REST resources in `ENTITY_RESOURCES` (`endpoints.js`), e.g. `FamilyMember` → `/api/v1/family-members`. A new entity needs a backend change too (`nps-be/src/modules/entities/entity-definitions.ts`) and an entry here.
 - Backend errors are always `{ error: "<message>" }`; `request()` turns them into thrown `Error`s with `status`.

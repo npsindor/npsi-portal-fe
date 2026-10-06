@@ -95,8 +95,8 @@ export default function StudentRegistration() {
     if (!file) return;
     setPhotoUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
-      setPhoto(file_url);
+      const { fileUrl } = await base44.integrations.Core.UploadPublicFile({ file });
+      setPhoto(fileUrl);
       toast({ title: t("stu.photoAdded") });
     } catch (err) {
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
@@ -170,31 +170,31 @@ export default function StudentRegistration() {
       const app = await base44.entities.StudentApplication.create({
         status: "PENDING_VERIFICATION",
         recaptchaToken,
-        student_name: stu.name,
-        father_name: stu.fatherName,
+        studentName: stu.name,
+        fatherName: stu.fatherName,
         mobile,
         email: stu.email,
         dob: stu.dob,
         gender: stu.gender,
         course: stu.course,
         institution: stu.institution,
-        academic_year: stu.academicYear,
-        guardian_name: guardian.guardianName,
-        guardian_mobile: guardian.guardianMobile,
+        academicYear: stu.academicYear,
+        guardianName: guardian.guardianName,
+        guardianMobile: guardian.guardianMobile,
         address: guardian.address,
         city: guardian.city,
         district: guardian.district,
         state: guardian.state,
         pincode: guardian.pincode,
-        photo_url: photo,
-        submitted_date: new Date().toISOString(),
+        photoUrl: photo,
+        submittedDate: new Date().toISOString(),
       });
 
       await base44.entities.Notification.create({
         title: "Student Application Submitted",
-        message: `Your student registration application ${app.application_id} has been submitted and is pending verification.`,
+        message: `Your student registration application ${app.applicationId} has been submitted and is pending verification.`,
         type: "Registration",
-        recipient_family_id: app.application_id,
+        recipientFamilyId: app.applicationId,
         date: new Date().toISOString(),
       });
 
@@ -220,18 +220,18 @@ export default function StudentRegistration() {
             <p className="mt-2 text-sm text-muted-foreground">{t("stu.successSub")}</p>
             <div className="mt-6 rounded-2xl border border-gold/40 bg-cream p-5">
               <div className="text-xs uppercase tracking-wide text-muted-foreground">{t("stu.appId")}</div>
-              <div className="mt-1 font-display text-3xl font-bold tracking-wide text-maroon">{submittedApp.application_id}</div>
+              <div className="mt-1 font-display text-3xl font-bold tracking-wide text-maroon">{submittedApp.applicationId}</div>
               <div className="mt-3 flex justify-center gap-2">
                 <button
-                  onClick={() => navigator.clipboard.writeText(submittedApp.application_id)}
+                  onClick={() => navigator.clipboard.writeText(submittedApp.applicationId)}
                   className="inline-flex items-center gap-1.5 rounded-full border border-gold/50 px-4 py-2 text-xs font-semibold text-maroon hover:bg-gold/10"
                 >
                   <Copy className="h-3.5 w-3.5" /> {t("stu.copy")}
                 </button>
                 <button
                   onClick={() => {
-                    if (navigator.share) navigator.share({ title: "Application ID", text: submittedApp.application_id });
-                    else navigator.clipboard.writeText(submittedApp.application_id);
+                    if (navigator.share) navigator.share({ title: "Application ID", text: submittedApp.applicationId });
+                    else navigator.clipboard.writeText(submittedApp.applicationId);
                   }}
                   className="inline-flex items-center gap-1.5 rounded-full border border-gold/50 px-4 py-2 text-xs font-semibold text-maroon hover:bg-gold/10"
                 >

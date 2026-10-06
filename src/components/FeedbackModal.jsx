@@ -87,7 +87,7 @@ export default function FeedbackModal() {
       const validItems = items.filter((it) => it.answer?.trim());
       const overall = Math.round(validItems.reduce((s, it) => s + (it.rating || 0), 0) / (validItems.length || 1));
       await base44.entities.Feedback.create({
-        member_name: user?.full_name || "Member",
+        memberName: user?.fullName || "Member",
         email: user?.email || "",
         questions: validItems.map((it) => ({ question: it.question, answer: it.answer, rating: it.rating || 0 })),
         rating: overall,

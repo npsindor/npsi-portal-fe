@@ -18,7 +18,7 @@ export default function AdminRules() {
   const load = async () => {
     setLoading(true);
     try {
-      const data = await base44.entities.Rule.list("section_number");
+      const data = await base44.entities.Rule.list("sectionNumber");
       setRules(data);
     } catch (e) {
       toast({ title: "Failed to load rules", variant: "destructive" });
@@ -29,26 +29,26 @@ export default function AdminRules() {
 
   useEffect(() => { load(); }, []);
 
-  const openNew = () => setEditing({ section_number: rules.length + 1, status: "Active" });
+  const openNew = () => setEditing({ sectionNumber: rules.length + 1, status: "Active" });
   const openEdit = (r) => setEditing({ ...r });
 
   const { search, setSearch, page, setPage, totalPages, totalItems, pageSize, pageItems } = useTableControls(rules, {
-    searchFields: ["title_en", "title_hi"],
+    searchFields: ["titleEn", "titleHi"],
   });
 
   const save = async () => {
-    if (!editing.title_en || !editing.title_hi || !editing.content_en || !editing.content_hi) {
+    if (!editing.titleEn || !editing.titleHi || !editing.contentEn || !editing.contentHi) {
       toast({ title: "All four fields are required", variant: "destructive" });
       return;
     }
     setSaving(true);
     try {
       const payload = {
-        section_number: Number(editing.section_number) || 0,
-        title_en: editing.title_en,
-        title_hi: editing.title_hi,
-        content_en: editing.content_en,
-        content_hi: editing.content_hi,
+        sectionNumber: Number(editing.sectionNumber) || 0,
+        titleEn: editing.titleEn,
+        titleHi: editing.titleHi,
+        contentEn: editing.contentEn,
+        contentHi: editing.contentHi,
         status: editing.status || "Active",
       };
       if (editing.id) {
@@ -113,11 +113,11 @@ export default function AdminRules() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
-                      {t("rules.section")} {r.section_number} · {r.status}
+                      {t("rules.section")} {r.sectionNumber} · {r.status}
                     </div>
-                    <div className="font-display text-base font-semibold text-maroon">{r.title_en}</div>
-                    <div className="text-sm font-medium text-foreground/80">{r.title_hi}</div>
-                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{r.content_en}</p>
+                    <div className="font-display text-base font-semibold text-maroon">{r.titleEn}</div>
+                    <div className="text-sm font-medium text-foreground/80">{r.titleHi}</div>
+                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{r.contentEn}</p>
                   </div>
                   <div className="flex shrink-0 gap-1.5">
                     <button onClick={() => openEdit(r)} className="rounded-full p-2 text-maroon hover:bg-maroon/10">
@@ -157,8 +157,8 @@ export default function AdminRules() {
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("rulesAdmin.sectionNo")}</label>
                 <input
                   type="number"
-                  value={editing.section_number ?? ""}
-                  onChange={(e) => setEditing({ ...editing, section_number: e.target.value })}
+                  value={editing.sectionNumber ?? ""}
+                  onChange={(e) => setEditing({ ...editing, sectionNumber: e.target.value })}
                   className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon"
                 />
               </div>
@@ -176,16 +176,16 @@ export default function AdminRules() {
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("rulesAdmin.titleEn")}</label>
                 <input
-                  value={editing.title_en || ""}
-                  onChange={(e) => setEditing({ ...editing, title_en: e.target.value })}
+                  value={editing.titleEn || ""}
+                  onChange={(e) => setEditing({ ...editing, titleEn: e.target.value })}
                   className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon"
                 />
               </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("rulesAdmin.titleHi")}</label>
                 <input
-                  value={editing.title_hi || ""}
-                  onChange={(e) => setEditing({ ...editing, title_hi: e.target.value })}
+                  value={editing.titleHi || ""}
+                  onChange={(e) => setEditing({ ...editing, titleHi: e.target.value })}
                   className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon"
                 />
               </div>
@@ -193,8 +193,8 @@ export default function AdminRules() {
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("rulesAdmin.contentEn")}</label>
                 <textarea
                   rows={5}
-                  value={editing.content_en || ""}
-                  onChange={(e) => setEditing({ ...editing, content_en: e.target.value })}
+                  value={editing.contentEn || ""}
+                  onChange={(e) => setEditing({ ...editing, contentEn: e.target.value })}
                   className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon"
                 />
               </div>
@@ -202,8 +202,8 @@ export default function AdminRules() {
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("rulesAdmin.contentHi")}</label>
                 <textarea
                   rows={5}
-                  value={editing.content_hi || ""}
-                  onChange={(e) => setEditing({ ...editing, content_hi: e.target.value })}
+                  value={editing.contentHi || ""}
+                  onChange={(e) => setEditing({ ...editing, contentHi: e.target.value })}
                   className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon"
                 />
               </div>

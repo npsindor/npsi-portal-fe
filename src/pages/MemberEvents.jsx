@@ -87,43 +87,43 @@ export default function MemberEvents() {
       const isFree = total === 0;
 
       await base44.entities.Transaction.create({
-        transaction_id: txnId,
+        transactionId: txnId,
         type: "Event Registration",
         amount: total,
-        payment_method: "UPI",
-        payment_status: isFree ? "SUCCESS" : "PENDING",
-        event_id: registering.id,
-        family_id: family?.family_id,
-        member_id: chosen[0]?.membership_id,
-        reference_id: regId,
+        paymentMethod: "UPI",
+        paymentStatus: isFree ? "SUCCESS" : "PENDING",
+        eventId: registering.id,
+        familyId: family?.familyId,
+        memberId: chosen[0]?.membershipId,
+        referenceId: regId,
         date: now,
         remarks: `Event: ${registering.title} | Members: ${chosen.length}`,
       });
 
       await base44.entities.EventRegistration.create({
-        registration_id: regId,
-        event_id: registering.id,
-        event_title: registering.title,
-        family_id: family?.family_id,
-        member_ids: chosen.map((m) => m.id),
-        member_names: chosen.map((m) => m.name),
+        registrationId: regId,
+        eventId: registering.id,
+        eventTitle: registering.title,
+        familyId: family?.familyId,
+        memberIds: chosen.map((m) => m.id),
+        memberNames: chosen.map((m) => m.name),
         count: chosen.length,
-        fee_per_member: feePer,
-        total_fee: total,
-        payment_status: isFree ? "SUCCESS" : "PENDING",
-        transaction_id: txnId,
+        feePerMember: feePer,
+        totalFee: total,
+        paymentStatus: isFree ? "SUCCESS" : "PENDING",
+        transactionId: txnId,
         status: "REGISTERED",
-        registered_by_id: user?.id,
-        registered_date: now,
-        registrant_name: user?.full_name || family?.head_name || "Member",
-        registrant_email: user?.email || "",
+        registeredById: user?.id,
+        registeredDate: now,
+        registrantName: user?.fullName || family?.headName || "Member",
+        registrantEmail: user?.email || "",
       });
 
       await base44.entities.Notification.create({
         title: t.regTitle,
         message: `${t.regMsg} ${registering.title}.`,
         type: "Event",
-        recipient_family_id: family?.family_id,
+        recipientFamilyId: family?.familyId,
         date: now,
       });
       toast({ title: t.success, description: `${chosen.length} ${t.successDesc} ${registering.title}${isFree ? "" : ` — ${t.payPending}`}.` });
@@ -149,14 +149,14 @@ export default function MemberEvents() {
         {events.map((ev) => (
           <div key={ev.id} className="overflow-hidden rounded-2xl border border-gold/30 bg-card shadow-sm">
             <div className="relative h-36 bg-gradient-to-br from-maroon to-maroon-dark">
-              {ev.banner_url && <img src={ev.banner_url} alt={localizedText(ev, "title", lang)} loading="lazy" decoding="async" className="h-full w-full object-cover" />}
+              {ev.bannerUrl && <img src={ev.bannerUrl} alt={localizedText(ev, "title", lang)} loading="lazy" decoding="async" className="h-full w-full object-cover" />}
               {ev.fee > 0 && <span className="absolute right-3 top-3 rounded-full bg-gold px-2.5 py-1 text-xs font-bold text-maroon">₹{ev.fee}</span>}
             </div>
             <div className="p-4">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <CalendarDays className="h-3.5 w-3.5" />
                 {ev.date ? new Date(ev.date).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" }) : "—"}
-                <Clock className="ml-1 h-3.5 w-3.5" /> {ev.start_time || ""}
+                <Clock className="ml-1 h-3.5 w-3.5" /> {ev.startTime || ""}
               </div>
               <h3 className="mt-2 font-display text-lg font-semibold text-maroon">{localizedText(ev, "title", lang)}</h3>
               <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3.5 w-3.5" /> {ev.venue}</div>

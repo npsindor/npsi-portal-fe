@@ -101,7 +101,7 @@ export default function MemberDashboard() {
       {/* Greeting */}
       <div>
         <h1 className="font-display text-3xl font-semibold text-maroon">
-          {t.greeting}, {user?.full_name?.split(" ")[0] || t.member} 🙏
+          {t.greeting}, {user?.fullName?.split(" ")[0] || t.member} 🙏
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">{t.welcome}</p>
       </div>
@@ -116,7 +116,7 @@ export default function MemberDashboard() {
                 <Link to="/portal/family" className="text-xs font-semibold text-maroon hover:underline">{t.viewAll} →</Link>
               </div>
               <div className="mt-3 flex items-center gap-2 text-2xl font-bold text-maroon">
-                <Users className="h-5 w-5" /> {family.member_count || members.length}
+                <Users className="h-5 w-5" /> {family.memberCount || members.length}
                 <span className="text-sm font-normal text-muted-foreground">{t.membersUnit}</span>
               </div>
               <Link to="/portal/family" className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-maroon px-4 py-2 text-xs font-semibold text-cream hover:bg-maroon-dark">
@@ -149,7 +149,7 @@ export default function MemberDashboard() {
           {student ? (
             <>
               <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-semibold text-maroon">
-                <ArrowRightLeft className="h-3.5 w-3.5" /> {t.studentBadge}: {student.student_id}
+                <ArrowRightLeft className="h-3.5 w-3.5" /> {t.studentBadge}: {student.studentId}
               </div>
               <p className="mt-2 text-xs text-muted-foreground">{t.studentTransferHint}</p>
               <button onClick={() => setShowTransfer(true)} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-maroon px-5 py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark">
@@ -175,7 +175,7 @@ export default function MemberDashboard() {
           {events.map((ev) => (
             <div key={ev.id} className="overflow-hidden rounded-2xl border border-gold/30 bg-card shadow-sm">
               <div className="h-28 bg-gradient-to-br from-maroon to-maroon-dark">
-                {ev.banner_url && <img src={ev.banner_url} alt={localizedText(ev, "title", lang)} loading="lazy" decoding="async" className="h-full w-full object-cover" />}
+                {ev.bannerUrl && <img src={ev.bannerUrl} alt={localizedText(ev, "title", lang)} loading="lazy" decoding="async" className="h-full w-full object-cover" />}
               </div>
               <div className="p-3.5">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -207,7 +207,7 @@ export default function MemberDashboard() {
                   title="Tap to enlarge"
                 >
                   <QRCodeSVG
-                    value={`${window.location.origin}/verify/${family.family_id}`}
+                    value={`${window.location.origin}/verify/${family.familyId}`}
                     size={216}
                     bgColor="#F7F0E3"
                     fgColor="#5A1A2A"
@@ -215,9 +215,9 @@ export default function MemberDashboard() {
                   />
                 </button>
                 <div className="mt-2 text-[0.65rem] text-cream/60">Tap QR to enlarge for scanning</div>
-                <div className="mt-4 font-display text-xl font-bold text-gold">{family.family_id}</div>
-                <div className="text-sm text-cream/90">{family.family_name}</div>
-                <div className="mt-1 text-xs text-cream/60">{t.head}: {family.head_name}</div>
+                <div className="mt-4 font-display text-xl font-bold text-gold">{family.familyId}</div>
+                <div className="text-sm text-cream/90">{family.familyName}</div>
+                <div className="mt-1 text-xs text-cream/60">{t.head}: {family.headName}</div>
                 <div className="mt-1 text-xs text-green-300">● {family.status}</div>
               </div>
             </div>
@@ -233,7 +233,7 @@ export default function MemberDashboard() {
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4" onClick={() => setShowQrZoom(false)}>
           <div className="flex w-full max-w-md flex-col items-center gap-4 rounded-2xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <QRCodeSVG
-              value={`${window.location.origin}/verify/${family.family_id}`}
+              value={`${window.location.origin}/verify/${family.familyId}`}
               size={380}
               bgColor="#FFFFFF"
               fgColor="#000000"
@@ -242,8 +242,8 @@ export default function MemberDashboard() {
               style={{ width: "100%", height: "auto", maxWidth: "380px" }}
             />
             <div className="text-center">
-              <div className="font-display text-base font-bold text-maroon">{family.family_id}</div>
-              <div className="text-xs text-muted-foreground">{family.family_name}</div>
+              <div className="font-display text-base font-bold text-maroon">{family.familyId}</div>
+              <div className="text-xs text-muted-foreground">{family.familyName}</div>
             </div>
             <button onClick={() => setShowQrZoom(false)} className="w-full rounded-full bg-maroon py-2.5 text-sm font-semibold text-cream">
               {t.close}

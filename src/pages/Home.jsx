@@ -277,7 +277,7 @@ export default function Home() {
             {events.map((ev) => (
               <div key={ev.id} className="premium-card group overflow-hidden">
                 <div className="relative h-40 bg-gradient-to-br from-maroon to-maroon-dark">
-                  {ev.banner_url && <img src={ev.banner_url} alt={localizedText(ev, "title", lang)} loading="lazy" decoding="async" className="h-full w-full object-cover" />}
+                  {ev.bannerUrl && <img src={ev.bannerUrl} alt={localizedText(ev, "title", lang)} loading="lazy" decoding="async" className="h-full w-full object-cover" />}
                   <div className="absolute inset-0 bg-gradient-to-t from-maroon/60 to-transparent" />
                 </div>
                 <div className="p-5">

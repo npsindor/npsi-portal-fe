@@ -13,9 +13,9 @@ import DateRangeFilter from "@/components/admin/DateRangeFilter";
 const STATUSES = ["PENDING", "ACTIVE", "SUSPENDED", "DEACTIVATED"];
 
 const EMPTY = {
-  family_id: "", family_name: "", head_name: "", status: "ACTIVE",
+  familyId: "", familyName: "", headName: "", status: "ACTIVE",
   address: "", city: "", district: "", state: "", pincode: "",
-  native_place: "", village: "", gotra: "", contact_number: "", email: ""
+  nativePlace: "", village: "", gotra: "", contactNumber: "", email: ""
 };
 
 const L = {
@@ -152,7 +152,7 @@ export default function AdminFamilies() {
 
   const viewFamily = async (f) => {
     setSelected(f);
-    const mems = await base44.entities.FamilyMember.filter({ family_id: f.family_id });
+    const mems = await base44.entities.FamilyMember.filter({ familyId: f.familyId });
     setMembers(mems);
   };
 
@@ -164,8 +164,8 @@ export default function AdminFamilies() {
     setResending(true);
     try {
       const result = await base44.users.inviteUser(f.email, "user", {
-        full_name: f.head_name,
-        phone: f.contact_number,
+        fullName: f.headName,
+        phone: f.contactNumber,
       });
       toast({ title: t.credentialsSent, description: `${f.email} · ${result.password}` });
     } catch (e) {
@@ -179,30 +179,30 @@ export default function AdminFamilies() {
   const openEdit = (f) => setEditing({ ...f });
 
   const save = async () => {
-    if (!editing.family_name || !editing.head_name) {
+    if (!editing.familyName || !editing.headName) {
       toast({ title: t.reqFields, variant: "destructive" });
       return;
     }
     setSaving(true);
     try {
       const payload = {
-        family_id: editing.family_id,
-        family_name: editing.family_name,
-        head_name: editing.head_name,
+        familyId: editing.familyId,
+        familyName: editing.familyName,
+        headName: editing.headName,
         status: editing.status || "ACTIVE",
         address: editing.address || "",
         city: editing.city || "",
         district: editing.district || "",
         state: editing.state || "",
         pincode: editing.pincode || "",
-        native_place: editing.native_place || "",
+        nativePlace: editing.nativePlace || "",
         village: editing.village || "",
         gotra: editing.gotra || "",
-        contact_number: editing.contact_number || "",
+        contactNumber: editing.contactNumber || "",
         email: editing.email || "",
-        registration_date: editing.registration_date || new Date().toISOString(),
-        member_count: editing.member_count || 0,
-        application_id: editing.application_id || "",
+        registrationDate: editing.registrationDate || new Date().toISOString(),
+        memberCount: editing.memberCount || 0,
+        applicationId: editing.applicationId || "",
       };
       if (editing.id) {
         await base44.entities.Family.update(editing.id, payload);
@@ -219,11 +219,11 @@ export default function AdminFamilies() {
   };
 
   const remove = async (f) => {
-    if (!window.confirm(`${t.confirmDel} ${f.family_id}? ${t.delSub}`)) return;
+    if (!window.confirm(`${t.confirmDel} ${f.familyId}? ${t.delSub}`)) return;
     try {
-      const mems = await base44.entities.FamilyMember.filter({ family_id: f.family_id });
+      const mems = await base44.entities.FamilyMember.filter({ familyId: f.familyId });
       if (mems.length > 0) {
-        await base44.entities.FamilyMember.deleteMany({ family_id: f.family_id });
+        await base44.entities.FamilyMember.deleteMany({ familyId: f.familyId });
       }
       await base44.entities.Family.delete(f.id);
       await load();
@@ -234,15 +234,15 @@ export default function AdminFamilies() {
   };
 
   const { search, setSearch, page, setPage, totalPages, totalItems, startIndex, pageSize, pageItems, filtered, dateFrom, setDateFrom, dateTo, setDateTo } = useTableControls(families, {
-    searchFields: ["family_id", "family_name", "head_name", "application_id"],
-    dateField: "registration_date",
+    searchFields: ["familyId", "familyName", "headName", "applicationId"],
+    dateField: "registrationDate",
   });
 
   const exportColumns = [
-    { key: "family_id", label: t.thFamId },
-    { key: "family_name", label: t.thFamName },
-    { key: "head_name", label: t.thHead },
-    { key: "member_count", label: t.thMembers },
+    { key: "familyId", label: t.thFamId },
+    { key: "familyName", label: t.thFamName },
+    { key: "headName", label: t.thHead },
+    { key: "memberCount", label: t.thMembers },
     { key: "city", label: t.thCity },
     { key: "status", label: t.thStatus },
   ];
@@ -297,10 +297,10 @@ export default function AdminFamilies() {
             {pageItems.map((f, i) => (
               <tr key={f.id} className="border-b border-border last:border-0 hover:bg-muted/30">
                 <td className="px-4 py-3 text-muted-foreground">{startIndex + i + 1}</td>
-                <td className="px-4 py-3 font-semibold text-maroon">{f.family_id}</td>
-                <td className="px-4 py-3">{f.family_name}</td>
-                <td className="px-4 py-3">{f.head_name}</td>
-                <td className="px-4 py-3">{f.member_count || 0}</td>
+                <td className="px-4 py-3 font-semibold text-maroon">{f.familyId}</td>
+                <td className="px-4 py-3">{f.familyName}</td>
+                <td className="px-4 py-3">{f.headName}</td>
+                <td className="px-4 py-3">{f.memberCount || 0}</td>
                 <td className="px-4 py-3 text-muted-foreground">{f.city}</td>
                 <td className="px-4 py-3"><StatusBadge status={f.status} /></td>
                 <td className="px-4 py-3 text-right">
@@ -326,18 +326,18 @@ export default function AdminFamilies() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">{t.family}</div>
-                <div className="font-display text-lg font-bold text-maroon">{selected.family_id}</div>
+                <div className="font-display text-lg font-bold text-maroon">{selected.familyId}</div>
               </div>
               <button onClick={() => setSelected(null)} className="rounded-full p-1.5 hover:bg-muted"><X className="h-4 w-4" /></button>
             </div>
             <div className="mt-4 space-y-3 text-sm">
               <div className="rounded-xl border border-gold/30 bg-cream p-4">
-                <div className="font-display text-base font-semibold text-maroon">{selected.family_name}</div>
-                <div className="text-xs text-muted-foreground">{t.head}: {selected.head_name}</div>
+                <div className="font-display text-base font-semibold text-maroon">{selected.familyName}</div>
+                <div className="text-xs text-muted-foreground">{t.head}: {selected.headName}</div>
                 <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
                   <div><span className="text-muted-foreground">{t.gotra}:</span> {selected.gotra || "—"}</div>
-                  <div><span className="text-muted-foreground">{t.native}:</span> {selected.native_place || "—"}</div>
-                  <div><span className="text-muted-foreground">{t.contact}:</span> {selected.contact_number}</div>
+                  <div><span className="text-muted-foreground">{t.native}:</span> {selected.nativePlace || "—"}</div>
+                  <div><span className="text-muted-foreground">{t.contact}:</span> {selected.contactNumber}</div>
                   <div><span className="text-muted-foreground">{t.email}:</span> {selected.email || "—"}</div>
                   <div className="col-span-2"><span className="text-muted-foreground">{t.address}:</span> {selected.address}, {selected.city}, {selected.state}</div>
                 </div>
@@ -358,7 +358,7 @@ export default function AdminFamilies() {
                       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-maroon/10"><Users className="h-4 w-4 text-maroon" /></div>
                       <div className="flex-1">
                         <div className="text-sm font-medium text-foreground">{m.name}</div>
-                        <div className="text-xs text-muted-foreground">{m.relationship} · {m.membership_id}</div>
+                        <div className="text-xs text-muted-foreground">{m.relationship} · {m.membershipId}</div>
                       </div>
                       <StatusBadge status={m.status} />
                     </div>
@@ -379,21 +379,21 @@ export default function AdminFamilies() {
               <button onClick={() => setEditing(null)} className="rounded-full p-1.5 hover:bg-muted"><X className="h-4 w-4" /></button>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblFamId}</label><input value={editing.family_id} onChange={(e) => setEditing({ ...editing, family_id: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblFamId}</label><input value={editing.familyId} onChange={(e) => setEditing({ ...editing, familyId: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblStatus}</label>
                 <select value={editing.status} onChange={(e) => setEditing({ ...editing, status: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">{STATUSES.map((s) => <option key={s}>{s}</option>)}</select>
               </div>
-              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblFamName} *</label><input value={editing.family_name} onChange={(e) => setEditing({ ...editing, family_name: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblHeadName} *</label><input value={editing.head_name} onChange={(e) => setEditing({ ...editing, head_name: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblFamName} *</label><input value={editing.familyName} onChange={(e) => setEditing({ ...editing, familyName: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblHeadName} *</label><input value={editing.headName} onChange={(e) => setEditing({ ...editing, headName: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblAddress}</label><input value={editing.address} onChange={(e) => setEditing({ ...editing, address: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblCity}</label><input value={editing.city} onChange={(e) => setEditing({ ...editing, city: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblDistrict}</label><input value={editing.district} onChange={(e) => setEditing({ ...editing, district: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblState}</label><input value={editing.state} onChange={(e) => setEditing({ ...editing, state: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblPincode}</label><input value={editing.pincode} onChange={(e) => setEditing({ ...editing, pincode: sanitizePincode(e.target.value) })} inputMode="numeric" maxLength={6} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblGotra}</label><input value={editing.gotra} onChange={(e) => setEditing({ ...editing, gotra: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblNativePlace}</label><input value={editing.native_place} onChange={(e) => setEditing({ ...editing, native_place: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblNativePlace}</label><input value={editing.nativePlace} onChange={(e) => setEditing({ ...editing, nativePlace: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblVillage}</label><input value={editing.village} onChange={(e) => setEditing({ ...editing, village: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblContact}</label><input value={editing.contact_number} onChange={(e) => setEditing({ ...editing, contact_number: sanitizeMobile(e.target.value) })} inputMode="numeric" maxLength={10} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblContact}</label><input value={editing.contactNumber} onChange={(e) => setEditing({ ...editing, contactNumber: sanitizeMobile(e.target.value) })} inputMode="numeric" maxLength={10} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblEmail}</label><input value={editing.email} onChange={(e) => setEditing({ ...editing, email: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
             </div>
             <button onClick={save} disabled={saving} className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-maroon py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark disabled:opacity-60">

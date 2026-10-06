@@ -10,10 +10,10 @@ import TablePagination from "@/components/admin/TablePagination";
 import { localizedText } from "@/lib/utils";
 
 const EMPTY_FORM = {
-  title: "", title_hi: "", description: "", description_hi: "", date: "", start_time: "", end_time: "",
-  venue: "", map_location: "", organizer: "", contact: "", fee: 0,
-  capacity: "", registration_open: "", registration_close: "", rules: "", terms: "", status: "PUBLISHED",
-  banner_url: "",
+  title: "", titleHi: "", description: "", descriptionHi: "", date: "", startTime: "", endTime: "",
+  venue: "", mapLocation: "", organizer: "", contact: "", fee: 0,
+  capacity: "", registrationOpen: "", registrationClose: "", rules: "", terms: "", status: "PUBLISHED",
+  bannerUrl: "",
 };
 
 const L = {
@@ -140,11 +140,11 @@ export default function AdminEvents() {
   const openNew = () => { resetForm(); setShowForm(true); };
   const openEdit = (ev) => {
     setForm({
-      title: ev.title || "", title_hi: ev.title_hi || "", description: ev.description || "", description_hi: ev.description_hi || "", date: ev.date || "", start_time: ev.start_time || "",
-      end_time: ev.end_time || "", venue: ev.venue || "", map_location: ev.map_location || "", organizer: ev.organizer || "",
-      contact: ev.contact || "", fee: ev.fee || 0, capacity: ev.capacity || "", registration_open: ev.registration_open || "",
-      registration_close: ev.registration_close || "", rules: ev.rules || "", terms: ev.terms || "", status: ev.status || "PUBLISHED",
-      banner_url: ev.banner_url || "",
+      title: ev.title || "", titleHi: ev.titleHi || "", description: ev.description || "", descriptionHi: ev.descriptionHi || "", date: ev.date || "", startTime: ev.startTime || "",
+      endTime: ev.endTime || "", venue: ev.venue || "", mapLocation: ev.mapLocation || "", organizer: ev.organizer || "",
+      contact: ev.contact || "", fee: ev.fee || 0, capacity: ev.capacity || "", registrationOpen: ev.registrationOpen || "",
+      registrationClose: ev.registrationClose || "", rules: ev.rules || "", terms: ev.terms || "", status: ev.status || "PUBLISHED",
+      bannerUrl: ev.bannerUrl || "",
     });
     setEditingId(ev.id);
     setShowForm(true);
@@ -154,8 +154,8 @@ export default function AdminEvents() {
     if (!file) return;
     setPhotoUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
-      setForm((f) => ({ ...f, banner_url: file_url }));
+      const { fileUrl } = await base44.integrations.Core.UploadPublicFile({ file });
+      setForm((f) => ({ ...f, bannerUrl: fileUrl }));
       toast({ title: t.photoUploaded });
     } catch (err) {
       toast({ title: t.uploadFailed, description: err.message, variant: "destructive" });
@@ -194,7 +194,7 @@ export default function AdminEvents() {
 
   const duplicate = async (ev) => {
     try {
-      const { id, created_date, updated_date, created_by_id, ...rest } = ev;
+      const { id, createdAt, updatedAt, created_by_id, ...rest } = ev;
       await base44.entities.Event.create({ ...rest, title: `${ev.title} (Copy)`, slug: `${ev.slug || ""}-copy` });
       toast({ title: t.duplicated });
       await load();
@@ -241,7 +241,7 @@ export default function AdminEvents() {
         {pageItems.map((ev) => (
           <div key={ev.id} className="overflow-hidden rounded-2xl border border-gold/30 bg-card shadow-sm">
             <div className="h-28 bg-gradient-to-br from-maroon to-maroon-dark">
-              {ev.banner_url && <img src={ev.banner_url} alt={ev.title} loading="lazy" decoding="async" className="h-full w-full object-cover" />}
+              {ev.bannerUrl && <img src={ev.bannerUrl} alt={ev.title} loading="lazy" decoding="async" className="h-full w-full object-cover" />}
             </div>
             <div className="p-4">
               <div className="flex items-center justify-between">
@@ -282,14 +282,14 @@ export default function AdminEvents() {
               </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.eventTitleHi}</label>
-                <input value={form.title_hi} onChange={(e) => setForm({ ...form, title_hi: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" />
+                <input value={form.titleHi} onChange={(e) => setForm({ ...form, titleHi: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" />
               </div>
               <div className="sm:col-span-2">
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.photo}</label>
                 <div className="mt-1 flex items-center gap-3">
                   <div className="flex h-16 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted">
-                    {form.banner_url ? (
-                      <img src={form.banner_url} alt="" className="h-full w-full object-cover" />
+                    {form.bannerUrl ? (
+                      <img src={form.bannerUrl} alt="" className="h-full w-full object-cover" />
                     ) : (
                       <ImagePlus className="h-5 w-5 text-muted-foreground" />
                     )}
@@ -297,10 +297,10 @@ export default function AdminEvents() {
                   <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-gold/40 px-3 py-1.5 text-xs font-semibold text-maroon hover:bg-gold/10">
                     <input type="file" accept="image/*" className="hidden" onChange={(e) => onPhoto(e.target.files?.[0])} disabled={photoUploading} />
                     {photoUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
-                    {photoUploading ? t.uploading : (form.banner_url ? t.changePhoto : t.uploadPhoto)}
+                    {photoUploading ? t.uploading : (form.bannerUrl ? t.changePhoto : t.uploadPhoto)}
                   </label>
-                  {form.banner_url && !photoUploading && (
-                    <button type="button" onClick={() => setForm((f) => ({ ...f, banner_url: "" }))} className="text-xs font-semibold text-destructive hover:underline">
+                  {form.bannerUrl && !photoUploading && (
+                    <button type="button" onClick={() => setForm((f) => ({ ...f, bannerUrl: "" }))} className="text-xs font-semibold text-destructive hover:underline">
                       {t.removePhoto}
                     </button>
                   )}
@@ -312,7 +312,7 @@ export default function AdminEvents() {
               </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.descriptionHi}</label>
-                <textarea value={form.description_hi} onChange={(e) => setForm({ ...form, description_hi: e.target.value })} rows={2} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" />
+                <textarea value={form.descriptionHi} onChange={(e) => setForm({ ...form, descriptionHi: e.target.value })} rows={2} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" />
               </div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.date} *</label><input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.status}</label>
@@ -322,16 +322,16 @@ export default function AdminEvents() {
                   <option value="ARCHIVED">{t.archived}</option>
                 </select>
               </div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.startTime}</label><input type="time" value={form.start_time} onChange={(e) => setForm({ ...form, start_time: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.endTime}</label><input type="time" value={form.end_time} onChange={(e) => setForm({ ...form, end_time: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.startTime}</label><input type="time" value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.endTime}</label><input type="time" value={form.endTime} onChange={(e) => setForm({ ...form, endTime: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.venue} *</label><input value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.mapLocation}</label><input value={form.map_location} onChange={(e) => setForm({ ...form, map_location: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.mapLocation}</label><input value={form.mapLocation} onChange={(e) => setForm({ ...form, mapLocation: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.organizer}</label><input value={form.organizer} onChange={(e) => setForm({ ...form, organizer: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.contact}</label><input value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.fee}</label><input type="number" value={form.fee} onChange={(e) => setForm({ ...form, fee: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.capacity}</label><input type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.regOpen}</label><input type="date" value={form.registration_open} onChange={(e) => setForm({ ...form, registration_open: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.regClose}</label><input type="date" value={form.registration_close} onChange={(e) => setForm({ ...form, registration_close: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.regOpen}</label><input type="date" value={form.registrationOpen} onChange={(e) => setForm({ ...form, registrationOpen: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.regClose}</label><input type="date" value={form.registrationClose} onChange={(e) => setForm({ ...form, registrationClose: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.rules}</label><textarea value={form.rules} onChange={(e) => setForm({ ...form, rules: e.target.value })} rows={2} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
             </div>
             <button onClick={save} disabled={saving} className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-maroon py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark disabled:opacity-60">

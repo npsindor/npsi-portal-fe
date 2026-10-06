@@ -36,31 +36,31 @@ export default function AdminTransferRequests() {
   const load = async () => {
     setLoading(true);
     try {
-      const list = await base44.entities.TransferRequest.list("-requested_date", 200);
+      const list = await base44.entities.TransferRequest.list("-requestedDate", 200);
       setAll(list);
     } catch (e) {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
-  const open = (r) => { setSelected(r); setRemarks(r.admin_remarks || ""); };
+  const open = (r) => { setSelected(r); setRemarks(r.adminRemarks || ""); };
 
   const approve = async () => {
     setProcessing(true);
     try {
-      const targetFams = await base44.entities.Family.filter({ family_id: selected.target_family_id, status: "ACTIVE" });
+      const targetFams = await base44.entities.Family.filter({ familyId: selected.targetFamilyId, status: "ACTIVE" });
       if (targetFams.length === 0) { toast({ title: t("tr.targetNotFound"), variant: "destructive" }); setProcessing(false); return; }
       const target = targetFams[0];
 
-      if (selected.request_type === "student_to_family") {
+      if (selected.requestType === "student_to_family") {
         const students = await base44.entities.Student.list();
-        const stu = students.find((s) => s.student_id === selected.source_student_id);
+        const stu = students.find((s) => s.studentId === selected.sourceStudentId);
         if (!stu) { toast({ title: t("tr.sourceNotFound"), variant: "destructive" }); setProcessing(false); return; }
 
         // duplicate check within target family
         const dup = await findExistingPerson({ mobile: stu.mobile, email: stu.email });
         if (dup.found && dup.type === "member") {
           const existingMember = dup.record;
-          if (existingMember.family_id === target.family_id) {
+          if (existingMember.familyId === target.familyId) {
             toast({ title: t("tr.duplicateInTarget"), variant: "destructive" });
             setProcessing(false);
             return;
@@ -68,67 +68,67 @@ export default function AdminTransferRequests() {
         }
 
         const newMember = await base44.entities.FamilyMember.create({
-          family_id: target.family_id,
-          name: stu.student_name,
+          familyId: target.familyId,
+          name: stu.studentName,
           relationship: "Other",
           gender: stu.gender || "",
           dob: stu.dob || "",
           mobile: stu.mobile || "",
           email: stu.email || "",
           address: stu.address || "",
-          photo_url: stu.photo_url || "",
+          photoUrl: stu.photoUrl || "",
           status: "ACTIVE",
-          linked_student_id: stu.student_id,
+          linkedStudentId: stu.studentId,
         });
-        const memId = newMember.membership_id;
+        const memId = newMember.membershipId;
         await base44.entities.Student.update(stu.id, {
           status: "TRANSFERRED",
-          linked_family_id: target.family_id,
-          linked_membership_id: memId,
+          linkedFamilyId: target.familyId,
+          linkedMembershipId: memId,
         });
-        await base44.entities.Family.update(target.id, { member_count: (target.member_count || 0) + 1 });
+        await base44.entities.Family.update(target.id, { memberCount: (target.memberCount || 0) + 1 });
 
         await base44.entities.TransferRequest.update(selected.id, {
           status: "APPROVED",
-          admin_remarks: remarks.trim(),
-          reviewed_date: new Date().toISOString(),
-          approved_by_id: user?.id,
-          resulting_membership_id: memId,
-          new_family_id: target.family_id,
+          adminRemarks: remarks.trim(),
+          reviewedDate: new Date().toISOString(),
+          approvedById: user?.id,
+          resultingMembershipId: memId,
+          newFamilyId: target.familyId,
         });
         await base44.entities.Notification.create({
           title: t("tr.approvedNotif"),
-          message: t("tr.approvedMsg", { fam: target.family_name, mem: memId }),
+          message: t("tr.approvedMsg", { fam: target.familyName, mem: memId }),
           type: "Approval",
-          recipient_family_id: target.family_id,
+          recipientFamilyId: target.familyId,
           date: new Date().toISOString(),
         });
         toast({ title: t("tr.approved"), description: memId });
       } else {
         // family_to_family
         const members = await base44.entities.FamilyMember.list();
-        const mem = members.find((m) => m.membership_id === selected.source_membership_id);
+        const mem = members.find((m) => m.membershipId === selected.sourceMembershipId);
         if (!mem) { toast({ title: t("tr.sourceNotFound"), variant: "destructive" }); setProcessing(false); return; }
-        const oldFamId = mem.family_id;
-        await base44.entities.FamilyMember.update(mem.id, { family_id: target.family_id, status: "ACTIVE" });
+        const oldFamId = mem.familyId;
+        await base44.entities.FamilyMember.update(mem.id, { familyId: target.familyId, status: "ACTIVE" });
 
-        const oldFams = await base44.entities.Family.filter({ family_id: oldFamId });
-        if (oldFams[0]) await base44.entities.Family.update(oldFams[0].id, { member_count: Math.max((oldFams[0].member_count || 1) - 1, 0) });
-        await base44.entities.Family.update(target.id, { member_count: (target.member_count || 0) + 1 });
+        const oldFams = await base44.entities.Family.filter({ familyId: oldFamId });
+        if (oldFams[0]) await base44.entities.Family.update(oldFams[0].id, { memberCount: Math.max((oldFams[0].memberCount || 1) - 1, 0) });
+        await base44.entities.Family.update(target.id, { memberCount: (target.memberCount || 0) + 1 });
 
         await base44.entities.TransferRequest.update(selected.id, {
           status: "APPROVED",
-          admin_remarks: remarks.trim(),
-          reviewed_date: new Date().toISOString(),
-          approved_by_id: user?.id,
-          old_family_id: oldFamId,
-          new_family_id: target.family_id,
+          adminRemarks: remarks.trim(),
+          reviewedDate: new Date().toISOString(),
+          approvedById: user?.id,
+          oldFamilyId: oldFamId,
+          newFamilyId: target.familyId,
         });
         await base44.entities.Notification.create({
           title: t("tr.approvedNotif"),
-          message: t("tr.transferMsg", { from: oldFamId, to: target.family_name }),
+          message: t("tr.transferMsg", { from: oldFamId, to: target.familyName }),
           type: "Approval",
-          recipient_family_id: target.family_id,
+          recipientFamilyId: target.familyId,
           date: new Date().toISOString(),
         });
         toast({ title: t("tr.approved") });
@@ -146,9 +146,9 @@ export default function AdminTransferRequests() {
     try {
       await base44.entities.TransferRequest.update(selected.id, {
         status: "REJECTED",
-        admin_remarks: remarks.trim(),
-        reviewed_date: new Date().toISOString(),
-        approved_by_id: user?.id,
+        adminRemarks: remarks.trim(),
+        reviewedDate: new Date().toISOString(),
+        approvedById: user?.id,
       });
       toast({ title: t("tr.rejected") });
       setSelected(null);
@@ -164,9 +164,9 @@ export default function AdminTransferRequests() {
     try {
       await base44.entities.TransferRequest.update(selected.id, {
         status: "CORRECTION_REQUIRED",
-        admin_remarks: remarks.trim(),
-        reviewed_date: new Date().toISOString(),
-        approved_by_id: user?.id,
+        adminRemarks: remarks.trim(),
+        reviewedDate: new Date().toISOString(),
+        approvedById: user?.id,
       });
       toast({ title: t("tr.correctionRequested") });
       setSelected(null);
@@ -178,8 +178,8 @@ export default function AdminTransferRequests() {
 
   const visible = all.filter((r) => {
     if (filter !== "All" && r.status !== filter) return false;
-    if (search && !r.request_id?.toLowerCase().includes(search.toLowerCase()) && !r.requester_name?.toLowerCase().includes(search.toLowerCase())) return false;
-    if ((dateFrom || dateTo) && !inDateRange(r.requested_date, dateFrom, dateTo)) return false;
+    if (search && !r.requestId?.toLowerCase().includes(search.toLowerCase()) && !r.requesterName?.toLowerCase().includes(search.toLowerCase())) return false;
+    if ((dateFrom || dateTo) && !inDateRange(r.requestedDate, dateFrom, dateTo)) return false;
     return true;
   });
 
@@ -190,11 +190,11 @@ export default function AdminTransferRequests() {
   const pageItems = visible.slice(startIndex, startIndex + pageSize);
 
   const exportColumns = [
-    { key: "request_id", label: t("tr.thId") },
-    { key: "request_type", label: t("tr.thType") },
-    { key: "requester_name", label: t("tr.thRequester") },
-    { key: "target_family_name", label: t("tr.thTarget") },
-    { key: "requested_date", label: t("tr.thDate") },
+    { key: "requestId", label: t("tr.thId") },
+    { key: "requestType", label: t("tr.thType") },
+    { key: "requesterName", label: t("tr.thRequester") },
+    { key: "targetFamilyName", label: t("tr.thTarget") },
+    { key: "requestedDate", label: t("tr.thDate") },
     { key: "status", label: t("tr.thStatus") },
   ];
 
@@ -241,19 +241,19 @@ export default function AdminTransferRequests() {
             {pageItems.map((r, i) => (
               <tr key={r.id} className="border-b border-border last:border-0 hover:bg-muted/30">
                 <td className="px-4 py-3 text-muted-foreground">{startIndex + i + 1}</td>
-                <td className="px-4 py-3 font-mono text-xs font-semibold text-maroon">{r.request_id}</td>
+                <td className="px-4 py-3 font-mono text-xs font-semibold text-maroon">{r.requestId}</td>
                 <td className="px-4 py-3">
                   <span className="inline-flex items-center gap-1 rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 text-[0.6rem] font-semibold text-maroon">
                     <ArrowRightLeft className="h-3 w-3" />
-                    {r.request_type === "student_to_family" ? t("tr.typeStudent") : t("tr.typeFamily")}
+                    {r.requestType === "student_to_family" ? t("tr.typeStudent") : t("tr.typeFamily")}
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="font-medium text-foreground">{r.requester_name}</div>
-                  <div className="text-xs text-muted-foreground">{r.source_student_id || r.source_membership_id || ""}</div>
+                  <div className="font-medium text-foreground">{r.requesterName}</div>
+                  <div className="text-xs text-muted-foreground">{r.sourceStudentId || r.sourceMembershipId || ""}</div>
                 </td>
-                <td className="hidden px-4 py-3 md:table-cell">{r.target_family_name || r.target_family_id}</td>
-                <td className="hidden px-4 py-3 text-muted-foreground md:table-cell">{r.requested_date ? new Date(r.requested_date).toLocaleDateString(locale) : "—"}</td>
+                <td className="hidden px-4 py-3 md:table-cell">{r.targetFamilyName || r.targetFamilyId}</td>
+                <td className="hidden px-4 py-3 text-muted-foreground md:table-cell">{r.requestedDate ? new Date(r.requestedDate).toLocaleDateString(locale) : "—"}</td>
                 <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
                 <td className="px-4 py-3 text-right">
                   <button onClick={() => open(r)} className="inline-flex items-center gap-1 rounded-full border border-gold/40 px-3 py-1.5 text-xs font-semibold text-maroon hover:bg-gold/10">
@@ -273,23 +273,23 @@ export default function AdminTransferRequests() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">{t("tr.detail")}</div>
-                <div className="font-display text-lg font-bold text-maroon">{selected.request_id}</div>
+                <div className="font-display text-lg font-bold text-maroon">{selected.requestId}</div>
               </div>
               <StatusBadge status={selected.status} />
             </div>
 
             <div className="mt-4 space-y-2 text-sm">
-              <div><span className="text-muted-foreground">{t("tr.thType")}:</span> {selected.request_type === "student_to_family" ? t("tr.typeStudent") : t("tr.typeFamily")}</div>
-              <div><span className="text-muted-foreground">{t("tr.thRequester")}:</span> <span className="font-medium">{selected.requester_name}</span></div>
-              {selected.requester_mobile && <div><span className="text-muted-foreground">{t("tr.mobile")}:</span> {selected.requester_mobile}</div>}
-              {selected.source_student_id && <div><span className="text-muted-foreground">{t("tr.studentId")}:</span> {selected.source_student_id}</div>}
-              {selected.source_membership_id && <div><span className="text-muted-foreground">{t("tr.memberId")}:</span> {selected.source_membership_id}</div>}
-              {selected.source_family_id && <div><span className="text-muted-foreground">{t("tr.fromFamily")}:</span> {selected.source_family_id}</div>}
-              <div><span className="text-muted-foreground">{t("tr.targetFamilyId")}:</span> {selected.target_family_id} ({selected.target_family_name || "—"})</div>
+              <div><span className="text-muted-foreground">{t("tr.thType")}:</span> {selected.requestType === "student_to_family" ? t("tr.typeStudent") : t("tr.typeFamily")}</div>
+              <div><span className="text-muted-foreground">{t("tr.thRequester")}:</span> <span className="font-medium">{selected.requesterName}</span></div>
+              {selected.requesterMobile && <div><span className="text-muted-foreground">{t("tr.mobile")}:</span> {selected.requesterMobile}</div>}
+              {selected.sourceStudentId && <div><span className="text-muted-foreground">{t("tr.studentId")}:</span> {selected.sourceStudentId}</div>}
+              {selected.sourceMembershipId && <div><span className="text-muted-foreground">{t("tr.memberId")}:</span> {selected.sourceMembershipId}</div>}
+              {selected.sourceFamilyId && <div><span className="text-muted-foreground">{t("tr.fromFamily")}:</span> {selected.sourceFamilyId}</div>}
+              <div><span className="text-muted-foreground">{t("tr.targetFamilyId")}:</span> {selected.targetFamilyId} ({selected.targetFamilyName || "—"})</div>
               {selected.reason && <div className="rounded-xl border border-border bg-cream p-3"><span className="text-xs font-semibold text-maroon">{t("tr.reason")}:</span> <p className="mt-1">{selected.reason}</p></div>}
-              {selected.admin_remarks && <div className="rounded-xl border border-orange-200 bg-orange-50 p-3 text-orange-700"><span className="font-semibold">{t("tr.remarksLabel")}:</span> {selected.admin_remarks}</div>}
-              {selected.status === "APPROVED" && selected.resulting_membership_id && (
-                <div className="rounded-xl border border-green-200 bg-green-50 p-3 text-green-700"><span className="font-semibold">{t("tr.resultingMem")}:</span> {selected.resulting_membership_id}</div>
+              {selected.adminRemarks && <div className="rounded-xl border border-orange-200 bg-orange-50 p-3 text-orange-700"><span className="font-semibold">{t("tr.remarksLabel")}:</span> {selected.adminRemarks}</div>}
+              {selected.status === "APPROVED" && selected.resultingMembershipId && (
+                <div className="rounded-xl border border-green-200 bg-green-50 p-3 text-green-700"><span className="font-semibold">{t("tr.resultingMem")}:</span> {selected.resultingMembershipId}</div>
               )}
             </div>
 

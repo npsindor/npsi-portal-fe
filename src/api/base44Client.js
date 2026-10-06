@@ -2,26 +2,7 @@ import { API } from './endpoints';
 
 const localApiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
-const sanitizeDateStrings = (value) => {
-  if (Array.isArray(value)) return value.map((entry) => sanitizeDateStrings(entry));
-  if (value && typeof value === 'object' && !(value instanceof Date)) {
-    return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, sanitizeDateStrings(entry)]));
-  }
-  if (typeof value === 'string') {
-    const trimmed = value.trim();
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?$/.test(trimmed)) {
-      const parsed = new Date(trimmed);
-      if (!Number.isNaN(parsed.getTime())) {
-        return parsed.toISOString().slice(0, 19).replace('T', ' ');
-      }
-    }
-  }
-  return value;
-};
-
 const request = async (path, options = {}) => {
-  const payload = options.body ? JSON.parse(options.body) : null;
-  const sanitizedBody = payload ? sanitizeDateStrings(payload) : payload;
   const token = localStorage.getItem('base44_access_token');
 
   const response = await fetch(`${localApiBaseUrl}${path}`, {
@@ -32,7 +13,6 @@ const request = async (path, options = {}) => {
       ...(options.headers || {}),
     },
     ...options,
-    ...(sanitizedBody !== null ? { body: JSON.stringify(sanitizedBody) } : {}),
   });
 
   if (!response.ok) {
@@ -65,16 +45,20 @@ const uploadPublicFile = async ({ file }) => {
   return response.json();
 };
 
+const listQuery = (filters, order, limit) =>
+  new URLSearchParams({ ...Object.fromEntries(Object.entries(filters).filter(([, value]) => value !== undefined && value !== null)), order, limit: String(limit) }).toString();
+
 const createLocalEntities = () => new Proxy({}, {
   get: (_target, entity) => ({
-    list: (order = '-createdAt', limit = 100) => request(`${API.entities.collection(entity)}?order=${encodeURIComponent(order)}&limit=${limit}`),
-    filter: (filters = {}, order = '-createdAt', limit = 100) => request(`${API.entities.collection(entity)}?filter=${encodeURIComponent(JSON.stringify(filters))}&order=${encodeURIComponent(order)}&limit=${limit}`),
+    list: (order = '-createdAt', limit = 100) => request(`${API.entities.collection(entity)}?${listQuery({}, order, limit)}`),
+    // Each filter is a query parameter the resource accepts (e.g. familyId, status).
+    filter: (filters = {}, order = '-createdAt', limit = 100) => request(`${API.entities.collection(entity)}?${listQuery(filters, order, limit)}`),
     create: (data) => request(API.entities.collection(entity), { method: 'POST', body: JSON.stringify(data) }),
     bulkCreate: (records = []) => request(API.entities.batch(entity), { method: 'POST', body: JSON.stringify({ records }) }),
     update: (id, data) => request(API.entities.item(entity, id), { method: 'PATCH', body: JSON.stringify(data) }),
     delete: (id) => request(API.entities.item(entity, id), { method: 'DELETE' }),
     deleteMany: async (filters = {}) => {
-      const records = await request(`${API.entities.collection(entity)}?filter=${encodeURIComponent(JSON.stringify(filters))}&limit=500`);
+      const records = await request(`${API.entities.collection(entity)}?${listQuery(filters, '-createdAt', 500)}`);
       await Promise.all(records.map((record) => request(API.entities.item(entity, record.id), { method: 'DELETE' })));
       return records;
     },
@@ -84,7 +68,7 @@ const createLocalEntities = () => new Proxy({}, {
 const createLocalAuth = () => ({
   loginViaEmailPassword: async (email, password) => {
     const result = await request(API.auth.sessions, { method: 'POST', body: JSON.stringify({ email, password }) });
-    localStorage.setItem('base44_access_token', result.access_token);
+    localStorage.setItem('base44_access_token', result.accessToken);
     return result;
   },
   register: (emailOrData, password) => {
@@ -93,7 +77,7 @@ const createLocalAuth = () => ({
   },
   verifyOtp: async (data) => {
     const result = await request(API.auth.otpVerifications, { method: 'POST', body: JSON.stringify(data) });
-    if (result.access_token) localStorage.setItem('base44_access_token', result.access_token);
+    if (result.accessToken) localStorage.setItem('base44_access_token', result.accessToken);
     return result;
   },
   resendOtp: (email) => request(API.auth.otps, { method: 'POST', body: JSON.stringify({ email }) }),

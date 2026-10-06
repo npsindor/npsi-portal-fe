@@ -38,7 +38,7 @@ export default function AdminFeedback() {
   const load = async () => {
     setLoading(true);
     try {
-      const list = await base44.entities.Feedback.list("-submitted_date", 200);
+      const list = await base44.entities.Feedback.list("-submittedDate", 200);
       setAll(list);
     } catch (e) {} finally { setLoading(false); }
   };
@@ -47,7 +47,7 @@ export default function AdminFeedback() {
   const open = (f) => {
     setSelected(f);
     setReply(f.reply || "");
-    setNote(f.internal_note || "");
+    setNote(f.internalNote || "");
     setStatus(STATUS_FLOW.includes(f.status) ? f.status : "Submitted");
   };
 
@@ -56,10 +56,10 @@ export default function AdminFeedback() {
     try {
       const payload = {
         reply: reply.trim(),
-        internal_note: note.trim(),
+        internalNote: note.trim(),
         status,
-        replied_date: reply.trim() ? new Date().toISOString() : selected.replied_date,
-        replied_by_id: user?.id,
+        repliedDate: reply.trim() ? new Date().toISOString() : selected.repliedDate,
+        repliedById: user?.id,
       };
       await base44.entities.Feedback.update(selected.id, payload);
       toast({ title: t("fbAdmin.updated") });
@@ -84,8 +84,8 @@ export default function AdminFeedback() {
     if (filter === "Archived") { if (!f.archived) return false; }
     else if (f.archived) return false;
     else if (filter !== "All" && f.status !== filter) return false;
-    if (search && !f.member_name?.toLowerCase().includes(search.toLowerCase()) && !f.message?.toLowerCase().includes(search.toLowerCase())) return false;
-    if ((dateFrom || dateTo) && !inDateRange(f.submitted_date, dateFrom, dateTo)) return false;
+    if (search && !f.memberName?.toLowerCase().includes(search.toLowerCase()) && !f.message?.toLowerCase().includes(search.toLowerCase())) return false;
+    if ((dateFrom || dateTo) && !inDateRange(f.submittedDate, dateFrom, dateTo)) return false;
     return true;
   });
 
@@ -96,10 +96,10 @@ export default function AdminFeedback() {
   const pageItems = visible.slice(startIndex, startIndex + pageSize);
 
   const exportColumns = [
-    { key: "feedback_id", label: t("fbAdmin.thId") },
-    { key: "member_name", label: t("fbAdmin.thMember") },
+    { key: "feedbackId", label: t("fbAdmin.thId") },
+    { key: "memberName", label: t("fbAdmin.thMember") },
     { key: "subject", label: t("fbAdmin.thSubject") },
-    { key: "submitted_date", label: t("fbAdmin.thDate") },
+    { key: "submittedDate", label: t("fbAdmin.thDate") },
     { key: "status", label: t("fbAdmin.thStatus") },
   ];
 
@@ -154,16 +154,16 @@ export default function AdminFeedback() {
             {pageItems.map((f, i) => (
               <tr key={f.id} className="border-b border-border last:border-0 hover:bg-muted/30">
                 <td className="px-4 py-3 text-muted-foreground">{startIndex + i + 1}</td>
-                <td className="px-4 py-3 font-mono text-xs font-semibold text-maroon">{f.feedback_id || "—"}</td>
+                <td className="px-4 py-3 font-mono text-xs font-semibold text-maroon">{f.feedbackId || "—"}</td>
                 <td className="px-4 py-3">
-                  <div className="font-medium text-foreground">{f.member_name}</div>
+                  <div className="font-medium text-foreground">{f.memberName}</div>
                   <div className="text-xs text-muted-foreground">{f.email || ""}</div>
                 </td>
                 <td className="px-4 py-3">
                   {f.subject && <div className="font-medium text-foreground line-clamp-1">{f.subject}</div>}
                   <div className="text-xs text-muted-foreground line-clamp-1">{f.message}</div>
                 </td>
-                <td className="hidden px-4 py-3 text-muted-foreground md:table-cell">{f.submitted_date ? new Date(f.submitted_date).toLocaleDateString(locale) : "—"}</td>
+                <td className="hidden px-4 py-3 text-muted-foreground md:table-cell">{f.submittedDate ? new Date(f.submittedDate).toLocaleDateString(locale) : "—"}</td>
                 <td className="px-4 py-3"><StatusBadge status={f.status} /></td>
                 <td className="px-4 py-3 text-right">
                   <div className="inline-flex items-center gap-1.5">
@@ -189,19 +189,19 @@ export default function AdminFeedback() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">{t("fbAdmin.detail")}</div>
-                <div className="font-display text-lg font-bold text-maroon">{selected.feedback_id || "—"}</div>
+                <div className="font-display text-lg font-bold text-maroon">{selected.feedbackId || "—"}</div>
               </div>
               <StatusBadge status={selected.status} />
             </div>
 
             <div className="mt-4 space-y-3 text-sm">
-              <div><span className="text-muted-foreground">{t("fbAdmin.thMember")}:</span> <span className="font-medium">{selected.member_name}</span></div>
+              <div><span className="text-muted-foreground">{t("fbAdmin.thMember")}:</span> <span className="font-medium">{selected.memberName}</span></div>
               {selected.email && <div><span className="text-muted-foreground">Email:</span> {selected.email}</div>}
-              {selected.feedback_type && <div><span className="text-muted-foreground">{t("fb.type")}:</span> {t(`fb.types.${selected.feedback_type}`)}</div>}
+              {selected.feedbackType && <div><span className="text-muted-foreground">{t("fb.type")}:</span> {t(`fb.types.${selected.feedbackType}`)}</div>}
               {selected.subject && <div className="font-semibold text-foreground">{selected.subject}</div>}
               <div className="rounded-xl border border-border bg-cream p-3 text-foreground">{selected.message}</div>
-              {selected.attachment_url && (
-                <a href={selected.attachment_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-maroon hover:underline">📎 {t("fb.attachment")}</a>
+              {selected.attachmentUrl && (
+                <a href={selected.attachmentUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-maroon hover:underline">📎 {t("fb.attachment")}</a>
               )}
               {selected.reply && (
                 <div className="rounded-xl border border-green-200 bg-green-50 p-3">

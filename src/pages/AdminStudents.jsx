@@ -163,9 +163,9 @@ const L = {
 };
 
 const emptyForm = () => ({
-  application_id: "", status: "SUBMITTED", student_name: "", mobile: "", email: "", dob: "", gender: "",
-  course: "", institution: "", academic_year: "", guardian_name: "", guardian_mobile: "",
-  address: "", city: "", district: "", state: "", pincode: "", admin_remarks: "",
+  applicationId: "", status: "SUBMITTED", studentName: "", mobile: "", email: "", dob: "", gender: "",
+  course: "", institution: "", academicYear: "", guardianName: "", guardianMobile: "",
+  address: "", city: "", district: "", state: "", pincode: "", adminRemarks: "",
 });
 
 export default function AdminStudents() {
@@ -190,8 +190,8 @@ export default function AdminStudents() {
     setResendingId(a.id);
     try {
       const result = await base44.users.inviteUser(a.email, "user", {
-        full_name: a.student_name,
-        phone: a.mobile || a.guardian_mobile,
+        fullName: a.studentName,
+        phone: a.mobile || a.guardianMobile,
       });
       toast({ title: t.credentialsSent, description: `${a.email} · ${result.password}` });
     } catch (e) {
@@ -204,7 +204,7 @@ export default function AdminStudents() {
   const load = async () => {
     setLoading(true);
     try {
-      const list = await base44.entities.StudentApplication.list("-submitted_date", 100);
+      const list = await base44.entities.StudentApplication.list("-submittedDate", 100);
       setApps(list);
     } catch (e) {} finally { setLoading(false); }
   };
@@ -219,8 +219,8 @@ export default function AdminStudents() {
     try {
       if (action === "approve") {
         const newStudent = await base44.entities.Student.create({
-          student_name: selected.student_name,
-          father_name: selected.father_name,
+          studentName: selected.studentName,
+          fatherName: selected.fatherName,
           status: "ACTIVE",
           mobile: selected.mobile,
           email: selected.email,
@@ -228,36 +228,36 @@ export default function AdminStudents() {
           gender: selected.gender,
           course: selected.course,
           institution: selected.institution,
-          academic_year: selected.academic_year,
-          guardian_name: selected.guardian_name,
-          guardian_mobile: selected.guardian_mobile,
+          academicYear: selected.academicYear,
+          guardianName: selected.guardianName,
+          guardianMobile: selected.guardianMobile,
           address: selected.address,
           city: selected.city,
           district: selected.district,
           state: selected.state,
           pincode: selected.pincode,
-          photo_url: selected.photo_url,
-          registration_date: new Date().toISOString(),
-          application_id: selected.application_id,
+          photoUrl: selected.photoUrl,
+          registrationDate: new Date().toISOString(),
+          applicationId: selected.applicationId,
         });
-        const stuId = newStudent.student_id;
+        const stuId = newStudent.studentId;
         await base44.entities.StudentApplication.update(selected.id, {
           status: "APPROVED",
-          reviewed_date: new Date().toISOString(),
-          resulting_student_id: stuId,
+          reviewedDate: new Date().toISOString(),
+          resultingStudentId: stuId,
         });
         await base44.entities.Notification.create({
           title: t.notifApprovedTitle,
           message: `${t.notifApprovedMsg} ${stuId}. ${t.notifApprovedMsg2}`,
           type: "Approval",
-          recipient_family_id: stuId,
+          recipientFamilyId: stuId,
           date: new Date().toISOString(),
         });
         try {
           if (selected.email) {
             await base44.users.inviteUser(selected.email, "user", {
-              full_name: selected.student_name,
-              phone: selected.mobile || selected.guardian_mobile,
+              fullName: selected.studentName,
+              phone: selected.mobile || selected.guardianMobile,
             });
           }
         } catch (e) { /* already invited */ }
@@ -265,28 +265,28 @@ export default function AdminStudents() {
       } else if (action === "correction") {
         await base44.entities.StudentApplication.update(selected.id, {
           status: "CORRECTION_REQUIRED",
-          admin_remarks: remarks,
-          reviewed_date: new Date().toISOString(),
+          adminRemarks: remarks,
+          reviewedDate: new Date().toISOString(),
         });
         await base44.entities.Notification.create({
           title: t.notifCorrectionTitle,
           message: `${t.notifCorrectionMsg} ${remarks}`,
           type: "Correction",
-          recipient_family_id: selected.application_id,
+          recipientFamilyId: selected.applicationId,
           date: new Date().toISOString(),
         });
         toast({ title: t.correctionRequested });
       } else if (action === "reject") {
         await base44.entities.StudentApplication.update(selected.id, {
           status: "REJECTED",
-          admin_remarks: remarks,
-          reviewed_date: new Date().toISOString(),
+          adminRemarks: remarks,
+          reviewedDate: new Date().toISOString(),
         });
         await base44.entities.Notification.create({
           title: t.notifRejectedTitle,
           message: `${t.notifRejectedMsg} ${remarks}`,
           type: "Correction",
-          recipient_family_id: selected.application_id,
+          recipientFamilyId: selected.applicationId,
           date: new Date().toISOString(),
         });
         toast({ title: t.rejectedToast });
@@ -307,33 +307,33 @@ export default function AdminStudents() {
   const openEdit = (a) => setEditing({ ...a });
 
   const saveEdit = async () => {
-    if ((editing.id && !editing.application_id) || !editing.student_name || !editing.mobile) {
+    if ((editing.id && !editing.applicationId) || !editing.studentName || !editing.mobile) {
       toast({ title: t.reqFields, variant: "destructive" });
       return;
     }
     setSaving(true);
     try {
       const payload = {
-        application_id: editing.application_id,
+        applicationId: editing.applicationId,
         status: editing.status || "SUBMITTED",
-        student_name: editing.student_name,
-        father_name: editing.father_name || "",
+        studentName: editing.studentName,
+        fatherName: editing.fatherName || "",
         mobile: editing.mobile,
         email: editing.email || "",
         dob: editing.dob || "",
         gender: editing.gender || "",
         course: editing.course || "",
         institution: editing.institution || "",
-        academic_year: editing.academic_year || "",
-        guardian_name: editing.guardian_name || "",
-        guardian_mobile: editing.guardian_mobile || "",
+        academicYear: editing.academicYear || "",
+        guardianName: editing.guardianName || "",
+        guardianMobile: editing.guardianMobile || "",
         address: editing.address || "",
         city: editing.city || "",
         district: editing.district || "",
         state: editing.state || "",
         pincode: editing.pincode || "",
-        admin_remarks: editing.admin_remarks || "",
-        submitted_date: editing.submitted_date || new Date().toISOString(),
+        adminRemarks: editing.adminRemarks || "",
+        submittedDate: editing.submittedDate || new Date().toISOString(),
       };
       if (editing.id) {
         await base44.entities.StudentApplication.update(editing.id, payload);
@@ -350,7 +350,7 @@ export default function AdminStudents() {
   };
 
   const remove = async (a) => {
-    if (!window.confirm(`${t.confirmDel} ${a.application_id}?`)) return;
+    if (!window.confirm(`${t.confirmDel} ${a.applicationId}?`)) return;
     try {
       await base44.entities.StudentApplication.delete(a.id);
       await load();
@@ -361,15 +361,15 @@ export default function AdminStudents() {
   };
 
   const { search, setSearch, page, setPage, totalPages, totalItems, startIndex, pageSize, pageItems, filtered, dateFrom, setDateFrom, dateTo, setDateTo } = useTableControls(apps, {
-    searchFields: ["application_id", "student_name", "course", "mobile"],
-    dateField: "submitted_date",
+    searchFields: ["applicationId", "studentName", "course", "mobile"],
+    dateField: "submittedDate",
   });
 
   const exportColumns = [
-    { key: "application_id", label: t.thAppId },
-    { key: "student_name", label: t.thStudent },
+    { key: "applicationId", label: t.thAppId },
+    { key: "studentName", label: t.thStudent },
     { key: "course", label: t.thCourse },
-    { key: "submitted_date", label: t.thSubmitted },
+    { key: "submittedDate", label: t.thSubmitted },
     { key: "status", label: t.thStatus },
   ];
 
@@ -414,10 +414,10 @@ export default function AdminStudents() {
             {pageItems.map((a, i) => (
               <tr key={a.id} className="border-b border-border last:border-0 hover:bg-muted/30">
                 <td className="px-4 py-3 text-muted-foreground">{startIndex + i + 1}</td>
-                <td className="px-4 py-3 font-semibold text-maroon">{a.application_id}</td>
-                <td className="px-4 py-3">{a.student_name}</td>
+                <td className="px-4 py-3 font-semibold text-maroon">{a.applicationId}</td>
+                <td className="px-4 py-3">{a.studentName}</td>
                 <td className="px-4 py-3">{a.course || "—"}<span className="block text-xs text-muted-foreground">{a.institution || ""}</span></td>
-                <td className="px-4 py-3 text-muted-foreground">{a.submitted_date ? new Date(a.submitted_date).toLocaleDateString(locale) : "—"}</td>
+                <td className="px-4 py-3 text-muted-foreground">{a.submittedDate ? new Date(a.submittedDate).toLocaleDateString(locale) : "—"}</td>
                 <td className="px-4 py-3"><StatusBadge status={a.status} /></td>
                 <td className="px-4 py-3 text-right">
                   <div className="inline-flex items-center gap-1.5">
@@ -450,7 +450,7 @@ export default function AdminStudents() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">{t.app}</div>
-                <div className="font-display text-lg font-bold text-maroon">{selected.application_id}</div>
+                <div className="font-display text-lg font-bold text-maroon">{selected.applicationId}</div>
               </div>
               <StatusBadge status={selected.status} />
             </div>
@@ -458,25 +458,25 @@ export default function AdminStudents() {
             <div className="mt-5 space-y-4">
               <div className="rounded-xl border border-gold/30 bg-cream p-4">
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-maroon"><GraduationCap className="h-4 w-4" /> {t.student}</div>
-                <div className="mt-2 text-sm font-medium text-foreground">{selected.student_name}</div>
+                <div className="mt-2 text-sm font-medium text-foreground">{selected.studentName}</div>
                 <div className="mt-1 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                  <div className="col-span-2">{t.lblFatherName}: {selected.father_name || "—"}</div>
+                  <div className="col-span-2">{t.lblFatherName}: {selected.fatherName || "—"}</div>
                   <div>{selected.mobile}</div>
                   <div>{selected.email || "—"}</div>
                   <div>{selected.gender || "—"}{selected.dob ? ` · ${selected.dob}` : ""}</div>
                   <div>{selected.course || "—"}</div>
-                  <div className="col-span-2">{selected.institution}{selected.academic_year ? ` · ${selected.academic_year}` : ""}</div>
+                  <div className="col-span-2">{selected.institution}{selected.academicYear ? ` · ${selected.academicYear}` : ""}</div>
                 </div>
               </div>
               <div className="rounded-xl border border-gold/30 bg-cream p-4">
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-maroon">{t.guardian}</div>
-                <div className="mt-2 text-sm font-medium text-foreground">{selected.guardian_name}</div>
-                <div className="mt-1 text-xs text-muted-foreground">{selected.guardian_mobile}</div>
+                <div className="mt-2 text-sm font-medium text-foreground">{selected.guardianName}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{selected.guardianMobile}</div>
                 <div className="mt-1 text-xs text-muted-foreground">{selected.address}, {selected.city}, {selected.state} {selected.pincode}</div>
               </div>
-              {selected.admin_remarks && (
+              {selected.adminRemarks && (
                 <div className="rounded-xl border border-orange-300 bg-orange-50 p-3 text-sm text-orange-700">
-                  <div className="font-semibold">{t.adminRemarks}:</div> {selected.admin_remarks}
+                  <div className="font-semibold">{t.adminRemarks}:</div> {selected.adminRemarks}
                 </div>
               )}
             </div>
@@ -530,27 +530,27 @@ export default function AdminStudents() {
               <button onClick={() => setEditing(null)} className="rounded-full p-1.5 hover:bg-muted"><X className="h-4 w-4" /></button>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblAppId} *</label><input value={editing.application_id} onChange={(e) => setEditing({ ...editing, application_id: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblAppId} *</label><input value={editing.applicationId} onChange={(e) => setEditing({ ...editing, applicationId: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblStatus}</label>
                 <select value={editing.status} onChange={(e) => setEditing({ ...editing, status: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">{STATUSES.map((s) => <option key={s}>{s}</option>)}</select>
               </div>
-              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblName} *</label><input value={editing.student_name} onChange={(e) => setEditing({ ...editing, student_name: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblFatherName}</label><input value={editing.father_name || ""} onChange={(e) => setEditing({ ...editing, father_name: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblName} *</label><input value={editing.studentName} onChange={(e) => setEditing({ ...editing, studentName: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblFatherName}</label><input value={editing.fatherName || ""} onChange={(e) => setEditing({ ...editing, fatherName: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblMobile} *</label><input value={editing.mobile} onChange={(e) => setEditing({ ...editing, mobile: sanitizeMobile(e.target.value) })} inputMode="numeric" maxLength={10} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblEmail}</label><input value={editing.email} onChange={(e) => setEditing({ ...editing, email: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblDob}</label><input type="date" value={editing.dob} onChange={(e) => setEditing({ ...editing, dob: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblGender}</label><input value={editing.gender} onChange={(e) => setEditing({ ...editing, gender: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblCourse}</label><input value={editing.course} onChange={(e) => setEditing({ ...editing, course: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblInstitution}</label><input value={editing.institution} onChange={(e) => setEditing({ ...editing, institution: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblYear}</label><input value={editing.academic_year} onChange={(e) => setEditing({ ...editing, academic_year: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblGuardianName}</label><input value={editing.guardian_name} onChange={(e) => setEditing({ ...editing, guardian_name: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblGuardianMobile}</label><input value={editing.guardian_mobile} onChange={(e) => setEditing({ ...editing, guardian_mobile: sanitizeMobile(e.target.value) })} inputMode="numeric" maxLength={10} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblYear}</label><input value={editing.academicYear} onChange={(e) => setEditing({ ...editing, academicYear: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblGuardianName}</label><input value={editing.guardianName} onChange={(e) => setEditing({ ...editing, guardianName: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblGuardianMobile}</label><input value={editing.guardianMobile} onChange={(e) => setEditing({ ...editing, guardianMobile: sanitizeMobile(e.target.value) })} inputMode="numeric" maxLength={10} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblAddress}</label><input value={editing.address} onChange={(e) => setEditing({ ...editing, address: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblCity}</label><input value={editing.city} onChange={(e) => setEditing({ ...editing, city: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblDistrict}</label><input value={editing.district} onChange={(e) => setEditing({ ...editing, district: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblState}</label><input value={editing.state} onChange={(e) => setEditing({ ...editing, state: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblPincode}</label><input value={editing.pincode} onChange={(e) => setEditing({ ...editing, pincode: sanitizePincode(e.target.value) })} inputMode="numeric" maxLength={6} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblRemarks}</label><textarea value={editing.admin_remarks} onChange={(e) => setEditing({ ...editing, admin_remarks: e.target.value })} rows={2} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblRemarks}</label><textarea value={editing.adminRemarks} onChange={(e) => setEditing({ ...editing, adminRemarks: e.target.value })} rows={2} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
             </div>
             <button onClick={saveEdit} disabled={saving} className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-maroon py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark disabled:opacity-60">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}

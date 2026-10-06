@@ -22,7 +22,7 @@ export default function RequestTransferModal({ open, onClose, student, family, m
 
   const isStudent = !!student;
   const sourceLabel = isStudent
-    ? `${t("tr.studentId")}: ${student.student_id || "—"}`
+    ? `${t("tr.studentId")}: ${student.studentId || "—"}`
     : `${t("tr.memberId")}: ${membershipId || "—"}`;
 
   const lookupTarget = async () => {
@@ -31,7 +31,7 @@ export default function RequestTransferModal({ open, onClose, student, family, m
     setTargetName("");
     try {
       const { family: fam } = await base44.verifyFamily(targetFamilyId.trim());
-      if (fam?.status === "ACTIVE") setTargetName(fam.family_name || "—");
+      if (fam?.status === "ACTIVE") setTargetName(fam.familyName || "—");
       else toast({ title: t("tr.targetNotFound"), variant: "destructive" });
     } catch (e) {
       toast({ title: t("tr.targetNotFound"), description: e.message, variant: "destructive" });
@@ -58,30 +58,30 @@ export default function RequestTransferModal({ open, onClose, student, family, m
       }
 
       const created = await base44.entities.TransferRequest.create({
-        request_type: isStudent ? "student_to_family" : "family_to_family",
+        requestType: isStudent ? "student_to_family" : "family_to_family",
         status: "PENDING",
-        requester_name: isStudent ? student.student_name : (memberName || user?.full_name || "Member"),
-        requester_email: user?.email || "",
-        requester_mobile: isStudent ? student.mobile : "",
-        source_student_id: isStudent ? student.student_id : "",
-        source_membership_id: isStudent ? "" : membershipId,
-        source_family_id: isStudent ? "" : family?.family_id,
-        target_family_id: target.family_id,
-        target_family_name: target.family_name,
+        requesterName: isStudent ? student.studentName : (memberName || user?.fullName || "Member"),
+        requesterEmail: user?.email || "",
+        requesterMobile: isStudent ? student.mobile : "",
+        sourceStudentId: isStudent ? student.studentId : "",
+        sourceMembershipId: isStudent ? "" : membershipId,
+        sourceFamilyId: isStudent ? "" : family?.familyId,
+        targetFamilyId: target.familyId,
+        targetFamilyName: target.familyName,
         reason: reason.trim(),
-        requester_id: user?.id,
-        requested_date: new Date().toISOString(),
+        requesterId: user?.id,
+        requestedDate: new Date().toISOString(),
       });
 
       await base44.entities.Notification.create({
         title: t("tr.notifTitle"),
-        message: t("tr.notifMsg", { id: created.request_id }),
+        message: t("tr.notifMsg", { id: created.requestId }),
         type: "Approval",
-        recipient_family_id: target.family_id,
+        recipientFamilyId: target.familyId,
         date: new Date().toISOString(),
       });
 
-      toast({ title: t("tr.submitted"), description: created.request_id });
+      toast({ title: t("tr.submitted"), description: created.requestId });
       onClose();
       setTargetFamilyId(""); setTargetName(""); setReason("");
     } catch (e) {
@@ -103,7 +103,7 @@ export default function RequestTransferModal({ open, onClose, student, family, m
         <div className="space-y-4 px-6 py-5">
           <div className="rounded-xl border border-gold/30 bg-cream p-3 text-xs">
             <div className="font-semibold text-maroon">{sourceLabel}</div>
-            <div className="mt-1 text-muted-foreground">{isStudent ? t("tr.fromStudent") : t("tr.fromFamily")}: {family?.family_name || "—"}</div>
+            <div className="mt-1 text-muted-foreground">{isStudent ? t("tr.fromStudent") : t("tr.fromFamily")}: {family?.familyName || "—"}</div>
           </div>
 
           <div>

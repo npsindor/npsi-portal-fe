@@ -50,7 +50,7 @@ export default function Events() {
             {events.map((ev) => (
               <div key={ev.id} className="overflow-hidden rounded-2xl border border-gold/30 bg-card shadow-sm transition hover:shadow-md">
                 <div className="relative h-40 bg-gradient-to-br from-maroon to-maroon-dark">
-                  {ev.banner_url && <img src={ev.banner_url} alt={localizedText(ev, "title", lang)} loading="lazy" decoding="async" className="h-full w-full object-cover" />}
+                  {ev.bannerUrl && <img src={ev.bannerUrl} alt={localizedText(ev, "title", lang)} loading="lazy" decoding="async" className="h-full w-full object-cover" />}
                   {ev.fee > 0 && (
                     <span className="absolute right-3 top-3 rounded-full bg-gold px-2.5 py-1 text-xs font-bold text-maroon">
                       ₹{ev.fee}
@@ -65,7 +65,7 @@ export default function Events() {
                     </span>
                     <span className="inline-flex items-center gap-1">
                       <Clock className="h-3.5 w-3.5" />
-                      {ev.start_time || "—"}
+                      {ev.startTime || "—"}
                     </span>
                   </div>
                   <h3 className="mt-2 font-display text-lg font-semibold text-maroon">{localizedText(ev, "title", lang)}</h3>

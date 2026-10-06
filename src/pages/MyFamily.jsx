@@ -235,8 +235,8 @@ export default function MyFamily() {
         await base44.entities.FamilyMember.update(editing.id, payload);
         toast({ title: t.updated, description: `${payload.name} ${t.updatedDesc}` });
       } else {
-        await base44.entities.FamilyMember.create({ ...payload, family_id: family.family_id });
-        await base44.entities.Family.update(family.id, { member_count: (family.member_count || 0) + 1 });
+        await base44.entities.FamilyMember.create({ ...payload, familyId: family.familyId });
+        await base44.entities.Family.update(family.id, { memberCount: (family.memberCount || 0) + 1 });
         toast({ title: t.added, description: `${payload.name} ${t.addedDesc}` });
       }
       setForm(emptyForm);
@@ -256,7 +256,7 @@ export default function MyFamily() {
     setSubmitting(true);
     try {
       await base44.entities.FamilyMember.delete(m.id);
-      await base44.entities.Family.update(family.id, { member_count: Math.max((family.member_count || 1) - 1, 0) });
+      await base44.entities.Family.update(family.id, { memberCount: Math.max((family.memberCount || 1) - 1, 0) });
       toast({ title: t.removed, description: `${m.name} ${t.removedDesc}` });
       setConfirmRemove(null);
       load();
@@ -278,10 +278,10 @@ export default function MyFamily() {
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-gold">
             <span className="h-1.5 w-1.5 rounded-full bg-gold" />
-            {family?.family_name || t.family}
+            {family?.familyName || t.family}
           </div>
           <h1 className="mt-1.5 font-display text-3xl font-semibold tracking-tight text-maroon">{t.title}</h1>
-          {family && <p className="mt-1 text-sm text-muted-foreground">{family.family_name} · {family.family_id}</p>}
+          {family && <p className="mt-1 text-sm text-muted-foreground">{family.familyName} · {family.familyId}</p>}
         </div>
         <div className="flex flex-wrap gap-2">
           <button onClick={openAdd} className="inline-flex items-center justify-center gap-1.5 rounded-full bg-maroon px-5 py-2.5 text-sm font-semibold text-cream shadow-sm transition hover:bg-maroon-dark">
@@ -304,7 +304,7 @@ export default function MyFamily() {
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-semibold text-foreground">{m.name}</div>
                 <div className="text-xs text-muted-foreground">{relLabel(m.relationship)}{m.gender ? ` · ${genderLabel(m.gender)}` : ""}</div>
-                {m.membership_id && <div className="mt-0.5 font-mono text-[0.65rem] font-medium text-maroon">{m.membership_id}</div>}
+                {m.membershipId && <div className="mt-0.5 font-mono text-[0.65rem] font-medium text-maroon">{m.membershipId}</div>}
               </div>
               <StatusBadge status={m.status} />
             </div>
@@ -428,7 +428,7 @@ export default function MyFamily() {
         open={showTransfer}
         onClose={() => setShowTransfer(false)}
         family={family}
-        membershipId={members.find((m) => m.relationship === "Head")?.membership_id || members[0]?.membership_id}
+        membershipId={members.find((m) => m.relationship === "Head")?.membershipId || members[0]?.membershipId}
         memberName={members.find((m) => m.relationship === "Head")?.name || members[0]?.name}
       />
     </div>

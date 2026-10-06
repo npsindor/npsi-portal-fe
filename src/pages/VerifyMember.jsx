@@ -57,13 +57,13 @@ export default function VerifyMember() {
               </div>
               <div className="mt-5">
                 <div className="text-[0.6rem] uppercase tracking-[0.18em] text-cream/60">Family ID</div>
-                <div className="font-display text-2xl font-bold tracking-wide text-gold">{family.family_id}</div>
-                <div className="mt-1 text-sm text-cream/90">{family.family_name}</div>
+                <div className="font-display text-2xl font-bold tracking-wide text-gold">{family.familyId}</div>
+                <div className="mt-1 text-sm text-cream/90">{family.familyName}</div>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <div className="text-[0.6rem] uppercase tracking-[0.16em] text-cream/60">Family Head</div>
-                  <div className="font-medium text-cream">{family.head_name || "—"}</div>
+                  <div className="font-medium text-cream">{family.headName || "—"}</div>
                 </div>
                 <div>
                   <div className="text-[0.6rem] uppercase tracking-[0.16em] text-cream/60">Status</div>
@@ -80,7 +80,7 @@ export default function VerifyMember() {
                   <div className="text-[0.6rem] uppercase tracking-[0.16em] text-cream/60">Registered</div>
                   <div className="flex items-center gap-1.5 font-medium text-cream">
                     <Calendar className="h-3.5 w-3.5 text-gold" />
-                    {family.registration_date ? new Date(family.registration_date).toLocaleDateString("en-IN") : "—"}
+                    {family.registrationDate ? new Date(family.registrationDate).toLocaleDateString("en-IN") : "—"}
                   </div>
                 </div>
               </div>

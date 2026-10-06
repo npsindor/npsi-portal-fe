@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 
 export default function MemberProfileChip({ compact = false, variant = "chip" }) {
   const { user } = useAuth();
-  const [displayName, setDisplayName] = useState(user?.full_name || "Member");
+  const [displayName, setDisplayName] = useState(user?.fullName || "Member");
 
   useEffect(() => {
     let active = true;
@@ -12,13 +12,13 @@ export default function MemberProfileChip({ compact = false, variant = "chip" })
       if (!user?.email) return;
       try {
         const { family: mine } = await base44.me.family();
-        if (active && mine?.head_name) {
-          setDisplayName(mine.head_name);
+        if (active && mine?.headName) {
+          setDisplayName(mine.headName);
           return;
         }
       } catch (e) {
       } finally {
-        if (active && !displayName) setDisplayName(user?.full_name || "Member");
+        if (active && !displayName) setDisplayName(user?.fullName || "Member");
       }
     })();
     return () => {
@@ -26,7 +26,7 @@ export default function MemberProfileChip({ compact = false, variant = "chip" })
     };
   }, [user]);
 
-  const name = displayName || user?.full_name || "Member";
+  const name = displayName || user?.fullName || "Member";
   const firstName = name.split(" ").filter(Boolean)[0] || "Member";
   const initials = name
     .split(" ")
@@ -39,8 +39,8 @@ export default function MemberProfileChip({ compact = false, variant = "chip" })
   if (variant === "sidebar") {
     return (
       <div className="flex items-center gap-2.5">
-        {user?.photo_url ? (
-          <img src={user.photo_url} alt={firstName} className="h-9 w-9 rounded-full border-2 border-gold/60 object-cover" />
+        {user?.photoUrl ? (
+          <img src={user.photoUrl} alt={firstName} className="h-9 w-9 rounded-full border-2 border-gold/60 object-cover" />
         ) : (
           <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-gold/60 bg-maroon text-xs font-semibold text-gold">
             {initials || "M"}
@@ -60,8 +60,8 @@ export default function MemberProfileChip({ compact = false, variant = "chip" })
         </div>
       )}
       <div className="relative">
-        {user?.photo_url ? (
-          <img src={user.photo_url} alt={name} className="h-10 w-10 rounded-full border-2 border-gold/60 object-cover" />
+        {user?.photoUrl ? (
+          <img src={user.photoUrl} alt={name} className="h-10 w-10 rounded-full border-2 border-gold/60 object-cover" />
         ) : (
           <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-gold/60 bg-maroon text-sm font-semibold text-gold">
             {initials || "M"}

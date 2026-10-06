@@ -193,7 +193,7 @@ export default function AdminApplications() {
   const load = async () => {
     setLoading(true);
     try {
-      const list = await base44.entities.Application.list("-submitted_date", 100);
+      const list = await base44.entities.Application.list("-submittedDate", 100);
       setApps(list);
     } catch (e) {} finally { setLoading(false); }
   };
@@ -207,10 +207,10 @@ export default function AdminApplications() {
     setProcessing(true);
     try {
       if (action === "approve") {
-        const normalizedMembers = normalizeMembersPayload(selected.members_data);
+        const normalizedMembers = normalizeMembersPayload(selected.membersData);
         const newFamily = await base44.entities.Family.create({
-          family_name: selected.family_name,
-          head_name: selected.family_head_name,
+          familyName: selected.familyName,
+          headName: selected.familyHeadName,
           status: "ACTIVE",
           address: selected.address,
           city: selected.city,
@@ -218,18 +218,18 @@ export default function AdminApplications() {
           state: selected.state,
           pincode: selected.pincode,
           gotra: selected.gotra,
-          native_place: selected.native_place,
+          nativePlace: selected.nativePlace,
           village: selected.village,
-          contact_number: selected.mobile,
+          contactNumber: selected.mobile,
           email: selected.email,
-          registration_date: new Date().toISOString(),
-          member_count: normalizedMembers.length,
-          application_id: selected.application_id,
+          registrationDate: new Date().toISOString(),
+          memberCount: normalizedMembers.length,
+          applicationId: selected.applicationId,
         });
-        const famId = newFamily.family_id;
+        const famId = newFamily.familyId;
         const memberRecords = normalizedMembers.map((m) => {
           return {
-            family_id: famId,
+            familyId: famId,
             name: m.name,
             relationship: m.relationship,
             gender: m.gender,
@@ -247,20 +247,20 @@ export default function AdminApplications() {
         }
         await base44.entities.Application.update(selected.id, {
           status: "APPROVED",
-          reviewed_date: new Date().toISOString(),
-          resulting_family_id: famId,
+          reviewedDate: new Date().toISOString(),
+          resultingFamilyId: famId,
         });
         await base44.entities.Notification.create({
           title: t.notifApprovedTitle,
           message: `${t.notifApprovedMsg} ${famId}. ${t.notifApprovedMsg2}`,
           type: "Approval",
-          recipient_family_id: famId,
+          recipientFamilyId: famId,
           date: new Date().toISOString(),
         });
         try {
           if (selected.email) {
             await base44.users.inviteUser(selected.email, "user", {
-              full_name: selected.family_head_name,
+              fullName: selected.familyHeadName,
               phone: selected.mobile,
             });
           }
@@ -271,28 +271,28 @@ export default function AdminApplications() {
       } else if (action === "correction") {
         await base44.entities.Application.update(selected.id, {
           status: "CORRECTION_REQUIRED",
-          admin_remarks: remarks,
-          reviewed_date: new Date().toISOString(),
+          adminRemarks: remarks,
+          reviewedDate: new Date().toISOString(),
         });
         await base44.entities.Notification.create({
           title: t.notifCorrectionTitle,
           message: `${t.notifCorrectionMsg} ${remarks}`,
           type: "Correction",
-          recipient_family_id: selected.application_id,
+          recipientFamilyId: selected.applicationId,
           date: new Date().toISOString(),
         });
         toast({ title: t.correctionRequested });
       } else if (action === "reject") {
         await base44.entities.Application.update(selected.id, {
           status: "REJECTED",
-          admin_remarks: remarks,
-          reviewed_date: new Date().toISOString(),
+          adminRemarks: remarks,
+          reviewedDate: new Date().toISOString(),
         });
         await base44.entities.Notification.create({
           title: t.notifRejectedTitle,
           message: `${t.notifRejectedMsg} ${remarks}`,
           type: "Correction",
-          recipient_family_id: selected.application_id,
+          recipientFamilyId: selected.applicationId,
           date: new Date().toISOString(),
         });
         toast({ title: t.rejectedToast });
@@ -310,39 +310,39 @@ export default function AdminApplications() {
 
   const openNew = () => {
     setEditing({
-      application_id: "", status: "SUBMITTED", family_head_name: "", mobile: "", email: "", family_name: "",
-      address: "", city: "", district: "", state: "", pincode: "", gotra: "", native_place: "", village: "",
-      members_data: [], admin_remarks: "",
+      applicationId: "", status: "SUBMITTED", familyHeadName: "", mobile: "", email: "", familyName: "",
+      address: "", city: "", district: "", state: "", pincode: "", gotra: "", nativePlace: "", village: "",
+      membersData: [], adminRemarks: "",
     });
   };
 
   const openEdit = (a) => setEditing({ ...a });
 
   const saveEdit = async () => {
-    if ((editing.id && !editing.application_id) || !editing.family_head_name || !editing.mobile || !editing.family_name) {
+    if ((editing.id && !editing.applicationId) || !editing.familyHeadName || !editing.mobile || !editing.familyName) {
       toast({ title: t.reqFields, variant: "destructive" });
       return;
     }
     setSaving(true);
     try {
       const payload = {
-        application_id: editing.application_id,
+        applicationId: editing.applicationId,
         status: editing.status || "SUBMITTED",
-        family_head_name: editing.family_head_name,
+        familyHeadName: editing.familyHeadName,
         mobile: editing.mobile,
         email: editing.email || "",
-        family_name: editing.family_name,
+        familyName: editing.familyName,
         address: editing.address || "",
         city: editing.city || "",
         district: editing.district || "",
         state: editing.state || "",
         pincode: editing.pincode || "",
         gotra: editing.gotra || "",
-        native_place: editing.native_place || "",
+        nativePlace: editing.nativePlace || "",
         village: editing.village || "",
-        members_data: editing.members_data || [],
-        admin_remarks: editing.admin_remarks || "",
-        submitted_date: editing.submitted_date || new Date().toISOString(),
+        membersData: editing.membersData || [],
+        adminRemarks: editing.adminRemarks || "",
+        submittedDate: editing.submittedDate || new Date().toISOString(),
       };
       if (editing.id) {
         await base44.entities.Application.update(editing.id, payload);
@@ -359,7 +359,7 @@ export default function AdminApplications() {
   };
 
   const remove = async (a) => {
-    if (!window.confirm(`${t.confirmDel} ${a.application_id}?`)) return;
+    if (!window.confirm(`${t.confirmDel} ${a.applicationId}?`)) return;
     try {
       await base44.entities.Application.delete(a.id);
       await load();
@@ -370,15 +370,15 @@ export default function AdminApplications() {
   };
 
   const { search, setSearch, page, setPage, totalPages, totalItems, startIndex, pageSize, pageItems, filtered, dateFrom, setDateFrom, dateTo, setDateTo } = useTableControls(apps, {
-    searchFields: ["application_id", "family_head_name", "family_name", "mobile"],
-    dateField: "submitted_date",
+    searchFields: ["applicationId", "familyHeadName", "familyName", "mobile"],
+    dateField: "submittedDate",
   });
 
   const exportColumns = [
-    { key: "application_id", label: t.thAppId },
-    { key: "family_head_name", label: t.thFamilyHead },
-    { key: "family_name", label: t.thFamily },
-    { key: "submitted_date", label: t.thSubmitted },
+    { key: "applicationId", label: t.thAppId },
+    { key: "familyHeadName", label: t.thFamilyHead },
+    { key: "familyName", label: t.thFamily },
+    { key: "submittedDate", label: t.thSubmitted },
     { key: "status", label: t.thStatus },
   ];
 
@@ -423,10 +423,10 @@ export default function AdminApplications() {
             {pageItems.map((a, i) => (
               <tr key={a.id} className="border-b border-border last:border-0 hover:bg-muted/30">
                 <td className="px-4 py-3 text-muted-foreground">{startIndex + i + 1}</td>
-                <td className="px-4 py-3 font-semibold text-maroon">{a.application_id}</td>
-                <td className="px-4 py-3">{a.family_head_name}</td>
-                <td className="px-4 py-3">{a.family_name}</td>
-                <td className="px-4 py-3 text-muted-foreground">{a.submitted_date ? new Date(a.submitted_date).toLocaleDateString(locale) : "—"}</td>
+                <td className="px-4 py-3 font-semibold text-maroon">{a.applicationId}</td>
+                <td className="px-4 py-3">{a.familyHeadName}</td>
+                <td className="px-4 py-3">{a.familyName}</td>
+                <td className="px-4 py-3 text-muted-foreground">{a.submittedDate ? new Date(a.submittedDate).toLocaleDateString(locale) : "—"}</td>
                 <td className="px-4 py-3"><StatusBadge status={a.status} /></td>
                 <td className="px-4 py-3 text-right">
                   <div className="inline-flex items-center gap-1.5">
@@ -454,7 +454,7 @@ export default function AdminApplications() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">{t.app}</div>
-                <div className="font-display text-lg font-bold text-maroon">{selected.application_id}</div>
+                <div className="font-display text-lg font-bold text-maroon">{selected.applicationId}</div>
               </div>
               <StatusBadge status={selected.status} />
             </div>
@@ -462,18 +462,18 @@ export default function AdminApplications() {
             <div className="mt-5 space-y-4">
               <div className="rounded-xl border border-gold/30 bg-cream p-4">
                 <div className="text-xs font-semibold uppercase tracking-wide text-maroon">{t.familyHead}</div>
-                <div className="mt-1 text-sm font-medium text-foreground">{selected.family_head_name}</div>
+                <div className="mt-1 text-sm font-medium text-foreground">{selected.familyHeadName}</div>
                 <div className="text-xs text-muted-foreground">{selected.mobile} · {selected.email || "—"}</div>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><div className="text-xs text-muted-foreground">{t.familyName}</div><div className="font-medium">{selected.family_name}</div></div>
+                <div><div className="text-xs text-muted-foreground">{t.familyName}</div><div className="font-medium">{selected.familyName}</div></div>
                 <div><div className="text-xs text-muted-foreground">{t.gotra}</div><div className="font-medium">{selected.gotra || "—"}</div></div>
-                <div><div className="text-xs text-muted-foreground">{t.nativePlace}</div><div className="font-medium">{selected.native_place || "—"}</div></div>
+                <div><div className="text-xs text-muted-foreground">{t.nativePlace}</div><div className="font-medium">{selected.nativePlace || "—"}</div></div>
                 <div><div className="text-xs text-muted-foreground">{t.village}</div><div className="font-medium">{selected.village || "—"}</div></div>
                 <div className="col-span-2"><div className="text-xs text-muted-foreground">{t.address}</div><div className="font-medium">{selected.address}, {selected.city}, {selected.state} {selected.pincode}</div></div>
               </div>
               {(() => {
-                const memberList = normalizeMembersPayload(selected.members_data);
+                const memberList = normalizeMembersPayload(selected.membersData);
                 return (
                   <div>
                     <div className="text-xs font-semibold uppercase tracking-wide text-maroon">{t.members} ({memberList.length})</div>
@@ -491,9 +491,9 @@ export default function AdminApplications() {
                   </div>
                 );
               })()}
-              {selected.admin_remarks && (
+              {selected.adminRemarks && (
                 <div className="rounded-xl border border-orange-300 bg-orange-50 p-3 text-sm text-orange-700">
-                  <div className="font-semibold">{t.adminRemarks}:</div> {selected.admin_remarks}
+                  <div className="font-semibold">{t.adminRemarks}:</div> {selected.adminRemarks}
                 </div>
               )}
             </div>
@@ -547,23 +547,23 @@ export default function AdminApplications() {
               <button onClick={() => setEditing(null)} className="rounded-full p-1.5 hover:bg-muted"><X className="h-4 w-4" /></button>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblAppId} *</label><input value={editing.application_id} onChange={(e) => setEditing({ ...editing, application_id: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblAppId} *</label><input value={editing.applicationId} onChange={(e) => setEditing({ ...editing, applicationId: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblStatus}</label>
                 <select value={editing.status} onChange={(e) => setEditing({ ...editing, status: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">{STATUSES.map((s) => <option key={s}>{s}</option>)}</select>
               </div>
-              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblHeadName} *</label><input value={editing.family_head_name} onChange={(e) => setEditing({ ...editing, family_head_name: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblHeadName} *</label><input value={editing.familyHeadName} onChange={(e) => setEditing({ ...editing, familyHeadName: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblMobile} *</label><input value={editing.mobile} onChange={(e) => setEditing({ ...editing, mobile: sanitizeMobile(e.target.value) })} inputMode="numeric" maxLength={10} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblEmail}</label><input value={editing.email} onChange={(e) => setEditing({ ...editing, email: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblFamilyName} *</label><input value={editing.family_name} onChange={(e) => setEditing({ ...editing, family_name: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblFamilyName} *</label><input value={editing.familyName} onChange={(e) => setEditing({ ...editing, familyName: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblAddress}</label><input value={editing.address} onChange={(e) => setEditing({ ...editing, address: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblCity}</label><input value={editing.city} onChange={(e) => setEditing({ ...editing, city: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblDistrict}</label><input value={editing.district} onChange={(e) => setEditing({ ...editing, district: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblState}</label><input value={editing.state} onChange={(e) => setEditing({ ...editing, state: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblPincode}</label><input value={editing.pincode} onChange={(e) => setEditing({ ...editing, pincode: sanitizePincode(e.target.value) })} inputMode="numeric" maxLength={6} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblGotra}</label><input value={editing.gotra} onChange={(e) => setEditing({ ...editing, gotra: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblNative}</label><input value={editing.native_place} onChange={(e) => setEditing({ ...editing, native_place: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblNative}</label><input value={editing.nativePlace} onChange={(e) => setEditing({ ...editing, nativePlace: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblVillage}</label><input value={editing.village} onChange={(e) => setEditing({ ...editing, village: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblRemarks}</label><textarea value={editing.admin_remarks} onChange={(e) => setEditing({ ...editing, admin_remarks: e.target.value })} rows={2} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblRemarks}</label><textarea value={editing.adminRemarks} onChange={(e) => setEditing({ ...editing, adminRemarks: e.target.value })} rows={2} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
             </div>
             <button onClick={saveEdit} disabled={saving} className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-maroon py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark disabled:opacity-60">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}

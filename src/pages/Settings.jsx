@@ -42,8 +42,8 @@ export default function Settings() {
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
-      await base44.auth.updateMe({ photo_url: file_url });
+      const { fileUrl } = await base44.integrations.Core.UploadPublicFile({ file });
+      await base44.auth.updateMe({ photoUrl: fileUrl });
       await checkUserAuth();
       toast({ title: t("settings.photoUpdated") });
     } catch (err) {
@@ -85,7 +85,7 @@ export default function Settings() {
     }
   };
 
-  const name = family?.head_name || user?.full_name || "Member";
+  const name = family?.headName || user?.fullName || "Member";
   const initials = name
     .split(" ")
     .map((w) => w[0])
@@ -113,8 +113,8 @@ export default function Settings() {
       <div className="rounded-2xl border border-gold/30 bg-card p-5">
         <div className="flex items-center gap-4">
           <div className="relative">
-            {user?.photo_url ? (
-              <img src={user.photo_url} alt={name} className="h-20 w-20 rounded-full border-2 border-gold/60 object-cover" />
+            {user?.photoUrl ? (
+              <img src={user.photoUrl} alt={name} className="h-20 w-20 rounded-full border-2 border-gold/60 object-cover" />
             ) : (
               <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-gold/60 bg-maroon text-xl font-semibold text-gold">
                 {initials || "M"}

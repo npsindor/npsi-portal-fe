@@ -9,7 +9,7 @@ import TablePagination from "@/components/admin/TablePagination";
 
 const TYPES = ["Announcement", "Event", "Registration", "Approval", "Correction", "Payment", "Campaign"];
 
-const EMPTY = { title: "", message: "", type: "Announcement", recipient_family_id: "", deep_link: "" };
+const EMPTY = { title: "", message: "", type: "Announcement", recipientFamilyId: "", deepLink: "" };
 
 const L = {
   en: {
@@ -88,8 +88,8 @@ export default function AdminNotifications() {
         title: editing.title,
         message: editing.message,
         type: editing.type,
-        recipient_family_id: editing.recipient_family_id || "",
-        deep_link: editing.deep_link || "",
+        recipientFamilyId: editing.recipientFamilyId || "",
+        deepLink: editing.deepLink || "",
         read: editing.read ?? false,
         date: editing.date || new Date().toISOString(),
       };
@@ -190,7 +190,7 @@ export default function AdminNotifications() {
               </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblRecipient}</label>
-                <input value={editing.recipient_family_id} onChange={(e) => setEditing({ ...editing, recipient_family_id: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" />
+                <input value={editing.recipientFamilyId} onChange={(e) => setEditing({ ...editing, recipientFamilyId: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" />
               </div>
             </div>
             <button onClick={save} disabled={saving} className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-maroon py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark disabled:opacity-60">

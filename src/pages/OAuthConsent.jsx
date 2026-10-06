@@ -59,7 +59,7 @@ export default function OAuthConsent() {
           // which honors from_url rather than returnTo. Rebuild the query from
           // `ctx` alone — never forward window.location.search raw: the platform
           // resume returns from_url verbatim, so crafted extras on the consent
-          // link (app_base_url, access_token, …) would ride through the login
+          // link (app_base_url, accessToken, …) would ride through the login
           // round-trip and app-params.js would persist them into the freshly
           // authenticated session.
           const returnTo =

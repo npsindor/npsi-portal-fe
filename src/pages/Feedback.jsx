@@ -37,8 +37,8 @@ export default function Feedback() {
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
-      setAttachment(file_url);
+      const { fileUrl } = await base44.integrations.Core.UploadPublicFile({ file });
+      setAttachment(fileUrl);
     } catch (e) {
       toast({ title: t("fb.submitted"), description: e.message, variant: "destructive" });
     } finally { setUploading(false); }
@@ -52,16 +52,16 @@ export default function Feedback() {
     setSubmitting(true);
     try {
       const created = await base44.entities.Feedback.create({
-        member_name: user?.full_name || "Member",
+        memberName: user?.fullName || "Member",
         email: user?.email || "",
-        feedback_type: type,
+        feedbackType: type,
         subject: subject.trim(),
         message: message.trim(),
-        attachment_url: attachment,
+        attachmentUrl: attachment,
         status: "Submitted",
-        submitted_date: new Date().toISOString(),
+        submittedDate: new Date().toISOString(),
       });
-      setSubmittedId(created.feedback_id);
+      setSubmittedId(created.feedbackId);
       setSubject(""); setMessage(""); setAttachment(""); setType("General");
       toast({ title: t("fb.submitted"), description: t("fb.submittedDesc") });
       load();
@@ -143,14 +143,14 @@ export default function Feedback() {
               <div key={f.id} className="rounded-2xl border border-gold/30 bg-card p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-semibold text-maroon">{f.feedback_id || "—"}</span>
-                    {f.feedback_type && <span className="rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 text-[0.6rem] font-semibold text-maroon">{t(`fb.types.${f.feedback_type}`)}</span>}
+                    <span className="font-mono text-xs font-semibold text-maroon">{f.feedbackId || "—"}</span>
+                    {f.feedbackType && <span className="rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 text-[0.6rem] font-semibold text-maroon">{t(`fb.types.${f.feedbackType}`)}</span>}
                   </div>
                   <StatusBadge status={f.status} />
                 </div>
                 {f.subject && <div className="mt-2 text-sm font-semibold text-foreground">{f.subject}</div>}
                 <p className="mt-1 text-sm text-muted-foreground line-clamp-3">{f.message}</p>
-                <div className="mt-1 text-xs text-muted-foreground">{f.submitted_date ? new Date(f.submitted_date).toLocaleDateString(locale) : ""}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{f.submittedDate ? new Date(f.submittedDate).toLocaleDateString(locale) : ""}</div>
                 {f.reply && (
                   <div className="mt-3 rounded-xl border border-green-200 bg-green-50 p-3">
                     <div className="text-xs font-semibold text-green-700">{t("fb.reply")}</div>

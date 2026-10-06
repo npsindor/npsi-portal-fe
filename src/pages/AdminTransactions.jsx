@@ -14,8 +14,8 @@ const METHODS = ["UPI", "QR", "Card", "Net Banking", "Cash"];
 const STATUSES = ["PENDING", "SUCCESS", "FAILED", "REFUNDED"];
 
 const EMPTY = {
-  transaction_id: "", type: "Family Registration", amount: "", payment_method: "UPI",
-  payment_status: "PENDING", family_id: "", member_id: "", event_id: "", reference_id: "", date: "", remarks: ""
+  transactionId: "", type: "Family Registration", amount: "", paymentMethod: "UPI",
+  paymentStatus: "PENDING", familyId: "", memberId: "", eventId: "", referenceId: "", date: "", remarks: ""
 };
 
 const L = {
@@ -127,8 +127,8 @@ export default function AdminTransactions() {
   useEffect(() => { load(); }, []);
 
   const filtered = txns.filter((tx) => {
-    if (search && !tx.transaction_id?.toLowerCase().includes(search.toLowerCase()) && !tx.family_id?.toLowerCase().includes(search.toLowerCase())) return false;
-    if (statusFilter !== "All" && tx.payment_status !== statusFilter) return false;
+    if (search && !tx.transactionId?.toLowerCase().includes(search.toLowerCase()) && !tx.familyId?.toLowerCase().includes(search.toLowerCase())) return false;
+    if (statusFilter !== "All" && tx.paymentStatus !== statusFilter) return false;
     if (typeFilter !== "All" && tx.type !== typeFilter) return false;
     if ((dateFrom || dateTo) && !inDateRange(tx.date, dateFrom, dateTo)) return false;
     return true;
@@ -146,31 +146,31 @@ export default function AdminTransactions() {
     const numeric = Number(String(value ?? "").replace(/[^\d.-]/g, ""));
     return Number.isFinite(numeric) ? numeric : 0;
   };
-  const totalRevenue = filtered.filter((tx) => tx.payment_status === "SUCCESS").reduce((s, tx) => s + parseAmount(tx.amount), 0);
+  const totalRevenue = filtered.filter((tx) => tx.paymentStatus === "SUCCESS").reduce((s, tx) => s + parseAmount(tx.amount), 0);
 
   const openNew = () => {
     const now = Date.now().toString(36).toUpperCase();
-    setEditing({ ...EMPTY, transaction_id: `TXN-${now}` });
+    setEditing({ ...EMPTY, transactionId: `TXN-${now}` });
   };
   const openEdit = (tx) => setEditing({ ...tx, amount: tx.amount ?? "", date: tx.date ? new Date(tx.date).toISOString().slice(0, 16) : "" });
 
   const save = async () => {
-    if (!editing.transaction_id || !editing.type || editing.amount === "") {
+    if (!editing.transactionId || !editing.type || editing.amount === "") {
       toast({ title: t.reqFields, variant: "destructive" });
       return;
     }
     setSaving(true);
     try {
       const payload = {
-        transaction_id: editing.transaction_id,
+        transactionId: editing.transactionId,
         type: editing.type,
         amount: Number(editing.amount) || 0,
-        payment_method: editing.payment_method,
-        payment_status: editing.payment_status,
-        family_id: editing.family_id || "",
-        member_id: editing.member_id || "",
-        event_id: editing.event_id || "",
-        reference_id: editing.reference_id || "",
+        paymentMethod: editing.paymentMethod,
+        paymentStatus: editing.paymentStatus,
+        familyId: editing.familyId || "",
+        memberId: editing.memberId || "",
+        eventId: editing.eventId || "",
+        referenceId: editing.referenceId || "",
         date: editing.date ? new Date(editing.date).toISOString() : new Date().toISOString(),
         remarks: editing.remarks || "",
       };
@@ -189,7 +189,7 @@ export default function AdminTransactions() {
   };
 
   const remove = async (tx) => {
-    if (!window.confirm(`${t.confirmDel} ${tx.transaction_id}?`)) return;
+    if (!window.confirm(`${t.confirmDel} ${tx.transactionId}?`)) return;
     try {
       await base44.entities.Transaction.delete(tx.id);
       await load();
@@ -216,13 +216,13 @@ export default function AdminTransactions() {
             title={t.title}
             labels={{ export: t.export }}
             columns={[
-              { key: "transaction_id", label: t.thTxnId },
+              { key: "transactionId", label: t.thTxnId },
               { key: "type", label: t.thType },
               { key: "amount", label: t.thAmount },
-              { key: "payment_method", label: t.thMethod },
-              { key: "reference_id", label: t.thReference },
+              { key: "paymentMethod", label: t.thMethod },
+              { key: "referenceId", label: t.thReference },
               { key: "date", label: t.thDate },
-              { key: "payment_status", label: t.thStatus },
+              { key: "paymentStatus", label: t.thStatus },
             ]}
             rows={filtered}
           />
@@ -243,7 +243,7 @@ export default function AdminTransactions() {
         </div>
         <div className="rounded-2xl border border-gold/30 bg-card p-4">
           <div className="text-xs uppercase tracking-wide text-muted-foreground">{t.successful}</div>
-          <div className="mt-1 font-display text-2xl font-bold text-green-600">{filtered.filter((tx) => tx.payment_status === "SUCCESS").length}</div>
+          <div className="mt-1 font-display text-2xl font-bold text-green-600">{filtered.filter((tx) => tx.paymentStatus === "SUCCESS").length}</div>
         </div>
       </div>
 
@@ -282,13 +282,13 @@ export default function AdminTransactions() {
             {pageItems.map((tx, i) => (
               <tr key={tx.id} className="border-b border-border last:border-0 hover:bg-muted/30">
                 <td className="px-4 py-3 text-muted-foreground">{startIndex + i + 1}</td>
-                <td className="px-4 py-3 font-semibold text-maroon">{tx.transaction_id}</td>
+                <td className="px-4 py-3 font-semibold text-maroon">{tx.transactionId}</td>
                 <td className="px-4 py-3">{tx.type}</td>
                 <td className="px-4 py-3 font-semibold">₹{parseAmount(tx.amount).toLocaleString(locale)}</td>
-                <td className="px-4 py-3 text-muted-foreground">{tx.payment_method}</td>
-                <td className="px-4 py-3 text-muted-foreground">{tx.reference_id || "—"}</td>
+                <td className="px-4 py-3 text-muted-foreground">{tx.paymentMethod}</td>
+                <td className="px-4 py-3 text-muted-foreground">{tx.referenceId || "—"}</td>
                 <td className="px-4 py-3 text-muted-foreground">{tx.date ? new Date(tx.date).toLocaleDateString(locale) : "—"}</td>
-                <td className="px-4 py-3"><StatusBadge status={tx.payment_status} /></td>
+                <td className="px-4 py-3"><StatusBadge status={tx.paymentStatus} /></td>
                 <td className="px-4 py-3 text-right">
                   <div className="inline-flex gap-1.5">
                     <button onClick={() => openEdit(tx)} className="rounded-full p-1.5 text-maroon hover:bg-maroon/10"><Pencil className="h-3.5 w-3.5" /></button>
@@ -311,20 +311,20 @@ export default function AdminTransactions() {
               <button onClick={() => setEditing(null)} className="rounded-full p-1.5 hover:bg-muted"><X className="h-4 w-4" /></button>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblTxnId} *</label><input value={editing.transaction_id} onChange={(e) => setEditing({ ...editing, transaction_id: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblTxnId} *</label><input value={editing.transactionId} onChange={(e) => setEditing({ ...editing, transactionId: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblType} *</label>
                 <select value={editing.type} onChange={(e) => setEditing({ ...editing, type: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">{TYPES.map((tp) => <option key={tp}>{tp}</option>)}</select>
               </div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblAmount} *</label><input type="number" value={editing.amount} onChange={(e) => setEditing({ ...editing, amount: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblMethod}</label>
-                <select value={editing.payment_method} onChange={(e) => setEditing({ ...editing, payment_method: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">{METHODS.map((m) => <option key={m}>{m}</option>)}</select>
+                <select value={editing.paymentMethod} onChange={(e) => setEditing({ ...editing, paymentMethod: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">{METHODS.map((m) => <option key={m}>{m}</option>)}</select>
               </div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblStatus}</label>
-                <select value={editing.payment_status} onChange={(e) => setEditing({ ...editing, payment_status: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">{STATUSES.map((s) => <option key={s}>{s}</option>)}</select>
+                <select value={editing.paymentStatus} onChange={(e) => setEditing({ ...editing, paymentStatus: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">{STATUSES.map((s) => <option key={s}>{s}</option>)}</select>
               </div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblFamilyId}</label><input value={editing.family_id} onChange={(e) => setEditing({ ...editing, family_id: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblMemberId}</label><input value={editing.member_id} onChange={(e) => setEditing({ ...editing, member_id: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblRefId}</label><input value={editing.reference_id} onChange={(e) => setEditing({ ...editing, reference_id: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblFamilyId}</label><input value={editing.familyId} onChange={(e) => setEditing({ ...editing, familyId: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblMemberId}</label><input value={editing.memberId} onChange={(e) => setEditing({ ...editing, memberId: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblRefId}</label><input value={editing.referenceId} onChange={(e) => setEditing({ ...editing, referenceId: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblDate}</label><input type="datetime-local" value={editing.date} onChange={(e) => setEditing({ ...editing, date: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblRemarks}</label><textarea value={editing.remarks} onChange={(e) => setEditing({ ...editing, remarks: e.target.value })} rows={2} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
             </div>

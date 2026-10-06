@@ -41,7 +41,7 @@ export default function Register() {
     setLoading(true);
     try {
       const recaptchaToken = await getRecaptchaToken("account_register");
-      await base44.auth.register({ email, password, full_name: fullName, phone: phone.trim(), recaptchaToken });
+      await base44.auth.register({ email, password, fullName: fullName, phone: phone.trim(), recaptchaToken });
       setShowOtp(true);
     } catch (err) {
       setError(err.message || "Registration failed");
@@ -55,8 +55,8 @@ export default function Register() {
     setLoading(true);
     try {
       const result = await base44.auth.verifyOtp({ email, otpCode });
-      if (result?.access_token) {
-        base44.auth.setToken(result.access_token);
+      if (result?.accessToken) {
+        base44.auth.setToken(result.accessToken);
       }
       const returnTo = safeReturnTo();
       const destination = returnTo !== "/" ? returnTo : result?.user?.role === "admin" ? "/admin" : "/portal";

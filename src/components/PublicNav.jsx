@@ -15,8 +15,8 @@ export default function PublicNav() {
   const { user, isAuthenticated } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const displayName = (user?.full_name || "Member").split(" ").filter(Boolean)[0];
-  const initials = (user?.full_name || "Member")
+  const displayName = (user?.fullName || "Member").split(" ").filter(Boolean)[0];
+  const initials = (user?.fullName || "Member")
     .split(" ")
     .map((w) => w[0])
     .filter(Boolean)
@@ -76,8 +76,8 @@ export default function PublicNav() {
                 </Button>
               )}
               <Button size="sm" className="hidden items-center gap-2 bg-maroon text-cream hover:bg-maroon-dark sm:inline-flex" onClick={() => navigate("/portal")}>
-                {user?.photo_url ? (
-                  <img src={user.photo_url} alt={displayName} className="h-6 w-6 rounded-full border border-gold/60 object-cover" />
+                {user?.photoUrl ? (
+                  <img src={user.photoUrl} alt={displayName} className="h-6 w-6 rounded-full border border-gold/60 object-cover" />
                 ) : (
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gold/20 text-[0.65rem] font-semibold text-gold">
                     {initials || <UserRound className="h-3.5 w-3.5" />}

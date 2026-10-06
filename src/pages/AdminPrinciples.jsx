@@ -18,7 +18,7 @@ export default function AdminPrinciples() {
   const load = async () => {
     setLoading(true);
     try {
-      setPrinciples(await base44.entities.Principle.list("section_number"));
+      setPrinciples(await base44.entities.Principle.list("sectionNumber"));
     } catch (error) {
       toast({ title: t("principlesAdmin.loadFailed"), description: error.message, variant: "destructive" });
     } finally {
@@ -29,18 +29,18 @@ export default function AdminPrinciples() {
   useEffect(() => { load(); }, []);
 
   const save = async () => {
-    if (!editing.title_en || !editing.title_hi || !editing.content_en || !editing.content_hi) {
+    if (!editing.titleEn || !editing.titleHi || !editing.contentEn || !editing.contentHi) {
       toast({ title: t("principlesAdmin.required"), variant: "destructive" });
       return;
     }
     setSaving(true);
     try {
       const payload = {
-        section_number: Number(editing.section_number) || 0,
-        title_en: editing.title_en,
-        title_hi: editing.title_hi,
-        content_en: editing.content_en,
-        content_hi: editing.content_hi,
+        sectionNumber: Number(editing.sectionNumber) || 0,
+        titleEn: editing.titleEn,
+        titleHi: editing.titleHi,
+        contentEn: editing.contentEn,
+        contentHi: editing.contentHi,
         status: editing.status || "Active",
       };
       if (editing.id) await base44.entities.Principle.update(editing.id, payload);
@@ -67,7 +67,7 @@ export default function AdminPrinciples() {
   };
 
   const { search, setSearch, page, setPage, totalPages, totalItems, pageSize, pageItems } = useTableControls(principles, {
-    searchFields: ["title_en", "title_hi"],
+    searchFields: ["titleEn", "titleHi"],
   });
 
   return (
@@ -78,7 +78,7 @@ export default function AdminPrinciples() {
           <h1 className="mt-2 font-display text-2xl font-semibold text-maroon">{t("principlesAdmin.title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("principlesAdmin.sub")}</p>
         </div>
-        <button onClick={() => setEditing({ section_number: principles.length + 1, status: "Active" })} className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-maroon px-4 py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark">
+        <button onClick={() => setEditing({ sectionNumber: principles.length + 1, status: "Active" })} className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-maroon px-4 py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark">
           <Plus className="h-4 w-4" /> {t("principlesAdmin.add")}
         </button>
       </div>
@@ -89,7 +89,7 @@ export default function AdminPrinciples() {
           <div key={principle.id} className="rounded-2xl border border-gold/30 bg-card p-4 shadow-sm">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-maroon/10"><ScrollText className="h-5 w-5 text-maroon" /></div>
-              <div className="min-w-0 flex-1"><div className="text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">{t("principles.section")} {principle.section_number} · {principle.status}</div><div className="font-display text-base font-semibold text-maroon">{principle.title_en}</div><div className="text-sm font-medium text-foreground/80">{principle.title_hi}</div><p className="mt-1 text-xs text-muted-foreground line-clamp-2">{principle.content_en}</p></div>
+              <div className="min-w-0 flex-1"><div className="text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">{t("principles.section")} {principle.sectionNumber} · {principle.status}</div><div className="font-display text-base font-semibold text-maroon">{principle.titleEn}</div><div className="text-sm font-medium text-foreground/80">{principle.titleHi}</div><p className="mt-1 text-xs text-muted-foreground line-clamp-2">{principle.contentEn}</p></div>
               <div className="flex shrink-0 gap-1.5"><button onClick={() => setEditing({ ...principle })} className="rounded-full p-2 text-maroon hover:bg-maroon/10" aria-label={t("principlesAdmin.edit")}><Pencil className="h-4 w-4" /></button><button onClick={() => remove(principle)} className="rounded-full p-2 text-destructive hover:bg-destructive/10" aria-label={t("principlesAdmin.delete")}><Trash2 className="h-4 w-4" /></button></div>
             </div>
           </div>
@@ -102,12 +102,12 @@ export default function AdminPrinciples() {
       </div>
 
       {editing && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"><div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-gold/40 bg-card p-6 shadow-xl"><div className="flex items-center justify-between border-b border-gold/20 pb-3"><h2 className="font-display text-lg font-semibold text-maroon">{editing.id ? t("principlesAdmin.editTitle") : t("principlesAdmin.newTitle")}</h2><button onClick={() => setEditing(null)} className="rounded-full p-1.5 text-muted-foreground hover:bg-muted" aria-label={t("principlesAdmin.close")}><X className="h-4 w-4" /></button></div><div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("principlesAdmin.number")}<input type="number" value={editing.section_number ?? ""} onChange={(event) => setEditing({ ...editing, section_number: event.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm font-normal outline-none focus:border-maroon" /></label>
+        <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("principlesAdmin.number")}<input type="number" value={editing.sectionNumber ?? ""} onChange={(event) => setEditing({ ...editing, sectionNumber: event.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm font-normal outline-none focus:border-maroon" /></label>
         <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("principlesAdmin.status")}<select value={editing.status || "Active"} onChange={(event) => setEditing({ ...editing, status: event.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm font-normal outline-none focus:border-maroon"><option value="Active">{t("principlesAdmin.active")}</option><option value="Archived">{t("principlesAdmin.archived")}</option></select></label>
-        <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("principlesAdmin.titleEn")}<input value={editing.title_en || ""} onChange={(event) => setEditing({ ...editing, title_en: event.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm font-normal outline-none focus:border-maroon" /></label>
-        <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("principlesAdmin.titleHi")}<input value={editing.title_hi || ""} onChange={(event) => setEditing({ ...editing, title_hi: event.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm font-normal outline-none focus:border-maroon" /></label>
-        <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:col-span-2">{t("principlesAdmin.contentEn")}<textarea rows={4} value={editing.content_en || ""} onChange={(event) => setEditing({ ...editing, content_en: event.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm font-normal outline-none focus:border-maroon" /></label>
-        <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:col-span-2">{t("principlesAdmin.contentHi")}<textarea rows={4} value={editing.content_hi || ""} onChange={(event) => setEditing({ ...editing, content_hi: event.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm font-normal outline-none focus:border-maroon" /></label>
+        <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("principlesAdmin.titleEn")}<input value={editing.titleEn || ""} onChange={(event) => setEditing({ ...editing, titleEn: event.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm font-normal outline-none focus:border-maroon" /></label>
+        <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("principlesAdmin.titleHi")}<input value={editing.titleHi || ""} onChange={(event) => setEditing({ ...editing, titleHi: event.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm font-normal outline-none focus:border-maroon" /></label>
+        <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:col-span-2">{t("principlesAdmin.contentEn")}<textarea rows={4} value={editing.contentEn || ""} onChange={(event) => setEditing({ ...editing, contentEn: event.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm font-normal outline-none focus:border-maroon" /></label>
+        <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:col-span-2">{t("principlesAdmin.contentHi")}<textarea rows={4} value={editing.contentHi || ""} onChange={(event) => setEditing({ ...editing, contentHi: event.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm font-normal outline-none focus:border-maroon" /></label>
       </div><div className="mt-5 flex justify-end gap-2"><button onClick={() => setEditing(null)} className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-muted-foreground">{t("principlesAdmin.cancel")}</button><button onClick={save} disabled={saving} className="inline-flex items-center gap-1.5 rounded-full bg-maroon px-5 py-2 text-sm font-semibold text-cream disabled:opacity-50"><Save className="h-4 w-4" />{saving ? t("principlesAdmin.saving") : t("principlesAdmin.save")}</button></div></div></div>}
     </div>
   );

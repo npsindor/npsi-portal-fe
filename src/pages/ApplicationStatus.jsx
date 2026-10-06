@@ -82,8 +82,8 @@ export default function ApplicationStatus() {
                       <FileText className="h-5 w-5 text-maroon" />
                     </div>
                     <div>
-                      <div className="font-display text-lg font-semibold text-maroon">{result.application_id}</div>
-                      <div className="text-xs text-muted-foreground">{result.family_head_name}</div>
+                      <div className="font-display text-lg font-semibold text-maroon">{result.applicationId}</div>
+                      <div className="text-xs text-muted-foreground">{result.familyHeadName}</div>
                     </div>
                   </div>
                   <StatusBadge status={result.status} />
@@ -91,24 +91,24 @@ export default function ApplicationStatus() {
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <div>
                     <div className="text-xs uppercase tracking-wide text-muted-foreground">{t("status.familyName")}</div>
-                    <div className="text-sm font-medium text-foreground">{result.family_name}</div>
+                    <div className="text-sm font-medium text-foreground">{result.familyName}</div>
                   </div>
                   <div>
                     <div className="text-xs uppercase tracking-wide text-muted-foreground">{t("status.submittedOn")}</div>
                     <div className="flex items-center gap-1.5 text-sm font-medium text-foreground">
                       <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                      {result.submitted_date ? new Date(result.submitted_date).toLocaleDateString("en-IN") : "—"}
+                      {result.submittedDate ? new Date(result.submittedDate).toLocaleDateString("en-IN") : "—"}
                     </div>
                   </div>
                 </div>
-                {result.status === "APPROVED" && result.resulting_family_id && (
+                {result.status === "APPROVED" && result.resultingFamilyId && (
                   <div className="mt-4 rounded-xl border border-green-300 bg-green-50 p-4">
                     <div className="flex items-center gap-2 text-sm font-semibold text-green-800">
                       <CheckCircle2 className="h-4 w-4" />
                       {t("status.approved")}
                     </div>
                     <p className="mt-1 text-sm text-green-700">
-                      {t("status.approvedD", { id: result.resulting_family_id })}
+                      {t("status.approvedD", { id: result.resultingFamilyId })}
                     </p>
                   </div>
                 )}
@@ -118,7 +118,7 @@ export default function ApplicationStatus() {
                       <AlertCircle className="h-4 w-4" />
                       {t("status.correction")}
                     </div>
-                    <p className="mt-1 text-sm text-orange-700">{result.admin_remarks || t("status.correctionD")}</p>
+                    <p className="mt-1 text-sm text-orange-700">{result.adminRemarks || t("status.correctionD")}</p>
                   </div>
                 )}
                 {result.status === "REJECTED" && (
@@ -127,7 +127,7 @@ export default function ApplicationStatus() {
                       <XCircle className="h-4 w-4" />
                       {t("status.rejected")}
                     </div>
-                    <p className="mt-1 text-sm text-red-700">{result.admin_remarks || t("status.rejectedD")}</p>
+                    <p className="mt-1 text-sm text-red-700">{result.adminRemarks || t("status.rejectedD")}</p>
                   </div>
                 )}
                 {result.status === "PENDING_VERIFICATION" && (

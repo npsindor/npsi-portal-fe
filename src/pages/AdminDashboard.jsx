@@ -53,7 +53,7 @@ export default function AdminDashboard() {
         const [fams, mems, apps, evs, txns, stuApps, students] = await Promise.all([
           base44.entities.Family.list(),
           base44.entities.FamilyMember.list(),
-          base44.entities.Application.list("-submitted_date", 5),
+          base44.entities.Application.list("-submittedDate", 5),
           base44.entities.Event.list(),
           base44.entities.Transaction.list(),
           base44.entities.StudentApplication.list(),
@@ -65,8 +65,8 @@ export default function AdminDashboard() {
           const numeric = Number(String(value ?? "").replace(/[^\d.-]/g, ""));
           return Number.isFinite(numeric) ? numeric : 0;
         };
-        const revenue = txns.filter((tx) => tx.payment_status === "SUCCESS").reduce((s, tx) => s + parseAmount(tx.amount), 0);
-        const pendingPay = txns.filter((tx) => tx.payment_status === "PENDING").length;
+        const revenue = txns.filter((tx) => tx.paymentStatus === "SUCCESS").reduce((s, tx) => s + parseAmount(tx.amount), 0);
+        const pendingPay = txns.filter((tx) => tx.paymentStatus === "PENDING").length;
         setStats({
           families: fams.length,
           members: mems.length,
@@ -128,8 +128,8 @@ export default function AdminDashboard() {
           {recentApps.map((a) => (
             <Link key={a.id} to="/admin/applications" className="flex items-center justify-between rounded-xl border border-border p-3 hover:bg-muted">
               <div>
-                <div className="text-sm font-semibold text-foreground">{a.application_id}</div>
-                <div className="text-xs text-muted-foreground">{a.family_head_name} · {a.family_name}</div>
+                <div className="text-sm font-semibold text-foreground">{a.applicationId}</div>
+                <div className="text-xs text-muted-foreground">{a.familyHeadName} · {a.familyName}</div>
               </div>
               <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                 a.status === "APPROVED" ? "bg-green-100 text-green-800" :
