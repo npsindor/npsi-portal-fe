@@ -4,7 +4,7 @@
 #   test -> "test" environment (no approval, deploys automatically) -> test.npsindore.org,
 #           behind a browser login (user npsitest, password from TEST_SITE_PASSWORD)
 #
-# Push (or "Run workflow" in the Actions tab) -> checks (lint, tests, build) -> builds with the
+# Push (or "Run workflow" in the Actions tab) -> checks (lint, unit + browser tests, build) -> builds with the
 # environment's VITE_* values -> uploads dist as a zip -> Hostinger replaces
 # public_html with it -> checks the live site serves the new build.
 #
@@ -50,6 +50,10 @@ jobs:
         run: npm run lint
       - name: Unit tests
         run: npm test
+      - name: Browser tests (Playwright, mocked API)
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:browser
       - run: npm run build
 
   deploy:
