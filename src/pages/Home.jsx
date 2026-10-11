@@ -140,6 +140,7 @@ export default function Home() {
                   src={logoVideo}
                   autoPlay
                   loop
+                  muted
                   playsInline
                   controls
                   preload="auto"
