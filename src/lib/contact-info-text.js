@@ -3,7 +3,7 @@ export const contactInfoText = {
     'contact.title': 'Stay connected with our community',
     'contact.description': 'Share your details with the Nimad Patidar community in Indore. Fields marked * are required.',
     'contact.fullName': 'Full name', 'contact.phone': 'Contact number', 'contact.email': 'Email (optional)',
-    'contact.area': 'Area you live in Indore', 'contact.village': 'Native village in Nimad',
+    'contact.area': 'Area (Zone) you live in Indore', 'contact.village': 'Native village in Nimad',
     'contact.other': 'Other', 'contact.otherArea': 'Enter your area', 'contact.otherVillage': 'Enter your village',
     'contact.choose': 'Search and select', 'contact.search': 'Search in English or Hindi…',
     'contact.empty': 'No match. Select Other to enter your location.',
@@ -18,7 +18,7 @@ export const contactInfoText = {
     'contact.title': 'अपने समाज से जुड़े रहें',
     'contact.description': 'इंदौर में निमाड़ पाटीदार समाज से जुड़ने के लिए अपनी जानकारी दें। * वाले विवरण आवश्यक हैं।',
     'contact.fullName': 'पूरा नाम', 'contact.phone': 'संपर्क नंबर', 'contact.email': 'ईमेल (वैकल्पिक)',
-    'contact.area': 'इंदौर में आपका निवास क्षेत्र', 'contact.village': 'निमाड़ में आपका मूल गाँव',
+    'contact.area': 'इंदौर में आपका निवास (ज़ोन) क्षेत्र', 'contact.village': 'निमाड़ में आपका मूल गाँव',
     'contact.other': 'अन्य', 'contact.otherArea': 'अपने क्षेत्र का नाम लिखें', 'contact.otherVillage': 'अपने गाँव का नाम लिखें',
     'contact.choose': 'खोजें और चुनें', 'contact.search': 'हिंदी या अंग्रेज़ी में खोजें…',
     'contact.empty': 'कोई विकल्प नहीं मिला। अपना स्थान लिखने के लिए अन्य चुनें।',
@@ -46,6 +46,7 @@ export const indoreAreas = [
   ["Sukhliya", "सुखलिया"],
   ["Bhawarkuan", "भंवरकुआँ"],
   ["Rajwada", "राजवाड़ा"],
+  ["Mhow", "महू"],
 ];
 export const nimadVillages = [
   ["Aghawan (Temla)", "अघावन (टेमला)"],
