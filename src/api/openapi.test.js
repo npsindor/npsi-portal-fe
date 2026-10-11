@@ -162,3 +162,7 @@ test('dropdown values are values the backend accepts', () => {
   }
   assert.deepEqual(problems, []);
 });
+
+test('contact form endpoint accepts public submissions', () => {
+  assert.ok(has('POST', API.contactInfo));
+});

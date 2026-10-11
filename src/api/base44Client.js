@@ -132,6 +132,7 @@ const createLocalUsers = () => ({
 });
 
 export const base44 = {
+  contactInfo: { create: (data) => request(API.contactInfo, { method: 'POST', body: JSON.stringify(data) }) },
   entities: createLocalEntities(),
   auth: createLocalAuth(),
   users: createLocalUsers(),

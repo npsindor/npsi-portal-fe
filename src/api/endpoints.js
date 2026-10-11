@@ -27,6 +27,7 @@ export const ENTITY_RESOURCES = {
 const resource = (entity) => `${API_PREFIX}/${ENTITY_RESOURCES[entity] || encodeURIComponent(entity)}`;
 
 export const API = {
+  contactInfo: `${API_PREFIX}/contact-info`,
   uploads: `${API_PREFIX}/uploads`,
   auth: {
     registrations: `${API_PREFIX}/auth/registrations`,

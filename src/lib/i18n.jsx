@@ -1,7 +1,9 @@
+import { contactInfoText } from './contact-info-text';
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 const translations = {
   en: {
+    ...contactInfoText.en,
     "lang.name": "EN",
     "lang.switchTo": "हिंदी",
 
@@ -621,6 +623,7 @@ const translations = {
   },
 
   hi: {
+    ...contactInfoText.hi,
     "lang.name": "हिं",
     "lang.switchTo": "English",
 
