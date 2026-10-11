@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Users, FileCheck, CalendarDays, IndianRupee, TrendingUp, AlertCircle, Clock, GraduationCap } from "lucide-react";
+import { Users, FileCheck, CalendarDays, IndianRupee, TrendingUp, AlertCircle, Clock, GraduationCap, Contact } from "lucide-react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useLang } from "@/lib/i18n";
@@ -18,6 +18,7 @@ const L = {
     totalApps: "Total Applications",
     totalStudents: "Total Students",
     pendingStudentApps: "Pending Student Apps",
+    communityContacts: "Community Contacts",
     recentApps: "Recent Applications",
     viewAll: "View all",
     noApps: "No applications yet.",
@@ -35,6 +36,7 @@ const L = {
     totalApps: "कुल आवेदन",
     totalStudents: "कुल स्टूडेंट",
     pendingStudentApps: "प्रतीक्षारत स्टूडेंट आवेदन",
+    communityContacts: "समाज के संपर्क",
     recentApps: "हाल के आवेदन",
     viewAll: "सभी देखें",
     noApps: "अभी कोई आवेदन नहीं।",
@@ -44,13 +46,13 @@ const L = {
 export default function AdminDashboard() {
   const { lang } = useLang();
   const t = L[lang];
-  const [stats, setStats] = useState({ families: 0, members: 0, pending: 0, active: 0, events: 0, revenue: 0, pendingPay: 0, regs: 0, students: 0, pendingStu: 0 });
+  const [stats, setStats] = useState({ families: 0, members: 0, pending: 0, active: 0, events: 0, revenue: 0, pendingPay: 0, regs: 0, students: 0, pendingStu: 0, contacts: 0 });
   const [recentApps, setRecentApps] = useState([]);
 
   useEffect(() => {
     (async () => {
       try {
-        const [fams, mems, apps, evs, txns, stuApps, students] = await Promise.all([
+        const [fams, mems, apps, evs, txns, stuApps, students, contacts] = await Promise.all([
           base44.entities.Family.listAll(),
           base44.entities.FamilyMember.listAll(),
           base44.entities.Application.list("-submittedDate", 5),
@@ -58,6 +60,7 @@ export default function AdminDashboard() {
           base44.entities.Transaction.listAll(),
           base44.entities.StudentApplication.listAll(),
           base44.entities.Student.listAll(),
+          base44.contactInfo.list({ limit: 1 }).catch(() => ({ total: 0 })),
         ]);
         const activeMembers = mems.filter((m) => m.status === "ACTIVE").length;
         const pending = apps.filter((a) => a.status === "PENDING_VERIFICATION" || a.status === "SUBMITTED").length;
@@ -78,6 +81,7 @@ export default function AdminDashboard() {
           regs: apps.length,
           students: students.length,
           pendingStu: stuApps.filter((a) => a.status === "PENDING_VERIFICATION" || a.status === "SUBMITTED").length,
+          contacts: contacts.total,
         });
         setRecentApps(apps);
       } catch (e) {}
@@ -96,6 +100,7 @@ export default function AdminDashboard() {
     { label: t.totalStudents, value: stats.students, icon: GraduationCap, color: "text-maroon", bg: "bg-maroon/10" },
     { label: t.pendingStudentApps, value: stats.pendingStu, icon: FileCheck, color: "text-amber-600", bg: "bg-amber-50" },
     { label: t.totalApps, value: stats.regs, icon: AlertCircle, color: "text-maroon", bg: "bg-maroon/10" },
+    { label: t.communityContacts, value: stats.contacts, icon: Contact, color: "text-maroon", bg: "bg-maroon/10" },
   ];
 
   return (
