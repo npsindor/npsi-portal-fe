@@ -4,7 +4,7 @@ import { mockApi } from './mock-api.js';
 async function fillContact(page) {
   await page.getByLabel('Full name', { exact: false }).fill('Test Contact');
   await page.getByLabel('Contact number', { exact: false }).fill('+91 98765 43210');
-  await page.getByRole('combobox', { name: 'Area you live in Indore' }).click();
+  await page.getByRole('combobox', { name: 'Area (Zone) you live in Indore' }).click();
   await page.getByPlaceholder('Search in English or Hindi…').fill('विजय');
   await page.getByRole('option', { name: 'Vijay Nagar' }).click();
   await page.getByRole('combobox', { name: 'Native village in Nimad' }).click();
@@ -40,5 +40,5 @@ test('failed submission keeps data and Hindi language switching works on mobile'
   await page.getByRole('button', { name: 'जानकारी जमा करें', exact: true }).click();
   await expect(page.getByRole('alert')).toHaveText('आपकी जानकारी सहेजी नहीं जा सकी। कृपया फिर से प्रयास करें।');
   await expect(page.getByLabel('पूरा नाम', { exact: false })).toHaveValue('Test Contact');
-  await expect(page.getByRole('combobox', { name: 'इंदौर में आपका निवास क्षेत्र' })).toContainText('विजय नगर');
+  await expect(page.getByRole('combobox', { name: 'इंदौर में आपका निवास (ज़ोन) क्षेत्र' })).toContainText('विजय नगर');
 });

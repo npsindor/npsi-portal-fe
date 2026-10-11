@@ -10,6 +10,8 @@ import { useLang } from '@/lib/i18n';
 export default function ContactLocationSelect({ id, label, options, value, other, onChange, onOtherChange, otherLabel, disabled }) {
   const [open, setOpen] = useState(false);
   const { lang, t } = useLang();
+  const labelIndex = lang === 'hi' ? 1 : 0;
+  const sortedOptions = [...options].sort((a, b) => a[labelIndex].localeCompare(b[labelIndex], lang === 'hi' ? 'hi-IN' : 'en-IN'));
   const selected = options.find(([key]) => key === value);
   const caption = value === '__other__' ? t('contact.other') : selected?.[lang === 'hi' ? 1 : 0];
   return <div className="space-y-1">
@@ -26,7 +28,7 @@ export default function ContactLocationSelect({ id, label, options, value, other
           <CommandList className="max-h-[min(240px,40dvh)]">
             <CommandEmpty>{t('contact.empty')}</CommandEmpty>
             <CommandGroup>
-              {options.map(([key, hi]) => <CommandItem className="min-h-11" key={key} value={`${key} ${hi}`} onSelect={() => { onChange(key); setOpen(false); }}>
+              {sortedOptions.map(([key, hi]) => <CommandItem className="min-h-11" key={key} value={`${key} ${hi}`} onSelect={() => { onChange(key); setOpen(false); }}>
                 <Check className={`mr-2 h-4 w-4 ${key === value ? 'opacity-100' : 'opacity-0'}`} />{lang === 'hi' ? hi : key}
               </CommandItem>)}
             </CommandGroup>
