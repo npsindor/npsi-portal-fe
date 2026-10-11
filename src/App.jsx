@@ -49,6 +49,7 @@ const StudentRegistration = lazy(() => import('@/pages/StudentRegistration'));
 const AdminStudents = lazy(() => import('@/pages/AdminStudents'));
 const AdminEventRegistrations = lazy(() => import('@/pages/AdminEventRegistrations'));
 const Feedback = lazy(() => import('@/pages/Feedback'));
+const AdminContactInfo = lazy(() => import('@/pages/AdminContactInfo'));
 const AdminFeedback = lazy(() => import('@/pages/AdminFeedback'));
 const AdminTransferRequests = lazy(() => import('@/pages/AdminTransferRequests'));
 const Help = lazy(() => import('@/pages/Help'));
@@ -123,6 +124,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/students" element={<AdminStudents />} />
           <Route path="/admin/event-registrations" element={<AdminEventRegistrations />} />
           <Route path="/admin/transfers" element={<AdminTransferRequests />} />
+          <Route path="/admin/contact-info" element={<AdminContactInfo />} />
           <Route path="/admin/feedback" element={<AdminFeedback />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/news" element={<AdminNews />} />
