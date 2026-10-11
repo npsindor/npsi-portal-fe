@@ -39,12 +39,12 @@ export const indoreAreas = [
   ["Dewas", "देवास"],
   ["Treasure Fantacy", "ट्रेज़र फैंटेसी"],
   ["Vaishali Nagar", "वैशाली नगर"],
-  ["Silicon City", "सिलिकॉन सिटी"],
+  ["Star City (Silicon)", "स्टार सिटी (सिलिकॉन)"],
   ["Treasure Town", "ट्रेज़र टाउन"],
   ["Bangali Square", "बंगाली चौराहा"],
   ["Vijay Nagar", "विजय नगर"],
   ["Sukhliya", "सुखलिया"],
-  ["Bhwarkuan", "भंवरकुआँ"],
+  ["Bhawarkuan", "भंवरकुआँ"],
   ["Rajwada", "राजवाड़ा"],
 ];
 export const nimadVillages = [
