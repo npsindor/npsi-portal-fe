@@ -5,8 +5,8 @@ async function fillContact(page) {
   await page.getByLabel('Full name', { exact: false }).fill('Test Contact');
   await page.getByLabel('Contact number', { exact: false }).fill('+91 98765 43210');
   await page.getByRole('combobox', { name: 'Area you live in Indore' }).click();
-  await page.getByPlaceholder('Search in English or Hindi…').fill('राजेंद्र');
-  await page.getByRole('option', { name: 'Rajendra Nagar' }).click();
+  await page.getByPlaceholder('Search in English or Hindi…').fill('विजय');
+  await page.getByRole('option', { name: 'Vijay Nagar' }).click();
   await page.getByRole('combobox', { name: 'Native village in Nimad' }).click();
   await page.getByPlaceholder('Search in English or Hindi…').fill('not in list');
   await page.getByRole('button', { name: 'Other', exact: true }).click();
@@ -25,7 +25,7 @@ test('public full-screen form submits searchable and custom locations without em
   await page.getByRole('button', { name: 'Submit details' }).click();
   await expect(page.getByRole('heading', { name: 'Thank you!' })).toBeVisible();
   expect(calls.filter(c => c.key === 'POST /contact-info').map(c => c.body)).toEqual([{
-    fullName: 'Test Contact', contactNumber: '9876543210', indoreArea: 'Rajendra Nagar', nativeVillage: 'Custom village', isStudent: true, lang: 'en',
+    fullName: 'Test Contact', contactNumber: '9876543210', indoreArea: 'Vijay Nagar', nativeVillage: 'Custom village', isStudent: true, lang: 'en',
   }]);
 });
 
@@ -40,5 +40,5 @@ test('failed submission keeps data and Hindi language switching works on mobile'
   await page.getByRole('button', { name: 'जानकारी जमा करें', exact: true }).click();
   await expect(page.getByRole('alert')).toHaveText('आपकी जानकारी सहेजी नहीं जा सकी। कृपया फिर से प्रयास करें।');
   await expect(page.getByLabel('पूरा नाम', { exact: false })).toHaveValue('Test Contact');
-  await expect(page.getByRole('combobox', { name: 'इंदौर में आपका निवास क्षेत्र' })).toContainText('राजेंद्र नगर');
+  await expect(page.getByRole('combobox', { name: 'इंदौर में आपका निवास क्षेत्र' })).toContainText('विजय नगर');
 });
