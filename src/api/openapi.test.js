@@ -166,3 +166,8 @@ test('dropdown values are values the backend accepts', () => {
 test('contact form endpoint accepts public submissions', () => {
   assert.ok(has('POST', API.contactInfo));
 });
+
+test("contact list endpoint requires admin authentication", () => {
+  assert.ok(has("GET", API.contactInfo));
+  assert.ok(spec.paths[API.contactInfo].get.security.length);
+});

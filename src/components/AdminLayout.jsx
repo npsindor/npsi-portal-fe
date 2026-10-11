@@ -24,6 +24,7 @@ export default function AdminLayout() {
     { label: t("admin.eventRegs"), path: "/admin/event-registrations", icon: TicketCheck },
     { label: t("admin.transactions"), path: "/admin/transactions", icon: CreditCard },
     { label: t("admin.notifications"), path: "/admin/notifications", icon: Bell },
+    { label: t("contacts.title"), path: "/admin/contact-info", icon: Users },
     { label: t("admin.feedback"), path: "/admin/feedback", icon: MessageSquare },
     { label: t("admin.rules"), path: "/admin/rules", icon: ScrollText },
     { label: t("admin.principles"), path: "/admin/principles", icon: Lightbulb },
