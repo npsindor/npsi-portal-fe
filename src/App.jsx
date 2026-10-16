@@ -13,7 +13,6 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import Layout from '@/components/Layout';
 import AdminLayout from '@/components/AdminLayout';
 // import LaunchCurtain from '@/components/LaunchCurtain';
-import GarbaVideoPopup from '@/components/GarbaVideoPopup'; // GARBA PROMO — see removal notes in that file
 
 // Pages are lazy-loaded per route so the initial bundle only ships the
 // shell + whichever page is actually visited, instead of all ~37 pages.
@@ -137,10 +136,6 @@ const AuthenticatedApp = () => {
 };
 
 
-function SiteContent() {
-  return <><GarbaVideoPopup /><AuthenticatedApp /></>;
-}
-
 function App() {
 
   return (
@@ -152,7 +147,7 @@ function App() {
             <QueryClientProvider client={queryClientInstance}>
               <Router>
                 <ScrollToTop />
-                <SiteContent />
+                <AuthenticatedApp />
               </Router>
               <Toaster />
             </QueryClientProvider>
