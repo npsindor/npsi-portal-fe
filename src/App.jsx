@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import ScrollToTop from './components/ScrollToTop';
@@ -17,7 +17,6 @@ import GarbaVideoPopup from '@/components/GarbaVideoPopup'; // GARBA PROMO — s
 
 // Pages are lazy-loaded per route so the initial bundle only ships the
 // shell + whichever page is actually visited, instead of all ~37 pages.
-const ContactInfo = lazy(() => import('@/pages/ContactInfo'));
 const Home = lazy(() => import('@/pages/Home'));
 const About = lazy(() => import('@/pages/About'));
 const Events = lazy(() => import('@/pages/Events'));
@@ -139,10 +138,6 @@ const AuthenticatedApp = () => {
 
 
 function SiteContent() {
-  const { pathname } = useLocation();
-  if (pathname.replace(/\/$/, '') === '/contact-info') {
-    return <Suspense fallback={<RouteLoadingFallback />}><ContactInfo /></Suspense>;
-  }
   return <><GarbaVideoPopup /><AuthenticatedApp /></>;
 }
 
