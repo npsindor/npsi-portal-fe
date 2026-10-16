@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ArrowUp, CalendarDays, MapPin, Bell, Users, ShieldCheck, Heart, BookOpen, ChevronRight, UserPlus, GraduationCap, ClipboardCheck, Info, ScrollText, HelpCircle } from "lucide-react";
 import PublicNav from "@/components/PublicNav";
@@ -13,27 +13,10 @@ export default function Home() {
   const [events, setEvents] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [stats, setStats] = useState({ families: 0, members: 0, events: 0 });
-  const videoRef = useRef(null);
-  const [needsSoundTap, setNeedsSoundTap] = useState(false);
-
-  useEffect(() => {
-    const el = videoRef.current;
-    if (!el) return;
-    el.muted = false;
-    el.play().catch(() => {
-      // Browser blocked unmuted autoplay; fall back to muted and ask the user to tap for sound.
-      el.muted = true;
-      setNeedsSoundTap(true);
-      el.play().catch(() => {});
-    });
-  }, []);
-
-  const enableSound = () => {
-    const el = videoRef.current;
-    if (!el) return;
-    el.muted = false;
-    el.play().catch(() => {});
-    setNeedsSoundTap(false);
+  const keepVideoMuted = (event) => {
+    const video = event.currentTarget;
+    if (!video.muted) video.muted = true;
+    if (video.volume !== 0) video.volume = 0;
   };
 
   useEffect(() => {
@@ -135,26 +118,20 @@ export default function Home() {
             <div className="rounded-2xl border border-gold/30 bg-maroon-dark/40 p-3 shadow-2xl backdrop-blur sm:p-6">
               <div className="relative">
                 <video
-                  ref={videoRef}
                   className="aspect-video w-full rounded-xl border border-gold/20 object-cover"
                   src={logoVideo}
                   autoPlay
                   loop
                   muted
+                  onLoadedMetadata={keepVideoMuted}
+                  onPlay={keepVideoMuted}
+                  onVolumeChange={keepVideoMuted}
                   playsInline
                   controls
                   preload="auto"
                   aria-label="Patidar Samaj Sangathan logo"
                 />
-                {needsSoundTap && (
-                  <button
-                    type="button"
-                    onClick={enableSound}
-                    className="absolute bottom-3 right-3 rounded-full bg-maroon-dark/80 px-3 py-1.5 text-xs font-semibold text-cream shadow-lg backdrop-blur hover:bg-maroon-dark"
-                  >
-                    {t("home.tapForSound") || "🔊 Tap for sound"}
-                  </button>
-                )}
+
               </div>
             </div>
           </div>
