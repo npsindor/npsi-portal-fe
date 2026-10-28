@@ -63,7 +63,7 @@ module.exports = {
   				ring: 'hsl(var(--sidebar-ring))'
   			},
   			gold: {
-  				DEFAULT: '#D4AF37',
+                DEFAULT: '#C49A43',
   				light: '#E6C86E',
   				dark: '#B8901F'
   			},
@@ -72,7 +72,7 @@ module.exports = {
   				dark: '#0A1F33',
   				light: '#1E3A5F'
   			},
-  			cream: '#F7F9FC'
+            cream: '#F5F7FA'
   		},
   		fontFamily: {
   			heading: ['var(--font-heading)'],

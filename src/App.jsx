@@ -16,6 +16,10 @@ import AdminLayout from '@/components/AdminLayout';
 
 // Pages are lazy-loaded per route so the initial bundle only ships the
 // shell + whichever page is actually visited, instead of all ~37 pages.
+const SehatSaathi = lazy(() => import('@/pages/SehatSaathi'));
+const SafarSaathi = lazy(() => import('@/pages/SafarSaathi'));
+const RoomHunting = lazy(() => import('@/pages/RoomHunting'));
+const CommunityPage = lazy(() => import('@/pages/CommunityPage'));
 const Home = lazy(() => import('@/pages/Home'));
 const About = lazy(() => import('@/pages/About'));
 const Events = lazy(() => import('@/pages/Events'));
@@ -89,6 +93,14 @@ const AuthenticatedApp = () => {
       <Route path="/help" element={<Help />} />
       <Route path="/news" element={<News />} />
 
+      <Route path="/transportation" element={<SafarSaathi />} />
+      <Route path="/medical" element={<SehatSaathi />} />
+      <Route path="/room-hunting" element={<RoomHunting />} />
+      <Route path="/community-services" element={<CommunityPage kind="services" />} />
+      <Route path="/career-business" element={<CommunityPage kind="careers" />} />
+      <Route path="/sagun" element={<CommunityPage kind="sagun" />} />
+      <Route path="/contact" element={<CommunityPage kind="contact" />} />
+      <Route path="/public-feedback" element={<CommunityPage kind="feedback" />} />
       {/* Auth routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register-account" element={<Register />} />
@@ -113,6 +125,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/applications" element={<AdminApplications />} />
           <Route path="/admin/families" element={<AdminFamilies />} />
+          <Route path="/admin/sehat-saathi" element={<SehatSaathi admin />} />
           <Route path="/admin/events" element={<AdminEvents />} />
           <Route path="/admin/transactions" element={<AdminTransactions />} />
           <Route path="/admin/notifications" element={<AdminNotifications />} />

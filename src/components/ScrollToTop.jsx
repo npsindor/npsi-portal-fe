@@ -16,15 +16,22 @@ export default function ScrollToTop() {
   const navigationType = useNavigationType();
 
   useEffect(() => {
-    if (navigationType === "POP") return;
-
     if (hash) {
       const id = getHashId(hash);
-      const timer = window.setTimeout(() => {
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-      }, 50);
-      return () => window.clearTimeout(timer);
+      // Lazy routes may mount after the location changes, including direct URLs.
+      const scroll = () => {
+        const target = document.getElementById(id);
+        if (!target) return false;
+        target.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+        return true;
+      };
+      if (scroll()) return;
+      const observer = new MutationObserver(() => { if (scroll()) observer.disconnect(); });
+      observer.observe(document.body, { subtree: true, childList: true });
+      const timeout = window.setTimeout(() => observer.disconnect(), 5000);
+      return () => { observer.disconnect(); window.clearTimeout(timeout); };
     }
+    if (navigationType === "POP") return;
 
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [pathname, hash, navigationType]);

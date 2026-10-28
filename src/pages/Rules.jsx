@@ -1,5 +1,7 @@
 import React from "react";
 import { ScrollText } from "lucide-react";
+import { useLang } from "@/lib/i18n";
+import PublicFooter from "@/components/PublicFooter";
 import PublicNav from "@/components/PublicNav";
 
 const rules = [
@@ -12,19 +14,22 @@ const rules = [
 ];
 
 export default function Rules() {
+  const { lang } = useLang();
+  const english = ["Equality, respect, and transparency — Ensure equality, respect, discipline, and financial transparency within the organization.", "Collective decisions — Make important organizational decisions through discussion, consultation, and collective agreement.", "Responsibility over status — Remain accountable to the organization and community rather than pursuing personal prestige or authority.", "Rotation of leadership and responsibilities — Rotate responsibilities after the prescribed term.", "Advance planning and approval — Plan programs, expenses, and important activities according to the organization’s established procedures.", "Privacy of member information — Do not publish personal information about members or families without permission."];
+  const content = lang === "hi" ? rules : english;
   return (
     <div className="min-h-screen bg-background">
       <PublicNav />
       <section className="border-b border-gold/30 bg-cream/50">
         <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6">
-          <span className="gold-badge">संगठन के नियम</span>
-          <h1 className="mt-4 font-display text-4xl font-semibold text-maroon">संगठन के नियम</h1>
+          <span className="gold-badge">{lang === "hi" ? "संगठन के नियम" : "Organization Rules"}</span>
+          <h1 className="mt-4 font-display text-4xl font-semibold text-maroon">{lang === "hi" ? "संगठन के नियम" : "Organization Rules"}</h1>
         </div>
       </section>
 
       <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
         <div className="space-y-5">
-          {rules.map((rule, index) => (
+          {content.map((rule, index) => (
             <article key={rule} className="rounded-2xl border border-gold/30 bg-card p-5 shadow-sm sm:p-6">
               <div className="flex items-start gap-3 border-b border-gold/20 pb-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-maroon/10">
@@ -32,7 +37,7 @@ export default function Rules() {
                 </div>
                 <div>
                   <div className="text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
-                    नियम {index + 1}
+                    {lang === "hi" ? "नियम" : "Rule"} {index + 1}
                   </div>
                   <h2 className="font-display text-lg font-semibold text-maroon">{rule.split(" — ")[0]}</h2>
                 </div>
@@ -44,6 +49,7 @@ export default function Rules() {
           ))}
         </div>
       </section>
+      <PublicFooter />
     </div>
   );
 }

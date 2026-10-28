@@ -1,0 +1,18 @@
+.sehat-module { --bs-primary:#15805e; --bs-primary-rgb:21,128,94; --bs-body-color:#102a43; --bs-body-bg:#f5faf8; --bs-border-color:#d6e5de; font-family:Inter,system-ui,sans-serif; line-height:1.6; background:var(--bs-body-bg); color:var(--bs-body-color); }
+.sehat-module .sehat-hero { background:linear-gradient(120deg,#102a43,#11684f);color:#fff; }
+.sehat-module .sehat-hero p { color:#e2f3eb; }
+.sehat-module .btn-primary { --bs-btn-bg:#137453;--bs-btn-border-color:#137453;--bs-btn-hover-bg:#0c593f;--bs-btn-hover-border-color:#0c593f; }
+.sehat-module .btn-outline-primary { --bs-btn-color:#116647;--bs-btn-border-color:#116647;--bs-btn-hover-bg:#116647;--bs-btn-hover-border-color:#116647; }
+.sehat-module .btn,.sehat-module .form-control,.sehat-module .form-select { min-height:44px; }
+.sehat-module .card { border-radius:1rem; }
+.sehat-module .form-check { padding-top:.35rem;padding-bottom:.35rem; }
+.sehat-module .form-check-input { width:1.2em;height:1.2em; }
+.sehat-module .form-control,.sehat-module .form-select { font-size:1rem; }
+.sehat-module .form-label { font-weight:600; }
+.sehat-module .badge { white-space:normal;text-align:left;line-height:1.5; }
+.sehat-module .text-break { overflow-wrap:anywhere; }
+.sehat-module .btn:focus-visible,.sehat-module a:focus-visible { outline:3px solid #c49a43;outline-offset:3px; }
+.sehat-module h1,.sehat-module h2,.sehat-module h3 { line-height:1.35; }
+.dark .sehat-module { --bs-body-bg:#0d202d;--bs-body-color:#f2f7f5;--bs-border-color:#345349;--bs-secondary-color:#bfcec8;--bs-tertiary-bg:#1a333d; }
+.dark .sehat-module .card,.dark .sehat-module .form-control,.dark .sehat-module .form-select { background:#122b36;color:#f2f7f5; }
+.dark .sehat-module .btn-outline-primary { --bs-btn-color:#9be2c5;--bs-btn-border-color:#77caa9; }

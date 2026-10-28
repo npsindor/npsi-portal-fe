@@ -1,6 +1,590 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/api/v1/sehat-saathi/public": {
+      "get": {
+        "operationId": "SehatController_publicData",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Verified public health resources and consented approved MR contacts only",
+        "tags": [
+          "Sehat Saathi"
+        ]
+      }
+    },
+    "/api/v1/sehat-saathi/me": {
+      "get": {
+        "operationId": "SehatController_mine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sehat Saathi"
+        ]
+      }
+    },
+    "/api/v1/sehat-saathi/mrs": {
+      "post": {
+        "operationId": "SehatController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SehatMrDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sehat Saathi"
+        ]
+      }
+    },
+    "/api/v1/sehat-saathi/requests": {
+      "post": {
+        "operationId": "SehatController_request",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SehatRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sehat Saathi"
+        ]
+      }
+    },
+    "/api/v1/sehat-saathi/requests/{id}/close": {
+      "patch": {
+        "operationId": "SehatController_close",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sehat Saathi"
+        ]
+      }
+    },
+    "/api/v1/sehat-saathi/requests/{id}/mr-action": {
+      "patch": {
+        "operationId": "SehatController_action",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MrRequestActionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sehat Saathi"
+        ]
+      }
+    },
+    "/api/v1/sehat-saathi/reports": {
+      "post": {
+        "operationId": "SehatController_report",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sehat Saathi"
+        ]
+      }
+    },
+    "/api/v1/sehat-saathi/admin": {
+      "get": {
+        "operationId": "SehatController_adminData",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sehat Saathi"
+        ]
+      }
+    },
+    "/api/v1/sehat-saathi/admin/mrs/{id}": {
+      "patch": {
+        "operationId": "SehatController_mrUpdate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminMrDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sehat Saathi"
+        ]
+      }
+    },
+    "/api/v1/sehat-saathi/admin/resources": {
+      "post": {
+        "operationId": "SehatController_resourceCreate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sehat Saathi"
+        ]
+      }
+    },
+    "/api/v1/sehat-saathi/admin/resources/{id}": {
+      "patch": {
+        "operationId": "SehatController_resourceUpdate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sehat Saathi"
+        ]
+      }
+    },
+    "/api/v1/sehat-saathi/admin/requests/{id}": {
+      "patch": {
+        "operationId": "SehatController_requestUpdate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sehat Saathi"
+        ]
+      }
+    },
+    "/api/v1/sehat-saathi/admin/reports/{id}": {
+      "patch": {
+        "operationId": "SehatController_reportUpdate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sehat Saathi"
+        ]
+      }
+    },
+    "/api/v1/sehat-saathi/admin/notifications/{id}/retry": {
+      "post": {
+        "operationId": "SehatController_retry",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sehat Saathi"
+        ]
+      }
+    },
+    "/api/v1/sehat-saathi/admin/{type}/{id}": {
+      "delete": {
+        "operationId": "SehatController_remove",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sehat Saathi"
+        ]
+      }
+    },
+    "/api/v1/safar-saathi/capabilities": {
+      "get": {
+        "operationId": "SafarController_capabilities",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Available notification channels; no personal data",
+        "tags": [
+          "Safar Saathi"
+        ]
+      }
+    },
+    "/api/v1/safar-saathi/me": {
+      "get": {
+        "operationId": "SafarController_mine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Own travel requests, matches and private notifications",
+        "tags": [
+          "Safar Saathi"
+        ]
+      }
+    },
+    "/api/v1/safar-saathi/entries": {
+      "post": {
+        "operationId": "SafarController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSafarDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a member travel request or willing-to-help travel plan and find matches",
+        "tags": [
+          "Safar Saathi"
+        ]
+      }
+    },
+    "/api/v1/safar-saathi/entries/{id}/cancellation": {
+      "patch": {
+        "operationId": "SafarController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel only your own entry and its active matches",
+        "tags": [
+          "Safar Saathi"
+        ]
+      }
+    },
+    "/api/v1/safar-saathi/matches/{id}": {
+      "patch": {
+        "operationId": "SafarController_decide",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SafarDecisionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Accept, decline or complete your own match; contacts require mutual acceptance",
+        "tags": [
+          "Safar Saathi"
+        ]
+      }
+    },
     "/api/v1/health": {
       "get": {
         "operationId": "HealthController_check",
@@ -6747,6 +7331,626 @@
       }
     },
     "schemas": {
+      "SehatMrDto": {
+        "type": "object",
+        "properties": {
+          "ownerUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "membershipId": {
+            "type": "string"
+          },
+          "company": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "areas": {
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "phone": {
+            "type": "string",
+            "pattern": "^[6-9][0-9]{9}$"
+          },
+          "whatsapp": {
+            "type": "string",
+            "pattern": "^[6-9][0-9]{9}$",
+            "nullable": true
+          },
+          "assistance": {
+            "type": "string",
+            "enum": [
+              "SAMPLES",
+              "ALTERNATIVES",
+              "BOTH"
+            ]
+          },
+          "publishContact": {
+            "type": "boolean"
+          },
+          "emailOptIn": {
+            "type": "boolean"
+          },
+          "whatsappOptIn": {
+            "type": "boolean"
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "hi",
+              "en"
+            ]
+          },
+          "consent": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "membershipId",
+          "company",
+          "role",
+          "city",
+          "areas",
+          "phone",
+          "assistance",
+          "publishContact",
+          "emailOptIn",
+          "whatsappOptIn",
+          "lang",
+          "consent"
+        ]
+      },
+      "SehatRequestDto": {
+        "type": "object",
+        "properties": {
+          "ownerUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "clientRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "medicine": {
+            "type": "string"
+          },
+          "composition": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "assistance": {
+            "type": "string",
+            "enum": [
+              "SAMPLES",
+              "ALTERNATIVES"
+            ]
+          },
+          "city": {
+            "type": "string"
+          },
+          "area": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "pattern": "^[6-9][0-9]{9}$"
+          },
+          "whatsapp": {
+            "type": "string",
+            "pattern": "^[6-9][0-9]{9}$",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailOptIn": {
+            "type": "boolean"
+          },
+          "whatsappOptIn": {
+            "type": "boolean"
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "hi",
+              "en"
+            ]
+          },
+          "consent": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "clientRequestId",
+          "medicine",
+          "quantity",
+          "assistance",
+          "city",
+          "area",
+          "name",
+          "phone",
+          "emailOptIn",
+          "whatsappOptIn",
+          "lang",
+          "consent"
+        ]
+      },
+      "MrRequestActionDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "ACCEPT",
+              "DECLINE",
+              "ASSISTANCE_FOUND",
+              "CLOSED"
+            ]
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "ReportDto": {
+        "type": "object",
+        "properties": {
+          "targetType": {
+            "type": "string",
+            "enum": [
+              "MR",
+              "REQUEST",
+              "RESOURCE"
+            ]
+          },
+          "targetId": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "targetType",
+          "targetId",
+          "message"
+        ]
+      },
+      "AdminMrDto": {
+        "type": "object",
+        "properties": {
+          "ownerUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "membershipId": {
+            "type": "string"
+          },
+          "company": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "areas": {
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "phone": {
+            "type": "string",
+            "pattern": "^[6-9][0-9]{9}$"
+          },
+          "whatsapp": {
+            "type": "string",
+            "pattern": "^[6-9][0-9]{9}$",
+            "nullable": true
+          },
+          "assistance": {
+            "type": "string",
+            "enum": [
+              "SAMPLES",
+              "ALTERNATIVES",
+              "BOTH"
+            ]
+          },
+          "publishContact": {
+            "type": "boolean"
+          },
+          "emailOptIn": {
+            "type": "boolean"
+          },
+          "whatsappOptIn": {
+            "type": "boolean"
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "hi",
+              "en"
+            ]
+          },
+          "consent": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED",
+              "SUSPENDED"
+            ],
+            "nullable": true
+          },
+          "reviewNote": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ResourceDto": {
+        "type": "object",
+        "properties": {
+          "titleEn": {
+            "type": "string"
+          },
+          "titleHi": {
+            "type": "string"
+          },
+          "descriptionEn": {
+            "type": "string"
+          },
+          "descriptionHi": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "HEALTH",
+              "DOCTOR",
+              "HOSPITAL",
+              "EMERGENCY",
+              "MEDICINE"
+            ]
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "verified": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "titleEn",
+          "titleHi",
+          "descriptionEn",
+          "descriptionHi",
+          "source",
+          "url",
+          "category",
+          "published",
+          "verified"
+        ]
+      },
+      "ResourceUpdateDto": {
+        "type": "object",
+        "properties": {
+          "titleEn": {
+            "type": "string"
+          },
+          "titleHi": {
+            "type": "string"
+          },
+          "descriptionEn": {
+            "type": "string"
+          },
+          "descriptionHi": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "HEALTH",
+              "DOCTOR",
+              "HOSPITAL",
+              "EMERGENCY",
+              "MEDICINE"
+            ]
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "verified": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AdminRequestDto": {
+        "type": "object",
+        "properties": {
+          "ownerUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "clientRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "medicine": {
+            "type": "string"
+          },
+          "composition": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "assistance": {
+            "type": "string",
+            "enum": [
+              "SAMPLES",
+              "ALTERNATIVES"
+            ]
+          },
+          "city": {
+            "type": "string"
+          },
+          "area": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "pattern": "^[6-9][0-9]{9}$"
+          },
+          "whatsapp": {
+            "type": "string",
+            "pattern": "^[6-9][0-9]{9}$",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailOptIn": {
+            "type": "boolean"
+          },
+          "whatsappOptIn": {
+            "type": "boolean"
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "hi",
+              "en"
+            ]
+          },
+          "consent": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "IN_PROGRESS",
+              "ASSISTANCE_FOUND",
+              "CLOSED",
+              "REJECTED"
+            ],
+            "nullable": true
+          },
+          "assignedMrId": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReportUpdateDto": {
+        "type": "object",
+        "properties": {
+          "targetType": {
+            "type": "string",
+            "enum": [
+              "MR",
+              "REQUEST",
+              "RESOURCE"
+            ]
+          },
+          "targetId": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "REVIEW",
+              "RESOLVED",
+              "DISMISSED"
+            ],
+            "nullable": true
+          },
+          "resolution": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CreateSafarDto": {
+        "type": "object",
+        "properties": {
+          "clientRequestId": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "REQUEST",
+              "OFFER"
+            ]
+          },
+          "requestType": {
+            "type": "string",
+            "enum": [
+              "TRAVEL",
+              "DELIVERY",
+              "URGENT",
+              "BOTH"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string"
+          },
+          "destination": {
+            "type": "string"
+          },
+          "travelDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "preferredTime": {
+            "type": "string"
+          },
+          "itemDetails": {
+            "type": "string",
+            "nullable": true
+          },
+          "instructions": {
+            "type": "string",
+            "nullable": true
+          },
+          "notificationMethod": {
+            "type": "string",
+            "enum": [
+              "IN_APP",
+              "EMAIL"
+            ]
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "hi",
+              "en"
+            ]
+          },
+          "consent": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "clientRequestId",
+          "kind",
+          "requestType",
+          "name",
+          "phone",
+          "origin",
+          "destination",
+          "travelDate",
+          "preferredTime",
+          "notificationMethod",
+          "lang",
+          "consent"
+        ]
+      },
+      "SafarDecisionDto": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "ACCEPT",
+              "DECLINE",
+              "COMPLETE"
+            ]
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
       "HealthVo": {
         "type": "object",
         "properties": {

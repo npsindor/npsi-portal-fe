@@ -7,6 +7,9 @@ export const mockApi = async (page, routes = {}) => {
   await page.addInitScript(() => {
     for (const key of ['nps_curtain_opened', 'nps_garba_popup_seen']) sessionStorage.setItem(key, '1');
   });
+  // Keep browser checks deterministic when Google Fonts is slow or unavailable.
+  await page.route('https://fonts.googleapis.com/**', route => route.abort());
+  await page.route('https://fonts.gstatic.com/**', route => route.abort());
   const calls = [];
   await page.route('**/api/v1/**', async (route) => {
     const request = route.request();

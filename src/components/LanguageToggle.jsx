@@ -10,8 +10,10 @@ export default function LanguageToggle({ className = "", variant = "light" }) {
       : "border-gold/40 bg-maroon-dark text-gold hover:bg-maroon-light";
   return (
     <button
+      type="button"
+      aria-label={lang === "en" ? "हिंदी में देखें" : "View in English"}
       onClick={toggle}
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${base} ${className}`}
+      className={`inline-flex items-center gap-1.5 min-h-11 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${base} ${className}`}
       title={lang === "en" ? "हिंदी में देखें" : "View in English"}
     >
       <Languages className="h-3.5 w-3.5" />

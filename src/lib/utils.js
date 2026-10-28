@@ -15,7 +15,7 @@ export const isIframe = window.self !== window.top;
 // yet.
 export const localizedText = (item, field, lang) => {
   if (lang === "hi") {
-    const hi = item?.[`${field}_hi`];
+    const hi = item?.[`${field}Hi`] || item?.[`${field}_hi`];
     if (hi && String(hi).trim()) return hi;
   }
   return item?.[field] || "";

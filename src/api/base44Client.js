@@ -131,7 +131,29 @@ const createLocalUsers = () => ({
   inviteUser: (email, role = 'user', extra = {}) => request(API.auth.invitations, { method: 'POST', body: JSON.stringify({ email, role, ...extra }) }),
 });
 
+const API_PREFIX_SAFAR = API.safar;
+
 export const base44 = {
+  sehat: {
+    public: () => request(`${API.sehat}/public`),
+    mine: () => request(`${API.sehat}/me`),
+    mr: data => request(`${API.sehat}/mrs`, { method: 'POST', body: JSON.stringify(data) }),
+    create: data => request(`${API.sehat}/requests`, { method: 'POST', body: JSON.stringify(data) }),
+    close: id => request(`${API.sehat}/requests/${encodeURIComponent(id)}/close`, { method: 'PATCH' }),
+    action: (id, action) => request(`${API.sehat}/requests/${encodeURIComponent(id)}/mr-action`, { method: 'PATCH', body: JSON.stringify({ action }) }),
+    report: data => request(`${API.sehat}/reports`, { method: 'POST', body: JSON.stringify(data) }),
+    admin: () => request(`${API.sehat}/admin`),
+    save: (type, id, data) => request(`${API.sehat}/admin/${type}${id ? '/' + encodeURIComponent(id) : ''}`, { method: id ? 'PATCH' : 'POST', body: JSON.stringify(data) }),
+    remove: (type, id) => request(`${API.sehat}/admin/${type}/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    retry: id => request(`${API.sehat}/admin/notifications/${encodeURIComponent(id)}/retry`, { method: 'POST' }),
+  },
+  safar: {
+    capabilities: () => request(`${API_PREFIX_SAFAR}/capabilities`),
+    mine: () => request(`${API_PREFIX_SAFAR}/me`),
+    create: data => request(`${API_PREFIX_SAFAR}/entries`, { method: 'POST', body: JSON.stringify(data) }),
+    cancel: id => request(`${API_PREFIX_SAFAR}/entries/${encodeURIComponent(id)}/cancellation`, { method: 'PATCH' }),
+    decide: (id, decision) => request(`${API_PREFIX_SAFAR}/matches/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ decision }) }),
+  },
   contactInfo: { list: ({ limit = 25, offset = 0 } = {}) => request(`${API.contactInfo}?${new URLSearchParams({ limit, offset })}`), create: (data) => request(API.contactInfo, { method: 'POST', body: JSON.stringify(data) }) },
   entities: createLocalEntities(),
   auth: createLocalAuth(),

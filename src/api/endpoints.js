@@ -27,6 +27,8 @@ export const ENTITY_RESOURCES = {
 const resource = (entity) => `${API_PREFIX}/${ENTITY_RESOURCES[entity] || encodeURIComponent(entity)}`;
 
 export const API = {
+  sehat: `${API_PREFIX}/sehat-saathi`,
+  safar: `${API_PREFIX}/safar-saathi`,
   contactInfo: `${API_PREFIX}/contact-info`,
   uploads: `${API_PREFIX}/uploads`,
   auth: {

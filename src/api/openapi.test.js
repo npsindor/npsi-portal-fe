@@ -18,6 +18,17 @@ const has = (method, url) => {
 
 // The calls base44Client.js makes, by method.
 const CALLS = [
+  ['GET', `${API.sehat}/public`], ['GET', `${API.sehat}/me`], ['GET', `${API.sehat}/admin`],
+  ['POST', `${API.sehat}/mrs`], ['POST', `${API.sehat}/requests`], ['POST', `${API.sehat}/reports`],
+  ['PATCH', `${API.sehat}/requests/id/close`], ['PATCH', `${API.sehat}/requests/id/mr-action`],
+  ['PATCH', `${API.sehat}/admin/mrs/id`], ['POST', `${API.sehat}/admin/resources`],
+  ['PATCH', `${API.sehat}/admin/resources/id`], ['PATCH', `${API.sehat}/admin/requests/id`], ['PATCH', `${API.sehat}/admin/reports/id`],
+  ['DELETE', `${API.sehat}/admin/notifications/id`], ['POST', `${API.sehat}/admin/notifications/id/retry`],
+  ['GET', `${API.safar}/capabilities`],
+  ['GET', `${API.safar}/me`],
+  ['POST', `${API.safar}/entries`],
+  ['PATCH', `${API.safar}/entries/test/cancellation`],
+  ['PATCH', `${API.safar}/matches/test`],
   ['POST', API.uploads],
   ['POST', API.auth.registrations],
   ['POST', API.auth.otpVerifications],

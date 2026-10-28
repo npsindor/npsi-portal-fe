@@ -4,16 +4,19 @@ import { LayoutDashboard, FileCheck, Users, CalendarDays, CreditCard, Bell, Sett
 import { useAuth } from "@/lib/AuthContext";
 import LanguageToggle from "@/components/LanguageToggle";
 import ThemeToggle from "@/components/ThemeToggle";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
 
 export default function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
   const t = useT();
+  const { lang } = useLang();
+  const sehatLabel = lang === "hi" ? "सेहत साथी" : "Sehat Saathi";
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navItems = [
+    { label: sehatLabel, path: "/admin/sehat-saathi", icon: Users },
     { label: t("admin.dashboard"), path: "/admin", icon: LayoutDashboard },
     { label: t("admin.registrations"), path: "/admin/applications", icon: FileCheck },
     { label: t("admin.students"), path: "/admin/students", icon: GraduationCap },
