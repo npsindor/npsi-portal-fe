@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useLang } from '@/lib/i18n';
 
 export const publicHindi = {
+ "Register Matrimonial Profile": "वैवाहिक परिचय पंजीकरण",
   "Transportation": "सफ़र साथी",
   "Medical": "सेहत साथी",
   "Travel Together with Our Community": "समाज के साथ सफ़र आसान बनाएँ",

@@ -134,6 +134,24 @@ const createLocalUsers = () => ({
 const API_PREFIX_SAFAR = API.safar;
 
 export const base44 = {
+  sagun: {
+    schema: () => request(`${API.sagun}/schema`),
+    mine: () => request(`${API.sagun}/me`),
+    browse: (query = {}) => request(`${API.sagun}/profiles?${new URLSearchParams(Object.entries(query).filter(([, value]) => value !== '' && value !== undefined))}`),
+    detail: id => request(`${API.sagun}/profiles/${encodeURIComponent(id)}`),
+    save: (id, data, action, ownerUserId) => request(`${API.sagun}/profiles${id ? '/' + encodeURIComponent(id) : ''}`, { method: id ? 'PATCH' : 'POST', body: JSON.stringify({ data, action, ...(ownerUserId ? { ownerUserId } : {}) }) }),
+    review: (id, status, notes) => request(`${API.sagun}/admin/profiles/${encodeURIComponent(id)}/review`, { method: 'PATCH', body: JSON.stringify({ status, notes }) }),
+    deactivate: id => request(`${API.sagun}/profiles/${encodeURIComponent(id)}/deactivation`, { method: 'PATCH' }),
+    withdrawConsent: id => request(`${API.sagun}/profiles/${encodeURIComponent(id)}/consent-withdrawal`, { method: 'PATCH' }),
+    remove: id => request(`${API.sagun}/profiles/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    admin: () => request(`${API.sagun}/admin`),
+    configure: overrides => request(`${API.sagun}/admin/schema`, { method: 'PATCH', body: JSON.stringify({ overrides }) }),
+    inquire: (id, message, consent) => request(`${API.sagun}/profiles/${encodeURIComponent(id)}/inquiries`, { method: 'POST', body: JSON.stringify({ message, consent }) }),
+    inquiryAction: (id, action, shareSagun) => request(`${API.sagun}/inquiries/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ action, shareSagun }) }),
+    upload: async (id, kind, file, consent) => { const body = new FormData(); body.append('file', file); body.append('consent', String(consent)); const response = await fetch(`${localApiBaseUrl}${API.sagun}/profiles/${encodeURIComponent(id)}/files/${encodeURIComponent(kind)}`, { method: 'POST', credentials: 'include', body }); if (!response.ok) throw new Error((await response.json()).error || 'SAGUN_FILE'); return response.json(); },
+    file: async id => { const response = await fetch(`${localApiBaseUrl}${API.sagun}/files/${encodeURIComponent(id)}`, { credentials: 'include' }); if (!response.ok) throw new Error('SAGUN_NOT_FOUND'); return response.blob(); },
+    deleteFile: id => request(`${API.sagun}/files/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  },
   sehat: {
     public: () => request(`${API.sehat}/public`),
     mine: () => request(`${API.sehat}/me`),

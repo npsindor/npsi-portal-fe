@@ -5,7 +5,7 @@ export const publicNavigation = [
   { label: 'Community Services', to: '/community-services', items: [['Blood Donation', '/community-services?category=blood-donation#blood-donation'], ['Emergency Help', '/community-services?category=emergency-help#emergency-help'], ['Social Welfare', '/community-services?category=social-welfare#social-welfare']] },
   { label: 'Career & Business', to: '/career-business', items: [['Job Opportunities', '/career-business?category=job-opportunities#job-opportunities'], ['Post a Vacancy', '/career-business?category=post-a-vacancy#post-a-vacancy'], ['Business Directory', '/career-business?category=business-directory#business-directory'], ['Career Guidance', '/career-business?category=career-guidance#career-guidance'], ['Business Promotion', '/career-business?category=business-promotion#business-promotion']] },
   { label: 'Sandesh', to: '/news', items: [['Important Notices', '/news?category=notices'], ['Community News', '/news?category=community'], ['Festival Greetings', '/news?category=greetings']] },
-  { label: 'Sagun', to: '/sagun', items: [['Bride Profiles', '/sagun?category=bride'], ['Groom Profiles', '/sagun?category=groom'], ['Create a Demo Profile', '/sagun#demo-form'], ['Matrimonial Introductions', '/sagun'], ['Privacy & Safety', '/sagun#privacy-safety']] },
+  { label: 'Sagun', to: '/sagun', items: [['Bride Profiles', '/sagun?category=bride'], ['Groom Profiles', '/sagun?category=groom'], ['Register Matrimonial Profile', '/sagun#registration'], ['Matrimonial Introductions', '/sagun'], ['Privacy & Safety', '/sagun#privacy-safety']] },
   { label: 'Transportation', to: '/transportation' },
   { label: 'Medical', to: '/medical' },
   { label: 'Room Hunting', to: '/room-hunting' },

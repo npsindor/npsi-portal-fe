@@ -18,6 +18,13 @@ const has = (method, url) => {
 
 // The calls base44Client.js makes, by method.
 const CALLS = [
+  ['GET', `${API.sagun}/schema`], ['GET', `${API.sagun}/me`], ['GET', `${API.sagun}/admin`],
+  ['GET', `${API.sagun}/profiles`], ['POST', `${API.sagun}/profiles`],
+  ['GET', `${API.sagun}/profiles/id`], ['PATCH', `${API.sagun}/profiles/id`], ['DELETE', `${API.sagun}/profiles/id`],
+  ['PATCH', `${API.sagun}/profiles/id/consent-withdrawal`], ['PATCH', `${API.sagun}/profiles/id/deactivation`], ['POST', `${API.sagun}/profiles/id/inquiries`],
+  ['PATCH', `${API.sagun}/inquiries/id`], ['PATCH', `${API.sagun}/admin/schema`],
+  ['PATCH', `${API.sagun}/admin/profiles/id/review`], ['POST', `${API.sagun}/profiles/id/files/PHOTO`],
+  ['GET', `${API.sagun}/files/id`], ['DELETE', `${API.sagun}/files/id`],
   ['GET', `${API.sehat}/public`], ['GET', `${API.sehat}/me`], ['GET', `${API.sehat}/admin`],
   ['POST', `${API.sehat}/mrs`], ['POST', `${API.sehat}/requests`], ['POST', `${API.sehat}/reports`],
   ['PATCH', `${API.sehat}/requests/id/close`], ['PATCH', `${API.sehat}/requests/id/mr-action`],

@@ -16,3 +16,14 @@
 .dark .sehat-module { --bs-body-bg:#0d202d;--bs-body-color:#f2f7f5;--bs-border-color:#345349;--bs-secondary-color:#bfcec8;--bs-tertiary-bg:#1a333d; }
 .dark .sehat-module .card,.dark .sehat-module .form-control,.dark .sehat-module .form-select { background:#122b36;color:#f2f7f5; }
 .dark .sehat-module .btn-outline-primary { --bs-btn-color:#9be2c5;--bs-btn-border-color:#77caa9; }
+.sagun-module .sehat-hero { background:linear-gradient(120deg,#102a43,#712b48); }
+.sagun-module .btn-primary { --bs-btn-bg:#102a43;--bs-btn-border-color:#102a43;--bs-btn-hover-bg:#1e3a5f;--bs-btn-hover-border-color:#1e3a5f; }
+.sagun-module .btn-outline-primary { --bs-btn-color:#713049;--bs-btn-border-color:#713049;--bs-btn-hover-bg:#713049;--bs-btn-hover-border-color:#713049; }
+.dark .sagun-module .btn-outline-primary { --bs-btn-color:#f3bfd2;--bs-btn-border-color:#ce8ca5; }
+@media print {
+ body:has(#sagun-gift-print) * { visibility: hidden; }
+ body:has(#sagun-gift-print) #sagun-gift-print, body:has(#sagun-gift-print) #sagun-gift-print * { visibility: visible; }
+ #sagun-gift-print { position: absolute; left: 0; top: 0; width: 100%; padding: 1rem; background: white; color: black; }
+ #sagun-gift-print .table-responsive { overflow: visible; }
+ #sagun-gift-print section { break-inside: avoid; }
+}

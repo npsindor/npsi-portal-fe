@@ -16,6 +16,7 @@ export default function AdminLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navItems = [
+    { label: lang === "hi" ? "सगुन" : "Sagun", path: "/admin/sagun", icon: Users },
     { label: sehatLabel, path: "/admin/sehat-saathi", icon: Users },
     { label: t("admin.dashboard"), path: "/admin", icon: LayoutDashboard },
     { label: t("admin.registrations"), path: "/admin/applications", icon: FileCheck },

@@ -1,6 +1,483 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/api/v1/sagun/schema": {
+      "get": {
+        "operationId": "SagunController_schema",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Sagun"
+        ]
+      }
+    },
+    "/api/v1/sagun/me": {
+      "get": {
+        "operationId": "SagunController_mine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sagun"
+        ]
+      }
+    },
+    "/api/v1/sagun/profiles": {
+      "get": {
+        "operationId": "SagunController_browse",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sagun"
+        ]
+      },
+      "post": {
+        "operationId": "SagunController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SagunSaveDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sagun"
+        ]
+      }
+    },
+    "/api/v1/sagun/profiles/{id}": {
+      "get": {
+        "operationId": "SagunController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sagun"
+        ]
+      },
+      "patch": {
+        "operationId": "SagunController_save",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SagunSaveDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sagun"
+        ]
+      },
+      "delete": {
+        "operationId": "SagunController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sagun"
+        ]
+      }
+    },
+    "/api/v1/sagun/profiles/{id}/deactivation": {
+      "patch": {
+        "operationId": "SagunController_deactivate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sagun"
+        ]
+      }
+    },
+    "/api/v1/sagun/profiles/{id}/consent-withdrawal": {
+      "patch": {
+        "operationId": "SagunController_withdrawConsent",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sagun"
+        ]
+      }
+    },
+    "/api/v1/sagun/admin/profiles/{id}/review": {
+      "patch": {
+        "operationId": "SagunController_review",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SagunReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sagun"
+        ]
+      }
+    },
+    "/api/v1/sagun/admin": {
+      "get": {
+        "operationId": "SagunController_admin",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sagun"
+        ]
+      }
+    },
+    "/api/v1/sagun/admin/schema": {
+      "patch": {
+        "operationId": "SagunController_configure",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SagunConfigDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sagun"
+        ]
+      }
+    },
+    "/api/v1/sagun/profiles/{id}/inquiries": {
+      "post": {
+        "operationId": "SagunController_inquiry",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SagunInquiryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sagun"
+        ]
+      }
+    },
+    "/api/v1/sagun/inquiries/{id}": {
+      "patch": {
+        "operationId": "SagunController_action",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SagunInquiryActionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sagun"
+        ]
+      }
+    },
+    "/api/v1/sagun/profiles/{id}/files/{kind}": {
+      "post": {
+        "operationId": "SagunController_upload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sagun"
+        ]
+      }
+    },
+    "/api/v1/sagun/files/{id}": {
+      "get": {
+        "operationId": "SagunController_file",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sagun"
+        ]
+      },
+      "delete": {
+        "operationId": "SagunController_deleteFile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Sagun"
+        ]
+      }
+    },
     "/api/v1/sehat-saathi/public": {
       "get": {
         "operationId": "SehatController_publicData",
@@ -7331,6 +7808,94 @@
       }
     },
     "schemas": {
+      "SagunSaveDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "SUBMIT"
+            ]
+          },
+          "ownerUserId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "action"
+        ]
+      },
+      "SagunReviewDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "REJECTED",
+              "DEACTIVATED"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "SagunConfigDto": {
+        "type": "object",
+        "properties": {
+          "overrides": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "overrides"
+        ]
+      },
+      "SagunInquiryDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "consent": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "message",
+          "consent"
+        ]
+      },
+      "SagunInquiryActionDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "ACCEPT",
+              "DECLINE",
+              "WITHDRAW",
+              "REVOKE",
+              "UPDATE_GRANT"
+            ]
+          },
+          "shareSagun": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
       "SehatMrDto": {
         "type": "object",
         "properties": {

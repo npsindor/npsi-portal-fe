@@ -66,23 +66,12 @@ for (const lang of ['en', 'hi']) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
 
-  test(`${lang}: private Sagun profile and interest demo`, async ({ page }) => {
+  test(`${lang}: Sagun requires membership and does not publish demo profiles`, async ({ page }) => {
     await setup(page, lang);
-    const hi = lang === 'hi';
-    await page.goto('/sagun?category=bride');
-    await page.getByRole('button', { name: hi ? 'विवरण देखें' : 'View Details', exact: true }).click();
-    await page.getByRole('button', { name: hi ? 'डेमो रुचि भेजें' : 'Send Demo Interest' }).click();
-    await expect(page.getByRole('dialog').getByRole('status')).toContainText(hi ? 'किसी व्यक्ति से संपर्क नहीं' : 'No person has been contacted');
-    await page.keyboard.press('Escape');
-    await page.locator('#sagun-title').fill('Fictional Private Person');
-    await page.locator('#sagun-location').fill('Sample city');
-    await page.locator('#sagun-description').fill('Fictional adult profile, age 28');
-    await page.getByRole('checkbox').check();
-    await page.getByRole('button', { name: hi ? 'निजी डेमो प्रोफाइल सहेजें' : 'Save Private Demo Profile' }).click();
-    await expect(page.getByRole('heading', { name: hi ? 'आपकी निजी डेमो प्रोफाइल' : 'Your Private Demo Profiles' })).toBeVisible();
-    await expect(page.getByRole('button', { name: hi ? 'विवरण देखें' : 'View Details', exact: true })).toHaveCount(1);
-    await page.getByRole('button', { name: hi ? 'हटाएँ' : 'Remove', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Fictional Private Person' })).toHaveCount(0);
+    await page.goto('/sagun');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.getByRole('link', { name: lang === 'hi' ? 'सदस्य लॉगिन' : 'Member Login', exact: true }).filter({ visible: true }).last()).toHaveAttribute('href', '/login?returnTo=%2Fsagun');
+    await expect(page.getByRole('button', { name: 'Send Demo Interest' })).toHaveCount(0);
   });
 
   for (const kind of ['contact', 'feedback']) {
