@@ -7,7 +7,7 @@ import { useLang } from "@/lib/i18n";
 const L = {
   en: {
     title: "Dashboard",
-    sub: "Overview of the Patidar Samaj Sangathan platform.",
+    sub: "Overview of the Nimar Patidar Sangathan, Indore platform.",
     totalFamilies: "Total Families",
     totalMembers: "Total Members",
     pendingApps: "Pending Applications",
@@ -25,7 +25,7 @@ const L = {
   },
   hi: {
     title: "डैशबोर्ड",
-    sub: "पाटीदार समाज संगठन मंच का अवलोकन।",
+    sub: "निमाड़ पाटीदार संगठन, इंदौर मंच का अवलोकन।",
     totalFamilies: "कुल परिवार",
     totalMembers: "कुल सदस्य",
     pendingApps: "प्रतीक्षारत आवेदन",

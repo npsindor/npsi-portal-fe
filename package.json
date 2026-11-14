@@ -9,7 +9,8 @@
     "preview": "vite preview --host 0.0.0.0",
     "lint": "eslint .",
     "test": "node --test --test-reporter=spec src/api/endpoints.test.js src/api/openapi.test.js",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "test:security": "playwright test --config playwright.security.config.js"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",
@@ -50,6 +51,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
+    "embla-carousel-react": "^8.6.0",
     "framer-motion": "^11.16.4",
     "html2canvas": "^1.4.1",
     "input-otp": "^1.4.2",

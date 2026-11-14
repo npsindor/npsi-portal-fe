@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useHeroText } from '@/components/PageContent';
 import { House, MapPin, Plus, Search } from 'lucide-react';
 import PublicNav from '@/components/PublicNav';
 import PublicFooter from '@/components/PublicFooter';
@@ -26,6 +27,7 @@ function readSaved() {
 
 export default function RoomHunting() {
   const { lang } = useLang();
+  const hero = useHeroText('room-hunting', lang);
   const hi = lang === 'hi';
   const copy = (en, hindi) => hi ? hindi : en;
   const [area, setArea] = useState('');
@@ -42,7 +44,7 @@ export default function RoomHunting() {
   const rentLabel = value => new Intl.NumberFormat(hi ? 'hi-IN' : 'en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
   const listings = [...saved, ...samples].filter(item => (!filters.area || item.area === filters.area) && (!filters.type || item.type === filters.type));
   const change = (key, value) => { setDraft(current => ({ ...current, [key]: value })); setError(''); setNotice(false); };
-  useEffect(() => { document.title = hi ? 'आवास साथी | निमाड़ पाटीदार संगठन' : 'Room Hunting | Nimar Patidar Sangathan'; }, [hi]);
+  useEffect(() => { document.title = hi ? 'आवास साथी | निमाड़ पाटीदार संगठन, इंदौर' : 'Room Hunting | Nimar Patidar Sangathan, Indore'; }, [hi]);
   const onPreview = event => {
     event.preventDefault(); setError(''); setNotice(false);
     if (!draft.area || !draft.type || !draft.phone.trim() || !draft.consent) { setError('required'); return; }
@@ -78,8 +80,8 @@ export default function RoomHunting() {
     <p className="text-muted-foreground">{copy('Demo details are visible only in this browser session. No owner is contacted.', 'डेमो विवरण केवल इस ब्राउज़र सत्र में दिखते हैं। किसी मकान मालिक से संपर्क नहीं किया जाता।')}</p>
   </div>;
 
-  return <div className="min-h-screen bg-background"><PublicNav /><main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
-    <div className="flex items-start justify-between gap-3"><div><h1 className="font-display text-3xl font-semibold sm:text-4xl">{copy('Room Hunting', 'आवास साथी')}</h1><p className="mt-3 text-muted-foreground">{copy('Find a home within our community', 'अपने समाज में किराए का घर खोजें')}</p></div><House className="mt-1 h-9 w-9 shrink-0 text-maroon" aria-hidden="true" /></div>
+  return <div className="min-h-screen bg-background"><PublicNav /><main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+    <div className="flex items-start justify-between gap-3"><div><h1 className="font-display text-3xl font-semibold sm:text-4xl">{hero.title || copy('Room Hunting', 'आवास साथी')}</h1><p className="mt-3 whitespace-pre-line text-muted-foreground">{hero.intro || copy('Find a home within our community', 'अपने समाज में किराए का घर खोजें')}</p></div><House className="mt-1 h-9 w-9 shrink-0 text-maroon" aria-hidden="true" /></div>
     <aside className="mt-6 rounded-2xl border border-gold/40 bg-gold/10 p-4 text-sm leading-relaxed"><strong>{copy('Demo listings', 'डेमो लिस्टिंग')}</strong><p className="mt-1">{copy('Sample properties are fictional. Posts and contact details stay only in this browser session and are not sent to the organization. Use fictional details when trying the form.', 'नमूना संपत्तियाँ काल्पनिक हैं। पोस्ट और संपर्क विवरण केवल इस ब्राउज़र सत्र में रहते हैं और संगठन को नहीं भेजे जाते। फॉर्म आज़माते समय काल्पनिक जानकारी भरें।')}</p></aside>
     <div className="mt-6 grid items-start gap-8 lg:grid-cols-[1fr_1fr]">
       <div className="min-w-0"><form className="rounded-3xl bg-muted p-5 sm:p-6" onSubmit={event => { event.preventDefault(); setFilters({ area, type }); }}>

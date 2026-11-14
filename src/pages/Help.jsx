@@ -266,7 +266,7 @@ export default function Help() {
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
         <div className="rounded-2xl border border-gold/30 bg-card p-8 text-center">
           <h3 className="font-display text-xl font-semibold text-maroon">{en ? "Ready to begin?" : "शुरू करने के लिए तैयार?"}</h3>
-          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{en ? "Register your family today and become part of the Patidar Samaj Sangathan community." : "आज ही अपना परिवार रजिस्टर करें और पाटीदार समाज संगठन सामुदायिक परिवार का हिस्सा बनें।"}</p>
+          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{en ? "Register your family today and become part of the Nimar Patidar Sangathan, Indore community." : "आज ही अपना परिवार रजिस्टर करें और निमाड़ पाटीदार संगठन, इंदौर सामुदायिक परिवार का हिस्सा बनें।"}</p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             <Link to="/register" className="inline-flex items-center gap-2 rounded-full bg-maroon px-6 py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark">
               <UserPlus className="h-4 w-4" /> {en ? "Register Now" : "अभी रजिस्टर करें"}
@@ -282,7 +282,7 @@ export default function Help() {
       <footer className="bg-maroon text-cream">
         <div className="mx-auto max-w-7xl px-4 py-8 text-center sm:px-6">
           <div className="border-t border-gold/20 pt-5 text-xs text-cream/60">
-            © {new Date().getFullYear()} Patidar Samaj Sangathan – Indore (Nimar). {en ? "All rights reserved." : "सर्वाधिकार सुरक्षित।"}
+            © {new Date().getFullYear()} Nimar Patidar Sangathan, Indore. {en ? "All rights reserved." : "सर्वाधिकार सुरक्षित।"}
           </div>
         </div>
       </footer>

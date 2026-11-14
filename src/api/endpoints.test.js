@@ -22,9 +22,24 @@ describe('API endpoints', () => {
       password: '/api/v1/auth/password',
       me: '/api/v1/auth/me',
       invitations: '/api/v1/auth/invitations',
+      mobileOtps: '/api/v1/auth/mobile-otps',
+      mobileOtpVerifications: '/api/v1/auth/mobile-otps/verifications',
+      mobileRegistrations: '/api/v1/auth/mobile-registrations',
     });
-    assert.deepEqual(API.me, { family: '/api/v1/me/family', feedback: '/api/v1/me/feedback', eventRegistrations: '/api/v1/me/event-registrations' });
+    const { registration, ...me } = API.me;
+    assert.deepEqual(me, {
+      family: '/api/v1/me/family',
+      feedback: '/api/v1/me/feedback',
+      eventRegistrations: '/api/v1/me/event-registrations',
+      registrations: '/api/v1/me/registrations',
+      paymentScreenshots: '/api/v1/me/payment-screenshots',
+      profileCompletion: '/api/v1/me/profile-completion',
+    });
+    assert.equal(registration('a/b'), '/api/v1/me/registrations/a%2Fb');
+    assert.equal(API.registrationPaymentReview('t1'), '/api/v1/registration-payments/t1/review');
+    assert.equal(API.addressOption('x'), '/api/v1/address-options/x');
     assert.equal(API.uploads, '/api/v1/uploads');
+    assert.equal(API.eventFinance, '/api/v1/event-finance');
     assert.equal(API.stats, '/api/v1/stats');
   });
 

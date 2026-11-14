@@ -13,7 +13,7 @@ const EMPTY_FORM = {
   title: "", titleHi: "", description: "", descriptionHi: "", date: "", startTime: "", endTime: "",
   venue: "", mapLocation: "", organizer: "", contact: "", fee: 0,
   capacity: "", registrationOpen: "", registrationClose: "", rules: "", terms: "", status: "PUBLISHED",
-  bannerUrl: "",
+  bannerUrl: "", category: "GENERAL",
 };
 
 const L = {
@@ -35,6 +35,10 @@ const L = {
     descriptionHi: "Description (Hindi)",
     date: "Date",
     status: "Status",
+    category: "Section on Events page",
+    catGENERAL: "Community event (calendar only)",
+    catGARBA: "Maa Na Garba",
+    catCULTURAL: "Cultural Program",
     published: "Published",
     draft: "Draft",
     archived: "Archived",
@@ -86,6 +90,10 @@ const L = {
     descriptionHi: "विवरण (हिंदी)",
     date: "तिथि",
     status: "स्थिति",
+    category: "कार्यक्रम पेज का भाग",
+    catGENERAL: "सामाजिक कार्यक्रम (केवल कैलेंडर)",
+    catGARBA: "माँ ना गरबा",
+    catCULTURAL: "सांस्कृतिक कार्यक्रम",
     published: "प्रकाशित",
     draft: "ड्राफ़्ट",
     archived: "संग्रहीत",
@@ -146,7 +154,7 @@ export default function AdminEvents() {
     setEditingId(null);
     setForm({
       ...EMPTY_FORM,
-      title: "Sneh Deepotsav 2026", titleHi: "स्नेह दीपोत्सव 2026",
+      title: "Sneh Deepotsav 2026", titleHi: "स्नेह दीपोत्सव 2026", category: "CULTURAL",
       description: "Nimar Patidar Sangathan, Indore, welcomes community members and families to Sneh Deepotsav 2026, a celebration of light, togetherness, and cultural traditions.",
       descriptionHi: "निमाड़ पाटीदार संगठन, इंदौर द्वारा स्नेह दीपोत्सव 2026 में समाज के सदस्यों और परिवारों का स्वागत है। आइए प्रकाश, स्नेह, एकता और सांस्कृतिक परंपराओं का उत्सव साथ मनाएँ।",
       organizer: "Nimar Patidar Sangathan, Indore",
@@ -159,7 +167,7 @@ export default function AdminEvents() {
       endTime: ev.endTime || "", venue: ev.venue || "", mapLocation: ev.mapLocation || "", organizer: ev.organizer || "",
       contact: ev.contact || "", fee: ev.fee || 0, capacity: ev.capacity || "", registrationOpen: ev.registrationOpen || "",
       registrationClose: ev.registrationClose || "", rules: ev.rules || "", terms: ev.terms || "", status: ev.status || "PUBLISHED",
-      bannerUrl: ev.bannerUrl || "",
+      bannerUrl: ev.bannerUrl || "", category: ev.category || "GENERAL",
     });
     setEditingId(ev.id);
     setShowForm(true);
@@ -336,6 +344,11 @@ export default function AdminEvents() {
                   <option value="PUBLISHED">{t.published}</option>
                   <option value="DRAFT">{t.draft}</option>
                   <option value="ARCHIVED">{t.archived}</option>
+                </select>
+              </div>
+              <div><label htmlFor="event-category" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.category}</label>
+                <select id="event-category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">
+                  {["GARBA", "CULTURAL", "GENERAL"].map((value) => <option key={value} value={value}>{t[`cat${value}`]}</option>)}
                 </select>
               </div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.startTime}</label><input type="time" value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>

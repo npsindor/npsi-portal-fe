@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Users, UserPlus, Pencil, Trash2, X, Mail, Phone, MapPin, GraduationCap, Briefcase, ArrowRightLeft } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
 import RequestTransferModal from "@/components/RequestTransferModal";
@@ -8,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useLang } from "@/lib/i18n";
 import { useT } from "@/lib/i18n";
 import { resolveMyFamily } from "@/lib/resolveMyFamily";
+import { sagunApi } from "@/api/sagunApi";
 
 const relationships = ["Spouse", "Son", "Daughter", "Father", "Mother", "Brother", "Sister", "Other"];
 const genders = ["Male", "Female", "Other"];
@@ -80,6 +82,13 @@ const L = {
     removedDesc: "removed from your family.",
     failRemove: "Failed to remove member",
     requestTransfer: "Transfer to another family",
+    sagunShow: "Show in Sagun (matrimonial)",
+    sagunHint: "Tick to open the Sagun form filled from this member's details; add the photo and consent, then submit for approval.",
+    sagunComplete: "Complete Sagun profile",
+    sagunWithdrawConfirm: "Remove this member from Sagun? Their consent is withdrawn and the profile is hidden.",
+    sagunWithdrawn: "Removed from Sagun",
+    sagunOther: "Created by another family account",
+    sagunStatus: { DRAFT: "Draft", SUBMITTED: "Submitted", UNDER_REVIEW: "Under review", APPROVED: "Visible in Sagun", REJECTED: "Rejected", INACTIVE: "Hidden" },
   },
   hi: {
     family: "परिवार",
@@ -131,6 +140,13 @@ const L = {
     removedDesc: "आपके परिवार से हटाया गया।",
     failRemove: "सदस्य हटाने में विफल",
     requestTransfer: "दूसरे परिवार में ट्रांसफर",
+    sagunShow: "सगुन (वैवाहिक) में दिखाएँ",
+    sagunHint: "टिक करें — इस सदस्य की जानकारी से भरा सगुन फ़ॉर्म खुलेगा; फ़ोटो और सहमति जोड़कर स्वीकृति के लिए भेजें।",
+    sagunComplete: "सगुन प्रोफ़ाइल पूरी करें",
+    sagunWithdrawConfirm: "इस सदस्य को सगुन से हटाएँ? सहमति वापस ली जाएगी और प्रोफ़ाइल छिप जाएगी।",
+    sagunWithdrawn: "सगुन से हटाया गया",
+    sagunOther: "किसी अन्य परिवार खाते ने बनाया",
+    sagunStatus: { DRAFT: "ड्राफ्ट", SUBMITTED: "जमा", UNDER_REVIEW: "समीक्षा में", APPROVED: "सगुन में दिख रहा है", REJECTED: "अस्वीकृत", INACTIVE: "छिपा हुआ" },
   },
 };
 
@@ -165,6 +181,16 @@ export default function MyFamily() {
   const [confirmRemove, setConfirmRemove] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [showTransfer, setShowTransfer] = useState(false);
+  // Sagun eligibility per member id (age from the recorded date of birth, decided by the server).
+  const [sagun, setSagun] = useState({});
+  const [sagunBusy, setSagunBusy] = useState("");
+  const navigate = useNavigate();
+  const loadSagun = useCallback(() => {
+    sagunApi.sagun
+      .eligibleMembers()
+      .then((data) => setSagun(Object.fromEntries((data?.members || []).map((row) => [row.id, row]))))
+      .catch(() => setSagun({}));
+  }, []);
   const tt = useT();
 
   const relLabel = (r) => (r && relLabels[r] ? relLabels[r][lang] : r) || "";
@@ -179,6 +205,27 @@ export default function MyFamily() {
   };
 
   useEffect(() => { load(); }, [user]);
+  useEffect(() => { if (family) loadSagun(); }, [family, members, loadSagun]);
+
+  const toggleSagun = async (member, info, on) => {
+    const application = info.application;
+    if (on) {
+      // A hidden or rejected profile is reopened from the Sagun workspace; otherwise start one for this member.
+      if (application) return navigate("/sagun/workspace");
+      return navigate(`/sagun?category=${info.gender === "FEMALE" ? "bride" : "groom"}&member=${encodeURIComponent(member.id)}`);
+    }
+    if (!application || !window.confirm(t.sagunWithdrawConfirm)) return;
+    setSagunBusy(member.id);
+    try {
+      await sagunApi.sagun.withdrawConsent(application.id);
+      toast({ title: t.sagunWithdrawn, description: member.name });
+      loadSagun();
+    } catch (err) {
+      toast({ title: t.sagunWithdrawn, description: err.message, variant: "destructive" });
+    } finally {
+      setSagunBusy("");
+    }
+  };
 
   const openAdd = () => {
     setEditing(null);
@@ -315,6 +362,7 @@ export default function MyFamily() {
               {m.occupation && <div className="flex items-center gap-1.5"><Briefcase className="h-3 w-3 text-gold" /> {m.occupation}</div>}
               {m.address && <div className="flex items-center gap-1.5"><MapPin className="h-3 w-3 text-gold" /> {m.address}</div>}
             </div>
+            <SagunToggle member={m} info={sagun[m.id]} t={t} busy={sagunBusy === m.id} onToggle={toggleSagun} />
             <div className="mt-4 flex gap-2">
               <button onClick={() => openEdit(m)} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-gold/40 px-3 py-1.5 text-xs font-semibold text-maroon transition hover:bg-gold/10">
                 <Pencil className="h-3 w-3" /> {t.edit}
@@ -430,6 +478,34 @@ export default function MyFamily() {
         membershipId={members.find((m) => m.relationship === "Head")?.membershipId || members[0]?.membershipId}
         memberName={members.find((m) => m.relationship === "Head")?.name || members[0]?.name}
       />
+    </div>
+  );
+}
+
+// "Show in Sagun" for one member: shown when the member is old enough (or already has a profile).
+function SagunToggle({ member, info, t, busy, onToggle }) {
+  if (!info) return null;
+  const application = info.application;
+  const active = Boolean(application) && !["INACTIVE", "REJECTED"].includes(application.status);
+  if (!active && !info.eligible && !application) return null;
+  const locked = Boolean(application) && !application.mine;
+  const id = `sagun-${member.id}`;
+  return (
+    <div className="mt-4 rounded-xl border border-gold/30 bg-gold/5 p-3 text-xs">
+      <label htmlFor={id} className="flex cursor-pointer items-start gap-2">
+        <input id={id} type="checkbox" className="mt-0.5 h-4 w-4 accent-[#102A43]" checked={active} disabled={busy || locked} onChange={(event) => onToggle(member, info, event.target.checked)} />
+        <span>
+          <span className="font-semibold text-foreground">{t.sagunShow}</span>
+          {application && <span className="ml-2 rounded-full bg-maroon/10 px-2 py-0.5 font-semibold text-maroon">{t.sagunStatus[application.status] || application.status}</span>}
+          {!application && <span className="mt-0.5 block text-muted-foreground">{t.sagunHint}</span>}
+          {locked && <span className="mt-0.5 block text-muted-foreground">{t.sagunOther}</span>}
+        </span>
+      </label>
+      {active && application.status === "DRAFT" && application.mine && (
+        <Link to="/sagun/workspace" className="mt-2 inline-block font-semibold text-maroon underline">
+          {t.sagunComplete}
+        </Link>
+      )}
     </div>
   );
 }

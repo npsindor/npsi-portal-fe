@@ -2,6 +2,13 @@ import { useCallback } from 'react';
 import { useLang } from '@/lib/i18n';
 
 export const publicHindi = {
+  "Account menu": "खाता मेनू",
+  "Student Login": "विद्यार्थी लॉगिन",
+  "Student Registration": "विद्यार्थी पंजीकरण",
+  "Admin Panel": "एडमिन पैनल",
+  "Profile": "प्रोफ़ाइल",
+  "Change Password": "पासवर्ड बदलें",
+  "Logout": "लॉगआउट",
  "Register Matrimonial Profile": "वैवाहिक परिचय पंजीकरण",
   "Transportation": "सफ़र साथी",
   "Medical": "सेहत साथी",
@@ -64,6 +71,7 @@ export const publicHindi = {
   "My Portal": "मेरा पोर्टल",
   "Member Login": "सदस्य लॉगिन",
   "Join the Organization": "संगठन से जुड़ें",
+  "Join the Sangathan": "संगठन से जुड़ें",
   "Open navigation menu": "नेविगेशन मेनू खोलें",
   "Close navigation menu": "नेविगेशन मेनू बंद करें",
   "Main navigation": "मुख्य नेविगेशन",

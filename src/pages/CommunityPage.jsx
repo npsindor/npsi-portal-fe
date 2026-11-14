@@ -5,6 +5,9 @@ import PublicNav from '@/components/PublicNav';
 import PublicFooter from '@/components/PublicFooter';
 import CommunityDemo, { DemoMessageForm } from '@/components/CommunityDemo';
 import { usePublicCopy } from '@/lib/public-copy';
+import { useLang } from '@/lib/i18n';
+import { BlockCard, usePageContent } from '@/components/PageContent';
+import { PageHero } from '@/components/PageSections';
 import { services, careers, transportation, medical } from '@/lib/community-content';
 
 const pages = {
@@ -19,10 +22,15 @@ const pages = {
 export default function CommunityPage({ kind }) {
   const page = pages[kind];
   const c = usePublicCopy();
+  const { lang } = useLang();
+  // Contact and Feedback are admin-managed (Admin → Page Content); other kinds keep their built-in copy.
+  const content = usePageContent(kind === 'feedback' ? 'feedback' : 'contact');
+  const managed = kind === 'contact' || kind === 'feedback';
+  const items = managed ? content.items('main') : [];
   useEffect(() => { document.title = `${c(page.eyebrow)} | ${c("Nimar Patidar Sangathan, Indore")}`; }, [page, c]);
   return <div className="min-h-screen bg-background"><PublicNav /><main id="main-content">
-    <section className="bg-maroon text-cream"><div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20"><span className="text-xs font-semibold tracking-widest text-gold">{c(page.eyebrow)}</span><h1 className="mt-5 max-w-4xl font-display text-3xl font-semibold leading-tight sm:text-5xl">{c(page.title)}</h1><p className="mt-6 max-w-3xl text-base leading-relaxed text-cream/80">{c(page.intro)}</p></div></section>
-    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6"><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{page.cards.map(([id, title, description]) => <article key={id} id={id} className="rounded-2xl border border-border bg-card p-6"><HeartHandshake className="h-7 w-7 text-gold" aria-hidden="true" /><h2 className="mt-5 font-display text-xl font-semibold">{c(title)}</h2><p className="mt-3 text-sm leading-relaxed text-muted-foreground">{c(description)}</p></article>)}</div>
+    <PageHero eyebrow={c(page.eyebrow)} title={c(page.title)} intro={c(page.intro)} icon={HeartHandshake} lang={lang} block={managed ? content.intro('hero') : null} overview={false} />
+    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">{items.length > 0 ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{items.map((block) => <BlockCard key={block.id} block={block} lang={lang} />)}</div> : <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{page.cards.map(([id, title, description]) => <article key={id} id={id} className="rounded-2xl border border-border bg-card p-6"><HeartHandshake className="h-7 w-7 text-gold" aria-hidden="true" /><h2 className="mt-5 font-display text-xl font-semibold">{c(title)}</h2><p className="mt-3 text-sm leading-relaxed text-muted-foreground">{c(description)}</p></article>)}</div>}
     {['services', 'careers', 'sagun', 'transportation', 'medical'].includes(kind) ? <CommunityDemo key={kind} group={kind} /> : <DemoMessageForm key={kind} kind={kind} />}
     <div className="mt-8 flex flex-col gap-3 sm:flex-row"><Link className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-maroon px-5 py-3 text-sm font-semibold text-cream" to={kind === 'feedback' ? '/portal/feedback' : '/register'}>{c(kind === 'feedback' ? 'Real Member Feedback' : 'Register Your Family')}<ArrowUpRight className="h-4 w-4" /></Link><Link className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border px-5 py-3 text-sm" to="/application-status">{c("Check Application Status")}</Link></div>
     </section></main><PublicFooter /></div>;

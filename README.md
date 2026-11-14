@@ -54,6 +54,10 @@ public/             Favicons, manifest, robots.txt, sitemap.xml, videos/
 
 The API client keeps the Base44 SDK shape (`base44.entities.Family.list()`, `base44.auth.me()`, ...) but sends everything to `VITE_API_BASE_URL`. The session token is stored in `localStorage` as `base44_access_token`.
 
+### Event finance spreadsheet suggestions
+
+On Admin → Event Management → Finance & Roster, an administrator can load an Excel workbook to suggest contributor names/villages and expense titles. The workbook is read in the browser only; its contents are not uploaded or saved. Suggestions are cleared when the page is closed.
+
 ## Troubleshooting
 
 - **"Failed to fetch" on login**: check that `nps-be` is running and `VITE_API_BASE_URL` is correct. If the browser console mentions `Access-Control-Allow-Origin` being `*`, a CORS browser extension is rewriting the response; disable it for localhost.

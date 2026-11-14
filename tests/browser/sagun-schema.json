@@ -37,8 +37,8 @@
     {
       "section": "personal",
       "key": "photoFileId",
-      "en": "Latest Photograph (JPG/PNG, up to 10 MB)",
-      "hi": "नवीनतम फोटो (जेपीजी/पीएनजी, अधिकतम 10 एमबी)",
+      "en": "Latest Photograph (JPG/JPEG/PNG/WebP, up to 10 MB)",
+      "hi": "नवीनतम फोटो (जेपीजी/जेपीईजी/पीएनजी/वेबपी, अधिकतम 10 एमबी)",
       "type": "photo",
       "required": true,
       "enabled": true,
@@ -250,29 +250,10 @@
       "en": "Company / Business Name",
       "hi": "कंपनी / व्यवसाय का नाम",
       "type": "text",
-      "required": true,
-      "enabled": true,
-      "exposure": "MEMBERS"
-    },
-    {
-      "section": "education",
-      "key": "officeAddress",
-      "en": "Office / Business Address",
-      "hi": "कार्यालय / व्यवसाय का पता",
-      "type": "textarea",
-      "required": true,
-      "enabled": true,
-      "exposure": "OWNER"
-    },
-    {
-      "section": "education",
-      "key": "professionalDetails",
-      "en": "Professional Details",
-      "hi": "पेशेवर विवरण",
-      "type": "textarea",
       "required": false,
       "enabled": true,
-      "exposure": "MEMBERS"
+      "exposure": "MEMBERS",
+      "optionalOnly": true
     },
     {
       "section": "education",
@@ -280,24 +261,15 @@
       "en": "Monthly Income (₹)",
       "hi": "मासिक आय (₹)",
       "type": "number",
-      "required": true,
+      "required": false,
       "enabled": true,
       "min": 0,
       "max": 1000000000,
-      "exposure": "OWNER"
+      "exposure": "OWNER",
+      "optionalOnly": true
     },
     {
-      "section": "contact",
-      "key": "candidateMobile",
-      "en": "Candidate’s Mobile",
-      "hi": "उम्मीदवार का मोबाइल",
-      "type": "tel",
-      "required": true,
-      "enabled": true,
-      "exposure": "CONTACT"
-    },
-    {
-      "section": "contact",
+      "section": "personal",
       "key": "fatherMobile",
       "en": "Father’s Mobile",
       "hi": "पिता का मोबाइल",
@@ -307,27 +279,7 @@
       "exposure": "CONTACT"
     },
     {
-      "section": "contact",
-      "key": "motherMobile",
-      "en": "Mother’s Mobile",
-      "hi": "माता का मोबाइल",
-      "type": "tel",
-      "required": false,
-      "enabled": true,
-      "exposure": "CONTACT"
-    },
-    {
-      "section": "contact",
-      "key": "email",
-      "en": "Email (optional)",
-      "hi": "ईमेल (वैकल्पिक)",
-      "type": "email",
-      "required": false,
-      "enabled": true,
-      "exposure": "CONTACT"
-    },
-    {
-      "section": "contact",
+      "section": "personal",
       "key": "residentialAddress",
       "en": "Current Residential Address",
       "hi": "वर्तमान निवास का पता",
@@ -337,27 +289,45 @@
       "exposure": "OWNER"
     },
     {
-      "section": "contact",
-      "key": "city",
-      "en": "City",
-      "hi": "शहर",
-      "type": "text",
-      "required": true,
-      "enabled": true,
-      "exposure": "MEMBERS"
-    },
-    {
-      "section": "contact",
+      "section": "personal",
       "key": "district",
       "en": "District",
       "hi": "ज़िला",
       "type": "text",
       "required": true,
       "enabled": true,
-      "exposure": "MEMBERS"
+      "exposure": "MEMBERS",
+      "locked": false,
+      "options": [
+        {
+          "value": "Indore",
+          "en": "Indore",
+          "hi": "इंदौर"
+        },
+        {
+          "value": "Dewas",
+          "en": "Dewas",
+          "hi": "देवास"
+        },
+        {
+          "value": "Ujjain",
+          "en": "Ujjain",
+          "hi": "उज्जैन"
+        },
+        {
+          "value": "Khargone",
+          "en": "Khargone",
+          "hi": "खरगोन"
+        },
+        {
+          "value": "Dhar",
+          "en": "Dhar",
+          "hi": "धार"
+        }
+      ]
     },
     {
-      "section": "contact",
+      "section": "personal",
       "key": "state",
       "en": "State",
       "hi": "राज्य",
@@ -367,7 +337,7 @@
       "exposure": "MEMBERS"
     },
     {
-      "section": "contact",
+      "section": "personal",
       "key": "pincode",
       "en": "PIN Code",
       "hi": "पिन कोड",
@@ -388,16 +358,6 @@
     },
     {
       "section": "family",
-      "key": "fatherGotra",
-      "en": "Father’s Gotra",
-      "hi": "पिता का गोत्र",
-      "type": "text",
-      "required": true,
-      "enabled": true,
-      "exposure": "MEMBERS"
-    },
-    {
-      "section": "family",
       "key": "motherName",
       "en": "Mother’s Full Name",
       "hi": "माता का पूरा नाम",
@@ -412,9 +372,10 @@
       "en": "Maternal Uncle’s Gotra",
       "hi": "मामा का गोत्र",
       "type": "text",
-      "required": true,
+      "required": false,
       "enabled": true,
-      "exposure": "MEMBERS"
+      "exposure": "MEMBERS",
+      "optionalOnly": true
     },
     {
       "section": "family",
@@ -422,11 +383,12 @@
       "en": "Number of Brothers",
       "hi": "भाइयों की संख्या",
       "type": "number",
-      "required": true,
+      "required": false,
       "enabled": true,
       "min": 0,
       "max": 30,
-      "exposure": "MEMBERS"
+      "exposure": "MEMBERS",
+      "optionalOnly": true
     },
     {
       "section": "family",
@@ -434,11 +396,12 @@
       "en": "Number of Sisters",
       "hi": "बहनों की संख्या",
       "type": "number",
-      "required": true,
+      "required": false,
       "enabled": true,
       "min": 0,
       "max": 30,
-      "exposure": "MEMBERS"
+      "exposure": "MEMBERS",
+      "optionalOnly": true
     },
     {
       "section": "family",
@@ -497,14 +460,25 @@
       "exposure": "MEMBERS"
     },
     {
-      "section": "family",
+      "section": "personal",
       "key": "nativeVillage",
-      "en": "Native Village / Ancestral Place",
-      "hi": "मूल गाँव / पैतृक स्थान",
+      "en": "Village",
+      "hi": "गाँव",
+      "type": "text",
+      "required": true,
+      "enabled": true,
+      "exposure": "MEMBERS",
+      "locked": true
+    },
+    {
+      "section": "personal",
+      "key": "area",
+      "en": "Area",
+      "hi": "क्षेत्र",
       "type": "text",
       "required": false,
       "enabled": true,
-      "exposure": "MEMBERS"
+      "exposure": "OWNER"
     },
     {
       "section": "family",
@@ -623,215 +597,12 @@
       "exposure": "MEMBERS"
     },
     {
-      "section": "sagun",
-      "key": "cashSagun",
-      "en": "Cash Sagun / Shagun (optional, ₹)",
-      "hi": "नकद सगुन / शगुन (वैकल्पिक, ₹)",
-      "type": "number",
-      "required": false,
-      "enabled": true,
-      "min": 0,
-      "max": 1000000000,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "coconut",
-      "en": "Coconut",
-      "hi": "नारियल",
-      "type": "textarea",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "dryFruits",
-      "en": "Dry Fruits",
-      "hi": "मेवे",
-      "type": "textarea",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "sweets",
-      "en": "Sweets / Mithai",
-      "hi": "मिठाई",
-      "type": "textarea",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "fruits",
-      "en": "Fruits",
-      "hi": "फल",
-      "type": "textarea",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "candidateClothes",
-      "en": "Clothes for Groom / Bride",
-      "hi": "वर / वधू के वस्त्र",
-      "type": "textarea",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "parentClothes",
-      "en": "Clothes for Parents",
-      "hi": "माता-पिता के वस्त्र",
-      "type": "textarea",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "silverGifts",
-      "en": "Silver Coins / Traditional Gifts",
-      "hi": "चाँदी के सिक्के / पारंपरिक उपहार",
-      "type": "textarea",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "jewellery",
-      "en": "Jewellery / Other Gifts",
-      "hi": "आभूषण / अन्य उपहार",
-      "type": "textarea",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "tilakItems",
-      "en": "Tilak Ceremony Items",
-      "hi": "तिलक सामग्री",
-      "type": "textarea",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "otherOfferings",
-      "en": "Other Traditional Offerings",
-      "hi": "अन्य पारंपरिक भेंट",
-      "type": "textarea",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "engagement",
-      "en": "Engagement / Sagai Details",
-      "hi": "सगाई का विवरण",
-      "type": "textarea",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "tilak",
-      "en": "Tilak Ceremony Details",
-      "hi": "तिलक समारोह का विवरण",
-      "type": "textarea",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "weddingVenue",
-      "en": "Venue / Marriage Garden",
-      "hi": "स्थान / मैरिज गार्डन",
-      "type": "textarea",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "accommodation",
-      "en": "Guest Accommodation",
-      "hi": "अतिथि आवास व्यवस्था",
-      "type": "textarea",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "giftExchange",
-      "en": "Family Gifts / Exchange Details",
-      "hi": "पारिवारिक उपहार का विवरण",
-      "type": "textarea",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "otherCustoms",
-      "en": "Other Agreed Customs",
-      "hi": "अन्य सहमत परंपराएँ",
-      "type": "textarea",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "weddingDate",
-      "en": "Wedding Date (if finalized)",
-      "hi": "विवाह तिथि (यदि तय हो)",
-      "type": "date",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "sagunItems",
-      "en": "Voluntary Customary Items",
-      "hi": "स्वैच्छिक पारंपरिक भेंट",
-      "type": "items",
-      "required": false,
-      "enabled": true,
-      "exposure": "SAGUN"
-    },
-    {
-      "section": "sagun",
-      "key": "voluntaryConsent",
-      "en": "These arrangements are voluntary and mutually agreed, without demands.",
-      "hi": "ये व्यवस्थाएँ स्वैच्छिक और परस्पर सहमत हैं; कोई मांग नहीं है।",
-      "type": "checkbox",
-      "required": false,
-      "enabled": true,
-      "locked": true,
-      "exposure": "SAGUN"
-    },
-    {
       "section": "documents",
       "key": "identityFileId",
-      "en": "Optional Identity Verification Document (restricted)",
-      "hi": "वैकल्पिक पहचान सत्यापन दस्तावेज (प्रतिबंधित)",
+      "en": "Aadhaar Card Photocopy (restricted)",
+      "hi": "आधार कार्ड की फोटो कॉपी (प्रतिबंधित)",
       "type": "document",
-      "required": false,
+      "required": true,
       "enabled": true,
       "locked": true,
       "exposure": "OWNER"
@@ -940,10 +711,8 @@
   "sections": [
     "personal",
     "education",
-    "contact",
     "family",
     "preferences",
-    "sagun",
     "documents",
     "privacy"
   ]

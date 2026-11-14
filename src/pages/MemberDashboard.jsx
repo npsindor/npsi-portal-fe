@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { CalendarDays, Bell, Users, ArrowRight, UserPlus } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import MembershipPass from "@/components/MembershipPass";
+import ProfileCompletionCard from "@/components/ProfileCompletionCard";
 import RequestTransferModal from "@/components/RequestTransferModal";
 import { ArrowRightLeft } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -24,6 +25,7 @@ const L = {
     noNotif: "No notifications.",
     noFamily: "No active family membership found linked to your account.",
     registerFamily: "Register Your Family",
+    sagunWorkspace: "Sagun profiles and requests",
     upcomingEvents: "Upcoming Events",
     noEvents: "No upcoming events.",
     viewEvent: "View Event",
@@ -32,7 +34,8 @@ const L = {
     close: "Close",
     member: "Member",
     studentBadge: "Student ID",
-    studentTransferHint: "You're registered as a student. Request to join a family to become a family member.",
+    studentTransferHint: "You're registered as a student. Become a family member by registering yourself (₹500), or ask to join an existing family.",
+    becomeMember: "Become a family member · ₹500",
     requestTransfer: "Request Family Transfer",
   },
   hi: {
@@ -47,6 +50,7 @@ const L = {
     noNotif: "कोई सूचना नहीं।",
     noFamily: "आपके खाते से कोई सक्रिय परिवार सदस्यता जुड़ी नहीं है।",
     registerFamily: "अपना परिवार रजिस्टर करें",
+    sagunWorkspace: "सगुन परिचय और अनुरोध",
     upcomingEvents: "आगामी कार्यक्रम",
     noEvents: "कोई आगामी कार्यक्रम नहीं।",
     viewEvent: "कार्यक्रम देखें",
@@ -55,7 +59,8 @@ const L = {
     close: "बंद करें",
     member: "सदस्य",
     studentBadge: "स्टूडेंट आईडी",
-    studentTransferHint: "आप स्टूडेंट के रूप में पंजीकृत हैं। परिवार का सदस्य बनने के लिए परिवार जुड़ने का अनुरोध करें।",
+    studentTransferHint: "आप स्टूडेंट के रूप में पंजीकृत हैं। स्वयं पंजीकरण (₹500) करके परिवार सदस्य बनें, या किसी मौजूदा परिवार से जुड़ने का अनुरोध करें।",
+    becomeMember: "परिवार सदस्य बनें · ₹500",
     requestTransfer: "परिवार ट्रांसफर अनुरोध",
   },
 };
@@ -106,6 +111,9 @@ export default function MemberDashboard() {
         <p className="mt-1 text-sm text-muted-foreground">{t.welcome}</p>
       </div>
 
+      {user?.role !== "admin" && <ProfileCompletionCard nudge />}
+      {user?.role !== "admin" && <Link to="/sagun/workspace" className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-card px-4 py-3 text-sm font-semibold text-maroon hover:border-maroon">{t.sagunWorkspace}<ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>}
+
       {family ? (
         <div className="grid gap-6 lg:grid-cols-2">
           <MembershipPass family={family} onFlip={() => setShowCard(true)} />
@@ -152,12 +160,17 @@ export default function MemberDashboard() {
                 <ArrowRightLeft className="h-3.5 w-3.5" /> {t.studentBadge}: {student.studentId}
               </div>
               <p className="mt-2 text-xs text-muted-foreground">{t.studentTransferHint}</p>
-              <button onClick={() => setShowTransfer(true)} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-maroon px-5 py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark">
-                <ArrowRightLeft className="h-4 w-4" /> {t.requestTransfer}
-              </button>
+              <div className="mt-3 flex flex-wrap justify-center gap-2">
+                <Link to="/portal/registration?type=family&from=student" className="inline-flex items-center gap-1.5 rounded-full bg-maroon px-5 py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark">
+                  <UserPlus className="h-4 w-4" aria-hidden="true" /> {t.becomeMember}
+                </Link>
+                <button type="button" onClick={() => setShowTransfer(true)} className="inline-flex items-center gap-1.5 rounded-full border border-maroon/30 px-5 py-2.5 text-sm font-semibold text-maroon hover:bg-muted">
+                  <ArrowRightLeft className="h-4 w-4" /> {t.requestTransfer}
+                </button>
+              </div>
             </>
           ) : (
-            <Link to="/register" className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-maroon px-5 py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark">
+            <Link to="/portal/registration" className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-maroon px-5 py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark">
               {t.registerFamily} <ArrowRight className="h-4 w-4" />
             </Link>
           )}
