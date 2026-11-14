@@ -1,0 +1,22 @@
+import { usePublicCopy } from '@/lib/public-copy';
+import { Link } from 'react-router-dom';
+import { ArrowRight, HeartHandshake, BriefcaseBusiness } from 'lucide-react';
+import { services, careers } from '@/lib/community-content';
+
+export default function CommunityHighlights() {
+  const c = usePublicCopy();
+  return <>
+    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+      <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{c("Support \u2022 Opportunity \u2022 Togetherness")}</span>
+      <h2 className="mt-3 section-title">{c("Explore Community Services")}</h2>
+      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{c("Connecting people with resources, mutual assistance, and opportunities to contribute.")}</p>
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{services.map(([id, title, description]) => <Link key={id} to={id === "rent-property" ? "/room-hunting" : `/community-services#${id}`} className="premium-card group p-6"><HeartHandshake className="h-7 w-7 text-gold" /><h3 className="mt-4 font-semibold">{c(title)}</h3><p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{c(description)}</p><span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold">{c("Learn More")} <ArrowRight className="h-4 w-4" /></span></Link>)}</div>
+    </section>
+    <section className="border-y border-border bg-card"><div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16"><h2 className="section-title">{c("Opportunities Grow When We Connect.")}</h2><p className="mt-3 text-sm text-muted-foreground">{c("Career & Business \u2014 encouraging learning, skills, and professional growth.")}</p><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{careers.map(([id, title, description]) => <Link key={id} to={`/career-business#${id}`} className="rounded-xl border border-border p-6 hover:border-gold"><BriefcaseBusiness className="h-6 w-6 text-gold" /><h3 className="mt-4 font-semibold">{c(title)}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c(description)}</p></Link>)}</div></div></section>
+    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16"><h2 className="section-title">{c("Your Participation Makes Our Community Stronger.")}</h2><p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{c("Become part of a connected community that values cooperation, shared progress, cultural heritage, and service to society.")}</p>
+      <ol className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{[['Register', 'Enter the required details and submit your membership application.'], ['Review', 'The authorized team reviews your application according to approved procedures.'], ['Family Registration', 'Add family members with the required consent and verification.'], ['Confirmation', 'Receive application status and membership confirmation when approved.']].map(([title, description], index) => <li key={title} className="rounded-xl border border-border bg-card p-6"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-maroon font-semibold text-gold">{index + 1}</span><h3 className="mt-4 font-semibold">{c(title)}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c(description)}</p></li>)}</ol>
+      <p className="mt-5 text-xs text-muted-foreground">{c("Submitting an application does not guarantee membership approval.")}</p><div className="mt-6 flex flex-col gap-3 sm:flex-row"><Link to="/register" className="rounded-lg bg-maroon px-6 py-3 text-center text-sm font-semibold text-cream">{c("Register Your Family")}</Link><Link to="/sagun" className="rounded-lg border border-border px-6 py-3 text-center text-sm font-semibold">{c("Discover Sagun")}</Link></div>
+    </section>
+    <section className="border-t border-gold/30 bg-card px-4 py-12 text-center"><h2 className="section-title">{c("Your Suggestions Help Us Improve.")}</h2><p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">{c("Share ideas to strengthen our community initiatives and make our digital services more useful.")}</p><Link to="/public-feedback" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-maroon px-6 py-3 text-sm font-semibold text-cream">{c("Share Feedback")} <ArrowRight className="h-4 w-4" /></Link></section>
+  </>;
+}

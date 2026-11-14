@@ -23,8 +23,8 @@ const translations = {
 
     // Home
     "home.badge": "Nimar Patidar Samaj Sangathan · Indore ",
-    "home.title": "A united community, one family at a time.",
-    "home.subtitle": "The digital home of the Patidar Samaj Sangathan — register your family, manage your membership, stay connected with Sangathan events, and carry your digital membership card wherever you go.",
+    "home.title": "Together for a Stronger Community",
+    "home.subtitle": "Nimar Patidar Sangathan, Indore, is a community platform dedicated to bringing people and families together through unity, cooperation, cultural traditions, education, professional networking, and social welfare.",
     "home.registerCta": "Register Your Family",
     "home.statusCta": "Check Application Status",
     "home.families": "Families",
@@ -1234,13 +1234,14 @@ const LanguageContext = createContext({ lang: "hi", t: (k) => k });
 export function LanguageProvider({ children }) {
   const [lang, setLang] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("pss_lang") || "en";
+      try { const saved = localStorage.getItem("pss_lang"); return saved === "hi" || saved === "en" ? saved : (window.location.pathname === "/medical" || window.location.pathname.startsWith("/admin/sehat-saathi") ? "hi" : "en"); } catch { return "en"; }
     }
     return "en";
   });
 
   useEffect(() => {
-    localStorage.setItem("pss_lang", lang);
+    document.documentElement.lang = lang;
+    try { localStorage.setItem("pss_lang", lang); } catch { /* Language still works without storage. */ }
   }, [lang]);
 
   const t = (key, vars) => {

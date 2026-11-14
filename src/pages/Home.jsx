@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ArrowUp, CalendarDays, MapPin, Bell, Users, ShieldCheck, Heart, BookOpen, ChevronRight, UserPlus, GraduationCap, ClipboardCheck, Info, ScrollText, HelpCircle } from "lucide-react";
+import { ArrowRight, CalendarDays, MapPin, Bell, Users, ShieldCheck, Heart, BookOpen, ChevronRight, UserPlus, GraduationCap, ClipboardCheck, Info, ScrollText, HelpCircle } from "lucide-react";
+import { usePublicCopy } from '@/lib/public-copy';
+import PublicFooter from '@/components/PublicFooter';
+import CommunityHighlights from '@/components/CommunityHighlights';
 import PublicNav from "@/components/PublicNav";
 import { base44 } from "@/api/base44Client";
 import { useT, useLang } from "@/lib/i18n";
@@ -9,10 +12,11 @@ import logoVideo from "@/images/logo.mp4";
 
 export default function Home() {
   const t = useT();
+  const c = usePublicCopy();
   const { lang } = useLang();
   const [events, setEvents] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
-  const [stats, setStats] = useState({ families: 0, members: 0, events: 0 });
+  const [stats, setStats] = useState({ families: null, members: null });
   const keepVideoMuted = (event) => {
     const video = event.currentTarget;
     if (!video.muted) video.muted = true;
@@ -22,17 +26,17 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       try {
-        const evs = await base44.entities.Event.list("-date", 3);
-        setEvents(evs.filter((e) => e.status === "PUBLISHED"));
-      } catch (e) {}
+        const evs = await base44.entities.Event.list("-createdAt", 50);
+        setEvents(evs.filter((e) => e.status === "PUBLISHED").slice(0, 3));
+      } catch {}
       try {
         const anns = await base44.entities.Announcement.list("-date", 3);
         setAnnouncements(anns.filter((a) => a.status === "Active"));
-      } catch (e) {}
+      } catch {}
       try {
         const { families, members } = await base44.stats();
         setStats((s) => ({ ...s, families, members }));
-      } catch (e) {}
+      } catch {}
     })();
   }, []);
 
@@ -83,10 +87,10 @@ export default function Home() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                to="/application-status"
+                to="/events"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-cream/30 px-5 py-3 text-sm font-semibold text-cream transition hover:bg-cream/10 sm:w-auto sm:px-6"
               >
-                {t("home.statusCta")}
+                {lang === "hi" ? "हमारी गतिविधियाँ देखें" : "Explore Our Activities"}
               </Link>
               <Link
                 to="/student-register"
@@ -98,12 +102,12 @@ export default function Home() {
             </div>
             <div className="mt-9 grid grid-cols-3 gap-3 sm:mt-10 sm:flex sm:items-center sm:gap-8">
               <div>
-                <div className="font-display text-2xl font-bold text-gold sm:text-3xl">{stats.families}+</div>
+                <div className="font-display text-2xl font-bold text-gold sm:text-3xl">{Number.isFinite(stats.families) ? stats.families : "—"}</div>
                 <div className="text-[0.6rem] uppercase leading-tight tracking-[0.1em] text-cream/60 sm:text-xs sm:tracking-[0.18em]">{t("home.families")}</div>
               </div>
               <div className="hidden h-10 w-px bg-cream/15 sm:block" />
               <div>
-                <div className="font-display text-2xl font-bold text-gold sm:text-3xl">{stats.members}+</div>
+                <div className="font-display text-2xl font-bold text-gold sm:text-3xl">{Number.isFinite(stats.members) ? stats.members : "—"}</div>
                 <div className="text-[0.6rem] uppercase leading-tight tracking-[0.1em] text-cream/60 sm:text-xs sm:tracking-[0.18em]">{t("home.members")}</div>
               </div>
               <div className="hidden h-10 w-px bg-cream/15 sm:block" />
@@ -128,8 +132,8 @@ export default function Home() {
                   onVolumeChange={keepVideoMuted}
                   playsInline
                   controls
-                  preload="auto"
-                  aria-label="Patidar Samaj Sangathan logo"
+                  preload="metadata"
+                  aria-label={c("Nimar Patidar Sangathan, Indore")}
                 />
 
               </div>
@@ -142,16 +146,16 @@ export default function Home() {
       <div className="overflow-hidden border-b border-gold/20 bg-gold py-2.5 text-maroon" aria-label="Community message">
         <div className="marquee-track flex w-max whitespace-nowrap">
           <span className="px-4 text-sm font-semibold tracking-wide">
-            एकता हमारी शक्ति • संगठन हमारी पहचान • सहयोग हमारा संस्कार • पारदर्शिता हमारा विश्वास • प्रगति, उन्नति एवं कल्याण हमारा संकल्प।
+            {lang === "hi" ? "एकता हमारी शक्ति • संगठन हमारी पहचान • सहयोग हमारा संस्कार • पारदर्शिता हमारा विश्वास • प्रगति, उन्नति एवं कल्याण हमारा संकल्प।" : "Unity is our strength • Cooperation brings us together • Transparency builds trust • Shared progress and welfare are our commitment."}
           </span>
           <span className="px-4 text-sm font-semibold tracking-wide" aria-hidden="true">
-            एकता हमारी शक्ति • संगठन हमारी पहचान • सहयोग हमारा संस्कार • पारदर्शिता हमारा विश्वास • प्रगति, उन्नति एवं कल्याण हमारा संकल्प।
+            {lang === "hi" ? "एकता हमारी शक्ति • संगठन हमारी पहचान • सहयोग हमारा संस्कार • पारदर्शिता हमारा विश्वास • प्रगति, उन्नति एवं कल्याण हमारा संकल्प।" : "Unity is our strength • Cooperation brings us together • Transparency builds trust • Shared progress and welfare are our commitment."}
           </span>
         </div>
       </div>
 
       {/* Official announcements */}
-      <section className="border-b border-gold/20 bg-maroon text-cream">
+      <section id="updates" className="border-b border-gold/20 bg-maroon text-cream">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
           <div className="flex items-center gap-2 border-b border-gold/20 pb-3">
             <Bell className="h-4 w-4 text-gold" />
@@ -168,7 +172,7 @@ export default function Home() {
                 <div className="flex items-center justify-between">
                   <span className="inline-flex items-center rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 text-[0.6rem] font-semibold text-gold">{a.type}</span>
                   <span className="text-[0.65rem] text-cream/50">
-                    {a.date ? new Date(a.date).toLocaleDateString("en-IN") : ""}
+                    {a.date ? new Date(a.date).toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN") : ""}
                   </span>
                 </div>
                 <div className="mt-1.5 text-sm font-semibold text-cream">{localizedText(a, "title", lang)}</div>
@@ -203,7 +207,7 @@ export default function Home() {
       </section>
 
       {/* Important services */}
-      <section className="border-y border-gold/20 bg-card">
+      <section id="services" className="border-y border-gold/20 bg-card">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
           <div className="flex items-end justify-between gap-4">
             <div>
@@ -234,7 +238,7 @@ export default function Home() {
       </section>
 
       {/* Upcoming events */}
-      <section className="border-y border-gold/20 bg-cream/60">
+      <section id="events" className="border-y border-gold/20 bg-cream/60">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
           <div className="flex items-end justify-between">
             <div>
@@ -254,17 +258,17 @@ export default function Home() {
             )}
             {events.map((ev) => (
               <div key={ev.id} className="premium-card group overflow-hidden">
-                <div className="relative h-40 bg-gradient-to-br from-maroon to-maroon-dark">
-                  {ev.bannerUrl && <img src={ev.bannerUrl} alt={localizedText(ev, "title", lang)} loading="lazy" decoding="async" className="h-full w-full object-cover" />}
-                  <div className="absolute inset-0 bg-gradient-to-t from-maroon/60 to-transparent" />
+                <div className="relative aspect-square bg-gradient-to-br from-maroon to-maroon-dark">
+                  {ev.bannerUrl && <img src={ev.bannerUrl} alt={localizedText(ev, "title", lang)} loading="lazy" decoding="async" className="h-full w-full object-contain" />}
+
                 </div>
                 <div className="p-5">
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <CalendarDays className="h-3.5 w-3.5 text-gold" />
-                    {ev.date ? new Date(ev.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                    {ev.date ? new Date(ev.date).toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
                     <span className="text-border">·</span>
                     <MapPin className="h-3.5 w-3.5 text-gold" />
-                    {ev.venue}
+                    {localizedText(ev, "venue", lang)}
                   </div>
                   <h3 className="mt-2 font-display text-base font-semibold text-maroon">{localizedText(ev, "title", lang)}</h3>
                   <p className="mt-1 text-xs leading-relaxed text-muted-foreground line-clamp-2">{localizedText(ev, "description", lang)}</p>
@@ -278,64 +282,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-maroon text-cream">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-          <div className="grid gap-8 md:grid-cols-3">
-            <div>
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-gold/50">
-                  <span className="font-display text-lg font-semibold text-gold">P</span>
-                </div>
-                <div>
-                  <div className="font-display text-sm font-semibold text-gold">PATIDAR SAMAJ SANGATHAN</div>
-                  <div className="text-[0.6rem] uppercase tracking-[0.18em] text-cream/70">Indore (Nimar)</div>
-                </div>
-              </div>
-              <p className="mt-4 text-sm leading-relaxed text-cream/70">{t("footer.tagline")}</p>
-              <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3 py-1.5 text-xs font-semibold text-gold">
-                <Users className="h-3.5 w-3.5" />
-                {t("nav.membersHint", { n: stats.members })}
-              </div>
-            </div>
-            <div>
-              <h4 className="font-display text-sm font-semibold text-gold">{t("footer.quickLinks")}</h4>
-              <ul className="mt-3 space-y-2 text-sm text-cream/70">
-                <li><Link to="/about" className="hover:text-gold">{t("footer.about")}</Link></li>
-                <li><Link to="/events" className="hover:text-gold">{t("footer.events")}</Link></li>
-                <li><Link to="/register" className="hover:text-gold">{t("footer.registration")}</Link></li>
-                <li><Link to="/application-status" className="hover:text-gold">{t("footer.appStatus")}</Link></li>
-                <li><Link to="/rules" className="hover:text-gold">{t("nav.rules")}</Link></li>
-                <li><Link to="/principles" className="hover:text-gold">{t("nav.principles")}</Link></li>
-                <li><Link to="/news" className="hover:text-gold">{t("nav.news")}</Link></li>
-                <li><Link to="/help" className="hover:text-gold">{t("footer.help")}</Link></li>
-                <li><Link to="/admin" className="hover:text-gold">{t("footer.adminAccess")}</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-display text-sm font-semibold text-gold">{t("footer.contact")}</h4>
-              <ul className="mt-3 space-y-2 text-sm text-cream/70">
-                <li><Link to="/portal" className="hover:text-gold">{t("footer.memberPortal")}</Link></li>
-                <li>Nimar, Indore, Madhya Pradesh</li>
-                <li><a href="mailto:info@npsindore.org" className="hover:text-gold">info@npsindore.org</a></li>
-                <li><a href="tel:9179856878" className="hover:text-gold">9179856878</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-gold/20 pt-5 text-center text-xs text-cream/60 sm:flex-row">
-            <span>© {new Date().getFullYear()} Nimar Patidar Sangathan – Indore. {t("footer.rights")}</span>
-            <button
-              type="button"
-              onClick={() => window.scrollTo({ top: 0, left: 0, behavior: "smooth" })}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gold/40 text-gold transition hover:bg-gold hover:text-maroon"
-              title="Back to top"
-              aria-label="Back to top"
-            >
-              <ArrowUp className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </footer>
+      <CommunityHighlights />
+      <PublicFooter />
     </div>
   );
 }

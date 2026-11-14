@@ -239,3 +239,13 @@
     }
   }
 }
+/* Public navigation anchors clear the sticky header on phones and desktops. */
+section[id], article[id] { scroll-margin-top: 15rem; }
+.public-link { display: inline-flex; align-items: center; min-height: 44px; }
+.public-link[aria-current="page"] { color: hsl(var(--primary)); font-weight: 700; }
+:where(a, button, summary):focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .marquee-track { animation: none; width: auto; white-space: normal; }
+  .marquee-track > [aria-hidden="true"] { display: none; }
+}

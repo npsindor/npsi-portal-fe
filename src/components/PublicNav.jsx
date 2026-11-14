@@ -1,134 +1,56 @@
-import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Info, CalendarDays, ScrollText, LayoutDashboard, UserRound, Menu, X, Lightbulb, Newspaper } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import LanguageToggle from "@/components/LanguageToggle";
-import ThemeToggle from "@/components/ThemeToggle";
-import { useAuth } from "@/lib/AuthContext";
-import { useT } from "@/lib/i18n";
-import logoImage from "@/images/logo.png";
+import { usePublicCopy } from '@/lib/public-copy';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
+import { useAuth } from '@/lib/AuthContext';
+import ThemeToggle from '@/components/ThemeToggle';
+import LanguageToggle from '@/components/LanguageToggle';
+import { publicNavigation } from '@/lib/public-navigation';
+import logoImage from '@/images/logo.png';
 
 export default function PublicNav() {
+  const c = usePublicCopy();
+  const [open, setOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
-  const t = useT();
-  const { user, isAuthenticated } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const displayName = (user?.fullName || "Member").split(" ").filter(Boolean)[0];
-  const initials = (user?.fullName || "Member")
-    .split(" ")
-    .map((w) => w[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-
-  const navItems = [
-    { label: t("nav.home"), path: "/", icon: Home },
-    { label: t("nav.about"), path: "/about", icon: Info },
-    { label: t("nav.events"), path: "/events", icon: CalendarDays },
-    { label: t("nav.rules"), path: "/rules", icon: ScrollText },
-    { label: t("nav.principles"), path: "/principles", icon: Lightbulb },
-    { label: t("nav.news"), path: "/news", icon: Newspaper },
-  ].filter((item) => !((isAuthenticated && (item.path === "/register"))));
-
-  return (
-    <header className="sticky top-0 z-40 border-b border-gold/30 bg-cream/90 backdrop-blur supports-[backdrop-filter]:bg-cream/75 dark:bg-card/90 dark:supports-[backdrop-filter]:bg-card/75">
-      <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6">
-        <Link to="/" className="flex shrink-0 items-center gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-gold/50 bg-maroon shadow-sm">
-            <img src={logoImage} alt="Nimar Patidar Sangathan Indore logo" className="h-full w-full rounded-xl object-contain" />
+  const header = useRef(null);
+  const menuButton = useRef(null);
+  const { isAuthenticated, user } = useAuth();
+  useEffect(() => {
+    setOpen(false);
+    header.current?.querySelectorAll('details[open]').forEach(item => item.removeAttribute('open'));
+  }, [location]);
+  useEffect(() => {
+    const close = event => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+        header.current?.querySelectorAll('details[open]').forEach(item => item.removeAttribute('open'));
+        menuButton.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', close);
+    return () => document.removeEventListener('keydown', close);
+  }, []);
+  return <header ref={header} className="sticky top-0 z-40 border-b border-gold/30 bg-background shadow-sm">
+    <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+      <Link to="/" className="flex min-w-0 flex-1 items-center gap-2 sm:flex-none">
+        <img src={logoImage} alt="" className="h-10 w-10 shrink-0 rounded-xl sm:h-12 sm:w-12" />
+        <span className="min-w-0 font-display text-xs font-semibold leading-snug text-maroon sm:text-base">{c("NIMAR PATIDAR SANGATHAN, INDORE")}<span className="mt-1 hidden text-xs font-normal text-muted-foreground sm:block">{c("Unity \u2022 Cooperation \u2022 Respect \u2022 Transparency")}</span></span>
+      </Link>
+      <div className="hidden items-center gap-2 sm:flex"><ThemeToggle /><LanguageToggle /><Link className="public-link" to={isAuthenticated ? (user?.role === 'admin' ? '/admin' : '/portal') : '/login'}>{c(isAuthenticated ? 'My Portal' : 'Member Login')}</Link></div>
+      <div className="sm:hidden"><LanguageToggle /></div>
+      <button ref={menuButton} type="button" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-border xl:hidden" aria-label={c(open ? 'Close navigation menu' : 'Open navigation menu')} aria-expanded={open} aria-controls="public-navigation" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button>
+      <Link to="/register" className="flex min-h-11 w-full items-center justify-center rounded-lg bg-maroon px-4 py-2 text-center text-sm font-semibold text-cream sm:w-auto">{c("Join the Organization")}</Link>
+    </div>
+    <nav id="public-navigation" aria-label={c("Main navigation")} className={`${open ? 'block' : 'hidden'} max-h-[65dvh] overflow-y-auto border-t border-border xl:block xl:overflow-visible`}>
+      <div className="mx-auto flex max-w-7xl flex-col px-4 py-2 xl:flex-row xl:flex-wrap xl:items-center xl:justify-between">
+        {publicNavigation.map(item => item.items ? <details key={item.label} className="group relative" onToggle={event => { if(event.currentTarget.open) header.current?.querySelectorAll('details[open]').forEach(other => { if(other !== event.currentTarget) other.removeAttribute('open'); }); }}>
+          <summary className="cursor-pointer rounded-lg px-2 py-3 text-sm font-medium text-foreground marker:text-gold hover:bg-muted">{c(item.label)}</summary>
+          <div className="border-l-2 border-gold bg-card p-2 xl:absolute xl:left-0 xl:top-full xl:w-60 xl:rounded-lg xl:border xl:border-border xl:shadow-xl">
+            {item.items.map(([label, to]) => <Link key={label} to={to} className="public-link block rounded-md px-3 py-3 text-sm hover:bg-muted">{c(label)}</Link>)}
           </div>
-          <span className="font-display text-sm font-semibold leading-tight tracking-wide text-maroon">
-            <span className="block">Nimar Patidar</span>
-            <span className="block text-[0.65rem] uppercase tracking-[0.12em] text-muted-foreground">Sangathan Indore</span>
-          </span>
-        </Link>
-
-        <nav className="hidden items-center gap-1 md:flex">
-          {navItems.map((item) => {
-            const active = location.pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`relative rounded-full px-4 py-2 text-sm font-medium transition ${
-                  active ? "text-maroon" : "text-foreground/70 hover:text-maroon"
-                }`}
-              >
-                {item.label}
-                {active && <span className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-gold" />}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <ThemeToggle />
-          <LanguageToggle />
-          {isAuthenticated ? (
-            <div className="flex items-center gap-2">
-              {user?.role === "admin" && (
-                <Button size="sm" variant="outline" className="hidden border-gold/50 text-maroon hover:bg-gold/10 sm:inline-flex" onClick={() => navigate("/admin")}>
-                  <LayoutDashboard className="mr-1.5 h-4 w-4" />
-                  {t("footer.adminAccess")}
-                </Button>
-              )}
-              <Button size="sm" className="hidden items-center gap-2 bg-maroon text-cream hover:bg-maroon-dark sm:inline-flex" onClick={() => navigate("/portal")}>
-                {user?.photoUrl ? (
-                  <img src={user.photoUrl} alt={displayName} className="h-6 w-6 rounded-full border border-gold/60 object-cover" />
-                ) : (
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gold/20 text-[0.65rem] font-semibold text-gold">
-                    {initials || <UserRound className="h-3.5 w-3.5" />}
-                  </span>
-                )}
-                {displayName}
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link to="/login" className="hidden text-sm font-semibold text-maroon hover:underline sm:block">
-                {t("nav.login")}
-              </Link>
-              <Button size="sm" className="hidden bg-maroon text-cream hover:bg-maroon-dark sm:inline-flex" onClick={() => navigate("/register")}>
-                {t("nav.registerBtn")}
-              </Button>
-            </div>
-          )}
-          <button
-            type="button"
-            className="rounded-lg p-2 text-maroon hover:bg-maroon/5 md:hidden"
-            onClick={() => setMenuOpen((open) => !open)}
-            aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
-            aria-expanded={menuOpen}
-          >
-            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        </div>
+        </details> : <Link key={item.label} to={item.to} aria-current={location.pathname === item.to ? 'page' : undefined} className="public-link rounded-lg px-2 py-3 text-sm font-medium hover:bg-muted">{c(item.label)}</Link>)}
+        <div className="flex flex-wrap items-center gap-2 border-t border-border pt-2 sm:hidden"><ThemeToggle /><LanguageToggle /><Link className="public-link" to={isAuthenticated ? '/portal' : '/login'}>{c(isAuthenticated ? 'My Portal' : 'Member Login')}</Link></div>
       </div>
-      {menuOpen && (
-        <nav className="border-t border-gold/20 bg-cream px-3 py-3 shadow-lg md:hidden">
-          <div className="space-y-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const active = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setMenuOpen(false)}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${active ? "bg-maroon text-cream" : "text-foreground/75 hover:bg-maroon/5 hover:text-maroon"}`}
-                >
-                  <Icon className={`h-4 w-4 ${active ? "text-gold" : "text-muted-foreground"}`} />
-                  {item.label}
-                </Link>
-              );
-            })}
-            {!isAuthenticated && <Link to="/login" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/75 hover:bg-maroon/5 hover:text-maroon">{t("nav.login")}</Link>}
-          </div>
-        </nav>
-      )}
-    </header>
-  );
+    </nav>
+  </header>;
 }
