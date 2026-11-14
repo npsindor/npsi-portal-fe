@@ -1,5 +1,8 @@
 import { test } from '@playwright/test';
 test.use({ baseURL: 'http://localhost:5173' });
+// Manual check against the running dev servers (frontend :5173, API :4000 with the leakcheck accounts), not part of
+// the mocked suite or CI: run it with LEAK_CHECK=1 npx playwright test tests/browser/zz-leak.spec.js
+test.skip(!process.env.LEAK_CHECK, 'manual leak check: set LEAK_CHECK=1 with the dev servers running');
 const PAGES = ['/', '/about', '/events', '/community-services', '/career-business', '/news', '/sagun', '/sagun?category=bride', '/transportation', '/medical', '/room-hunting', '/public-feedback', '/contact', '/verify/NPSI-FAM-LEAKB', '/application-status',
   '/portal', '/portal/registration', '/portal/family', '/portal/events', '/portal/notifications', '/portal/settings', '/portal/feedback'];
 const MARKERS = /LEAKCHECK-B|NPSI-FAM-LEAKB|9000022222|9000022223|member-b@leakcheck/;

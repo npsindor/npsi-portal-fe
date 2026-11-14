@@ -15,9 +15,13 @@ export default defineConfig({
   webServer: {
     // The API base is the app's own origin, so the mocked calls are same-origin.
     command: `vite build && vite preview --host 127.0.0.1 --port ${PORT} --strictPort`,
-    env: { VITE_API_BASE_URL: ORIGIN },
+    // Fixed values so the build never depends on a local .env (CI has none): the API is this origin, and a
+    // reCAPTCHA site key is set so protected forms ask the test's stubbed grecaptcha for a token.
+    env: { VITE_API_BASE_URL: ORIGIN, VITE_RECAPTCHA_SITE_KEY: 'playwright-test-site-key' },
     url: ORIGIN,
-    reuseExistingServer: !process.env.CI,
+    // Always the build made for these tests: a preview left running on this port (built for the real API)
+    // would silently answer with old code whose API calls the mocks can't serve.
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 });

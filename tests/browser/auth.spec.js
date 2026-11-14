@@ -26,6 +26,8 @@ test('mobile signup requires an email fallback for OTP and password recovery', a
 
 test('signup falls back to email verification when the deployed API lacks mobile OTP routes', async ({ page }) => {
   let registration;
+  // Logged out until the email code is verified, like the real signup (the session cookie comes with the verification).
+  let verified = false;
   await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN });
   await page.addInitScript(() => {
     localStorage.setItem('pss_lang', 'en');
@@ -36,18 +38,21 @@ test('signup falls back to email verification when the deployed API lacks mobile
     registration = route.request().postDataJSON();
     return route.fulfill({ json: { user: MEMBER, requiresOtp: true } });
   });
-  await page.route('**/api/v1/auth/otp-verifications', (route) => route.fulfill({ json: { user: MEMBER, accessToken: 'a'.repeat(64) }, headers: { 'Set-Cookie': 'npsi_session=x; Path=/; HttpOnly; SameSite=Strict' } }));
-  await page.route('**/api/v1/auth/me', (route) => route.fulfill({ json: MEMBER }));
+  await page.route('**/api/v1/auth/otp-verifications', (route) => {
+    verified = true;
+    return route.fulfill({ json: { user: MEMBER, accessToken: 'a'.repeat(64) }, headers: { 'Set-Cookie': 'npsi_session=x; Path=/; HttpOnly; SameSite=Strict' } });
+  });
+  await page.route('**/api/v1/auth/me', (route) => (verified ? route.fulfill({ json: MEMBER }) : route.fulfill({ status: 401, json: { error: 'Authentication required.' } })));
   await page.goto('/register-account');
   await page.locator('#otp-mobile').fill('9926877375');
   await page.locator('#otp-email').fill('new-member@example.test');
   await page.getByRole('button', { name: 'Send code' }).click();
-  await expect(page.getByText(/use an email verification code/i)).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: /use an email verification code/i })).toBeVisible();
   await page.locator('#reg-name').fill('New Test Member');
   await page.locator('#reg-password').fill('Secret123');
   await page.locator('#reg-confirm').fill('Secret123');
   await page.getByRole('button', { name: 'Create account' }).click();
-  await expect(page.getByRole('status')).toContainText('new-member@example.test');
+  await expect(page.getByRole('status').filter({ hasText: 'We sent a verification code to new-member@example.test' })).toBeVisible();
   expect(registration).toMatchObject({ email: 'new-member@example.test', phone: '9926877375', fullName: 'New Test Member', password: 'Secret123', recaptchaToken: 'test-recaptcha-token' });
   await page.locator('#legacy-register-code').fill('123456');
   await page.getByRole('button', { name: 'Verify' }).click();
