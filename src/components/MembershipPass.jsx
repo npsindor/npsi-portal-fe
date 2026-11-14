@@ -10,7 +10,7 @@ export default function MembershipPass({ family, onFlip }) {
 
       <div className="relative flex items-start justify-between">
         <div>
-          <div className="text-[0.6rem] uppercase tracking-[0.2em] text-gold/80">Patidar Samaj Sangathan</div>
+          <div className="text-[0.6rem] uppercase tracking-[0.2em] text-gold/80">Nimar Patidar Sangathan, Indore</div>
           <div className="font-display text-lg font-semibold text-gold">Family Membership Pass</div>
         </div>
         <div className="flex h-10 w-10 items-center justify-center rounded-full border border-gold/50 bg-maroon-dark">

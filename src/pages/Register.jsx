@@ -1,274 +1,200 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { ArrowLeft, Loader2, Lock, UserPlus, User, ShieldCheck } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import AuthLayout from "@/components/AuthLayout";
+import MobileOtpForm from "@/components/MobileOtpForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Lock, User, Phone, Loader2 } from "lucide-react";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import AuthLayout from "@/components/AuthLayout";
-import GoogleIcon from "@/components/GoogleIcon";
-import { toast } from "@/components/ui/use-toast";
+import { PasswordInput } from "@/components/ui/password-input";
 import { safeReturnTo } from "@/lib/authReturnTo";
-import { useT, useLang } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
+import { regCopy, translateError } from "@/lib/registration-copy";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 
+// Account-first registration: mobile → code on WhatsApp → password. The new account is logged in and
+// goes straight to the registration form (family ₹500 / student ₹100).
 export default function Register() {
-  const t = useT();
+  const tt = useT();
   const { lang } = useLang();
+  const t = regCopy[lang];
+  const [verified, setVerified] = useState(null); // { mobile, email, verificationToken }
   const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showOtp, setShowOtp] = useState(false);
-  const [otpCode, setOtpCode] = useState("");
+  const [legacyContact, setLegacyContact] = useState(null);
+  const [legacyCode, setLegacyCode] = useState("");
+  const returnTo = safeReturnTo();
+  const step = verified ? 2 : 0;
 
-  const handleSubmit = async (e) => {
+  const create = async (e) => {
     e.preventDefault();
     setError("");
-    if (!/^[6-9]\d{9}$/.test(phone.trim())) {
-      setError(t("auth.phoneInvalid"));
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError(t("auth.pwdNoMatch"));
-      return;
-    }
-    setLoading(true);
+    if (password.length < 6) return setError(translateError("Password must be at least 6 characters.", lang));
+    if (password !== confirm) return setError(t.passwordsDiffer);
+    setBusy(true);
     try {
-      const recaptchaToken = await getRecaptchaToken("account_register");
-      await base44.auth.register({ email, password, fullName: fullName, phone: phone.trim(), recaptchaToken });
-      setShowOtp(true);
+      await base44.auth.registerWithMobile({
+        phone: verified.mobile,
+        verificationToken: verified.verificationToken,
+        password,
+        email: verified.email || undefined,
+        fullName: fullName.trim() || undefined,
+      });
+      window.location.href = returnTo !== "/" ? returnTo : "/portal/registration";
     } catch (err) {
-      setError(err.message || "Registration failed");
+      const message = translateError(err.message, lang);
+      // An expired verification can only be fixed by verifying again.
+      if (/verification has expired|सत्यापन की अवधि/.test(message)) setVerified(null);
+      setError(message);
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   };
 
-  const handleVerify = async () => {
+  const legacyCreate = async (e) => {
+    e.preventDefault();
     setError("");
-    setLoading(true);
+    if (password.length < 6) return setError(translateError("Password must be at least 6 characters.", lang));
+    if (password !== confirm) return setError(t.passwordsDiffer);
+    setBusy(true);
     try {
-      // Verifying starts the session (the API sets the session cookie).
-      const result = await base44.auth.verifyOtp({ email, otpCode });
-      const returnTo = safeReturnTo();
-      const destination = returnTo !== "/" ? returnTo : result?.user?.role === "admin" ? "/admin" : "/portal";
-      window.location.href = destination;
+      const recaptchaToken = await getRecaptchaToken("register");
+      await base44.auth.register({
+        email: legacyContact.email,
+        phone: legacyContact.mobile,
+        fullName: fullName.trim() || undefined,
+        password,
+        recaptchaToken,
+      });
+      setLegacyContact((current) => ({ ...current, awaitingEmailCode: true }));
     } catch (err) {
-      setError(err.message || "Invalid verification code");
+      setError(translateError(err.message, lang));
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   };
 
-  const handleResend = async () => {
+  const legacyVerify = async (e) => {
+    e.preventDefault();
     setError("");
+    setBusy(true);
     try {
-      await base44.auth.resendOtp(email);
-      toast({ title: t("auth.codeSent"), description: t("auth.codeSentD") });
+      const result = await base44.auth.verifyOtp({ email: legacyContact.email, otpCode: legacyCode });
+      window.location.href = returnTo !== "/" ? returnTo : "/portal/registration";
+      return result;
     } catch (err) {
-      setError(err.message || "Failed to resend code");
+      setError(translateError(err.message, lang));
+    } finally {
+      setBusy(false);
     }
   };
-
-  const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", safeReturnTo());
-  };
-
-  if (showOtp) {
-    return (
-      <AuthLayout
-        icon={Mail}
-        title={t("auth.verifyTitle")}
-        subtitle={t("auth.verifySub", { email })}
-      >
-        {error && (
-          <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-            {error}
-          </div>
-        )}
-        <div className="flex justify-center mb-6">
-          <InputOTP
-            maxLength={6}
-            value={otpCode}
-            onChange={setOtpCode}
-            autoFocus
-            autoComplete="one-time-code"
-          >
-            <InputOTPGroup>
-              <InputOTPSlot index={0} />
-              <InputOTPSlot index={1} />
-              <InputOTPSlot index={2} />
-              <InputOTPSlot index={3} />
-              <InputOTPSlot index={4} />
-              <InputOTPSlot index={5} />
-            </InputOTPGroup>
-          </InputOTP>
-        </div>
-        <Button
-          className="w-full h-12 font-medium"
-          onClick={handleVerify}
-          disabled={loading || otpCode.length < 6}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              {t("auth.verifying")}
-            </>
-          ) : (
-            t("auth.verify")
-          )}
-        </Button>
-        <p className="text-center text-xs text-muted-foreground mt-2">{t("auth.demoNote")}</p>
-        <p className="text-center text-sm text-muted-foreground mt-4">
-          {t("auth.resendQ")}{" "}
-          <button onClick={handleResend} className="text-primary font-medium hover:underline">
-            {t("auth.resend")}
-          </button>
-        </p>
-      </AuthLayout>
-    );
-  }
 
   return (
     <AuthLayout
       icon={UserPlus}
-      title={t("auth.registerTitle")}
-      subtitle={t("auth.registerSub")}
+      title={t.accountTitle}
+      subtitle={t.accountSub}
       footer={
         <>
-          {t("auth.haveAccount")}{" "}
-          <Link
-            to={"/login" + (safeReturnTo() !== "/" ? "?returnTo=" + encodeURIComponent(safeReturnTo()) : "")}
-            className="text-primary font-medium hover:underline"
-          >
-            {t("auth.loginBtn")}
+          {t.haveAccount}{" "}
+          <Link to={"/login" + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")} className="text-primary font-medium hover:underline">
+            {t.login}
           </Link>
         </>
       }
     >
-      <Button
-        variant="outline"
-        className="w-full h-12 text-sm font-medium mb-6"
-        onClick={handleGoogle}
-      >
-        <GoogleIcon className="w-5 h-5 mr-2" />
-        {t("auth.google")}
-      </Button>
+      <ol className="mb-6 flex items-center gap-2 text-xs font-medium" aria-label={t.accountTitle}>
+        {[t.stepMobile, t.stepOtp, t.stepPassword].map((label, index) => (
+          <li key={label} className="flex flex-1 items-center gap-2">
+            <span
+              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${index <= (verified ? 2 : step) ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+              aria-current={index === (verified ? 2 : 0) ? "step" : undefined}
+            >
+              {index + 1}
+            </span>
+            <span className="truncate">{label}</span>
+          </li>
+        ))}
+      </ol>
 
-      <div className="relative mb-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-3 text-muted-foreground">{t("auth.or")}</span>
-        </div>
-      </div>
-
-      {error && (
-        <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="fullName">{t("auth.fullName")}</Label>
+      {!verified && !legacyContact ? (
+        <MobileOtpForm purpose="REGISTER" askEmail onVerified={setVerified} onUnsupported={setLegacyContact} />
+      ) : legacyContact?.awaitingEmailCode ? (
+        <form onSubmit={legacyVerify} className="space-y-4">
+          <p role="status" className="rounded-lg bg-primary/10 p-3 text-sm">
+            {lang === "hi" ? `हमने ${legacyContact.email} पर OTP भेजा है।` : `We sent a verification code to ${legacyContact.email}.`}
+          </p>
+          {error && <div role="alert" className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
+          <Label htmlFor="legacy-register-code">{t.enterCode}</Label>
           <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="fullName"
-              type="text"
-              autoComplete="name"
-              placeholder={t("auth.fullNamePlaceholder")}
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="pl-10 h-12"
-              required
-            />
+            <ShieldCheck className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <Input id="legacy-register-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={legacyCode} onChange={(event) => setLegacyCode(event.target.value.replace(/\D/g, "").slice(0, 6))} className="h-12 pl-10 tracking-[0.5em]" required />
           </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="phone">{t("auth.phone")}</Label>
-          <div className="relative">
-            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="phone"
-              type="tel"
-              inputMode="numeric"
-              autoComplete="tel"
-              maxLength={10}
-              placeholder={t("auth.phonePlaceholder")}
-              value={phone}
-              onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-              className="pl-10 h-12"
-              required
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">{t("auth.email")}</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              autoFocus
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="pl-10 h-12"
-              required
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">{t("auth.password")}</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <PasswordInput
-              id="password"
-              autoComplete="new-password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pl-10 h-12"
-              required
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="confirm">{t("auth.confirm")}</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <PasswordInput
-              id="confirm"
-              autoComplete="new-password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="pl-10 h-12"
-              required
-            />
-          </div>
-        </div>
-        <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              {t("auth.creating")}
-            </>
-          ) : (
-            t("auth.registerBtn")
+          <Button type="submit" className="h-12 w-full" disabled={busy || legacyCode.length !== 6}>{busy ? t.verifying : t.verify}</Button>
+          <button type="button" className="text-sm text-primary hover:underline disabled:opacity-50" disabled={busy} onClick={async () => {
+            setBusy(true); setError("");
+            try { await base44.auth.resendOtp(legacyContact.email); }
+            catch (err) { setError(translateError(err.message, lang)); }
+            finally { setBusy(false); }
+          }}>{t.resend}</button>
+        </form>
+      ) : legacyContact ? (
+        <form onSubmit={legacyCreate} className="space-y-4">
+          <p role="status" className="rounded-lg bg-primary/10 p-3 text-sm">
+            {lang === "hi" ? "इस सर्वर पर मोबाइल OTP उपलब्ध नहीं है। SMS शुल्क से बचने के लिए ईमेल पर निःशुल्क सत्यापन कोड भेजा जाएगा।" : "Mobile OTP is not available on this server yet. We’ll use an email verification code so you won’t incur SMS charges."}
+          </p>
+          {error && <div role="alert" className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
+          <p className="text-sm text-muted-foreground">+91 {legacyContact.mobile}</p>
+          <div className="space-y-2"><Label htmlFor="legacy-register-email">{lang === "hi" ? "ईमेल" : "Email"}</Label><Input id="legacy-register-email" type="email" autoComplete="email" value={legacyContact.email} onChange={(event) => setLegacyContact((current) => ({ ...current, email: event.target.value }))} required /></div>
+          <div className="space-y-2"><Label htmlFor="reg-name">{t.fullName}</Label><Input id="reg-name" autoComplete="name" maxLength={255} value={fullName} onChange={(event) => setFullName(event.target.value)} required /></div>
+          <div className="space-y-2"><Label htmlFor="reg-password">{t.createPassword}</Label><PasswordInput id="reg-password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} className="h-12" required minLength={6} /></div>
+          <div className="space-y-2"><Label htmlFor="reg-confirm">{t.confirmPassword}</Label><PasswordInput id="reg-confirm" autoComplete="new-password" value={confirm} onChange={(event) => setConfirm(event.target.value)} className="h-12" required minLength={6} /></div>
+          <Button type="submit" className="h-12 w-full" disabled={busy}>{busy ? t.creating : t.createAccount}</Button>
+        </form>
+      ) : (
+        <form onSubmit={create} className="space-y-4">
+          {error && (
+            <div role="alert" className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+              {error}
+            </div>
           )}
-        </Button>
-      </form>
+          <p className="text-sm text-muted-foreground">+91 {verified.mobile} ✓</p>
+          <div className="space-y-2">
+            <Label htmlFor="reg-name">{t.fullName}</Label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+              <Input id="reg-name" autoComplete="name" maxLength={255} value={fullName} onChange={(e) => setFullName(e.target.value)} className="pl-10 h-12" required />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="reg-password">{t.createPassword}</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+              <PasswordInput id="reg-password" autoComplete="new-password" autoFocus value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 h-12" required minLength={6} />
+            </div>
+            <p className="text-xs text-muted-foreground">{t.passwordRule}</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="reg-confirm">{t.confirmPassword}</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+              <PasswordInput id="reg-confirm" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="pl-10 h-12" required minLength={6} />
+            </div>
+          </div>
+          <Button type="submit" className="w-full h-12" disabled={busy}>
+            {busy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+            {busy ? t.creating : t.createAccount}
+          </Button>
+        </form>
+      )}
+      <Link to="/" className="mt-6 inline-flex w-full items-center justify-center gap-2 text-sm font-medium text-muted-foreground transition hover:text-primary">
+        <ArrowLeft className="h-4 w-4" />
+        {tt("common.backToWebsite")}
+      </Link>
     </AuthLayout>
   );
 }

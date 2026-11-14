@@ -171,7 +171,7 @@ export default function LaunchCurtain() {
         >
           निमाड़ पाटीदार संगठन, इंदौर
         </button>
-        <p className="text-xs uppercase tracking-[0.25em] text-gold/70 sm:text-sm">Nimar Patidar Sangathan Indore</p>
+        <p className="text-xs uppercase tracking-[0.25em] text-gold/70 sm:text-sm">Nimar Patidar Sangathan, Indore</p>
       </div>
     </div>
   );

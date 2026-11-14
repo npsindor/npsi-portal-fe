@@ -22,7 +22,7 @@ const translations = {
     "common.backToWebsite": "Back to Website",
 
     // Home
-    "home.badge": "Nimar Patidar Samaj Sangathan · Indore ",
+    "home.badge": "Nimar Patidar Sangathan, Indore",
     "home.title": "Together for a Stronger Community",
     "home.subtitle": "Nimar Patidar Sangathan, Indore, is a community platform dedicated to bringing people and families together through unity, cooperation, cultural traditions, education, professional networking, and social welfare.",
     "home.registerCta": "Register Your Family",
@@ -61,7 +61,7 @@ const translations = {
     "home.upcomingSub": "Join the next Sangathan gathering.",
     "home.viewAll": "View all",
     "home.viewEvent": "View Event",
-    "home.noEvents": "No upcoming events published yet.",
+    "home.noEvents": "No events published yet.",
     "home.announcements": "OFFICIAL ANNOUNCEMENTS",
     "home.noAnnouncements": "No announcements yet.",
 
@@ -80,9 +80,9 @@ const translations = {
 
     // About
     "about.badge": "About Us",
-    "about.title": "Patidar Samaj Sangathan",
+    "about.title": "Nimar Patidar Sangathan, Indore",
     "about.loc": "Indore (Nimar) · Madhya Pradesh",
-    "about.intro": "The Patidar Samaj Sangathan – Indore (Nimar) is a community organization dedicated to uniting Patidar families across the Indore and Nimar regions. Our mission is to preserve our shared heritage, strengthen family bonds, and serve our community through education, support, and celebration.",
+    "about.intro": "Nimar Patidar Sangathan, Indore, is a community organization dedicated to uniting Patidar families across the Indore and Nimar regions. Our mission is to preserve our shared heritage, strengthen family bonds, and serve our community through education, support, and celebration.",
     "about.vision": "Vision",
     "about.visionD": "A connected Patidar community where every family is recognized, supported, and celebrated.",
     "about.mission": "Mission",
@@ -257,7 +257,6 @@ const translations = {
     "auth.codeSentD": "Check your email for the new code.",
     "auth.pwdNoMatch": "Passwords do not match",
     "auth.forgotTitle": "Forgot password",
-    "auth.forgotSub": "Enter your email to receive a reset link",
     "auth.sendLink": "Send reset link",
     "auth.sending": "Sending...",
     "auth.resetSent": "If an account exists, a reset link has been sent.",
@@ -336,7 +335,7 @@ const translations = {
     // Rules
     "rules.badge": "Rules & Discipline",
     "rules.title": "Constitution & By-Laws",
-    "rules.sub": "The complete rules and constitution of the Patidar Samaj Sangathan.",
+    "rules.sub": "The complete rules and constitution of the Nimar Patidar Sangathan, Indore.",
     "rules.loading": "Loading rules...",
     "rules.empty": "No rules published yet.",
     "rules.section": "Section",
@@ -640,9 +639,9 @@ const translations = {
     "nav.membersHint": "{n} सदस्य रजिस्टर्ड",
     "common.backToWebsite": "वेबसाइट पर वापस",
 
-    "home.badge": "पाटीदार समाज संगठन · इंदौर (निमाड़)",
+    "home.badge": "निमाड़ पाटीदार संगठन, इंदौर",
     "home.title": "एक एकत्रित समुदाय, एक समय में एक परिवार।",
-    "home.subtitle": "पाटीदार समाज संगठन का डिजिटल घर — अपना परिवार रजिस्टर करें, सदस्यता प्रबंधित करें, संगठन के कार्यक्रमों से जुड़े रहें, और अपना डिजिटल सदस्यता कार्ड साथ रखें।",
+    "home.subtitle": "निमाड़ पाटीदार संगठन, इंदौर का डिजिटल घर — अपना परिवार रजिस्टर करें, सदस्यता प्रबंधित करें, संगठन के कार्यक्रमों से जुड़े रहें, और अपना डिजिटल सदस्यता कार्ड साथ रखें।",
     "home.registerCta": "अपना परिवार रजिस्टर करें",
     "home.statusCta": "आवेदन स्थिति जानें",
     "home.families": "परिवार",
@@ -679,7 +678,7 @@ const translations = {
     "home.upcomingSub": "अगले संगठन सम्मेलन में शामिल हों।",
     "home.viewAll": "सभी देखें",
     "home.viewEvent": "कार्यक्रम देखें",
-    "home.noEvents": "अभी कोई आगामी कार्यक्रम प्रकाशित नहीं।",
+    "home.noEvents": "अभी कोई कार्यक्रम प्रकाशित नहीं।",
     "home.announcements": "आधिकारिक घोषणाएँ",
     "home.noAnnouncements": "अभी कोई घोषणा नहीं।",
 
@@ -696,9 +695,9 @@ const translations = {
     "footer.help": "सहायता गाइड",
 
     "about.badge": "हमारे बारे में",
-    "about.title": "पाटीदार समाज संगठन",
+    "about.title": "निमाड़ पाटीदार संगठन, इंदौर",
     "about.loc": "इंदौर (निमाड़) · मध्य प्रदेश",
-    "about.intro": "पाटीदार समाज संगठन – इंदौर (निमाड़) एक सामुदायिक संगठन है जो इंदौर और निमाड़ क्षेत्रों के पाटीदार परिवारों को एकजुट करने के लिए समर्पित है। हमारा ध्येय हमारी साझी विरासत को संरक्षित रखना, पारिवारिक बंधनों को मजबूत करना और शिक्षा, सहयोग तथा उत्सवों के माध्यम से अपने समुदाय की सेवा करना है।",
+    "about.intro": "निमाड़ पाटीदार संगठन, इंदौर एक सामुदायिक संगठन है जो इंदौर और निमाड़ क्षेत्रों के पाटीदार परिवारों को एकजुट करने के लिए समर्पित है। हमारा ध्येय हमारी साझी विरासत को संरक्षित रखना, पारिवारिक बंधनों को मजबूत करना और शिक्षा, सहयोग तथा उत्सवों के माध्यम से अपने समुदाय की सेवा करना है।",
     "about.vision": "विज़न",
     "about.visionD": "एक जुड़ा हुआ पाटीदार समुदाय जहाँ हर परिवार मान्य, सहाय और उत्सवित हो।",
     "about.mission": "मिशन",
@@ -868,7 +867,6 @@ const translations = {
     "auth.codeSentD": "नया कोड के लिए अपना ईमेल देखें।",
     "auth.pwdNoMatch": "पासवर्ड मेल नहीं खाते",
     "auth.forgotTitle": "पासवर्ड भूल गए",
-    "auth.forgotSub": "रीसेट लिंक पाने के लिए अपना ईमेल दर्ज करें",
     "auth.sendLink": "रीसेट लिंक भेजें",
     "auth.sending": "भेजा जा रहा है...",
     "auth.resetSent": "यदि खाता है, तो रीसेट लिंक भेज दिया गया है।",
@@ -944,7 +942,7 @@ const translations = {
 
     "rules.badge": "संगठन के नियम",
     "rules.title": "संगठन के नियम",
-    "rules.sub": "पाटीदार समाज संगठन के निर्धारित नियम और अनुशासन।",
+    "rules.sub": "निमाड़ पाटीदार संगठन, इंदौर के निर्धारित नियम और अनुशासन।",
     "rules.loading": "नियम लोड हो रहे हैं...",
     "rules.empty": "अभी कोई नियम प्रकाशित नहीं।",
     "rules.section": "अनुभाग",

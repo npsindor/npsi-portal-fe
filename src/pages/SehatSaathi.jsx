@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useHeroText } from '@/components/PageContent';
 import { Link } from 'react-router-dom';
 import PublicNav from '@/components/PublicNav';
 import PublicFooter from '@/components/PublicFooter';
@@ -13,7 +14,7 @@ import '@/styles/sehat.css';
 
 const categories = ['HEALTH', 'DOCTOR', 'HOSPITAL', 'EMERGENCY', 'MEDICINE'];
 export default function SehatSaathi({ admin = false }) {
-  const { lang } = useLang(); const t = sehatCopy[lang]; const { user, isAuthenticated } = useAuth();
+  const { lang } = useLang(); const t = sehatCopy[lang]; const hero = useHeroText('medical', lang); const { user, isAuthenticated } = useAuth();
   const [publicData, setPublic] = useState({ resources: [], mrs: [], capabilities: { email: false, whatsapp: false } });
   const [mine, setMine] = useState(null); const [management, setManagement] = useState(null);
   const [tab, setTab] = useState(admin ? 'mrs' : 'requests'); const [editor, setEditor] = useState(null);
@@ -67,7 +68,7 @@ export default function SehatSaathi({ admin = false }) {
   };
   const RootTag = admin ? "div" : "main";
   const content = <div className="sehat-module"><RootTag>
-    {!admin && <section className="sehat-hero py-5"><div className="container"><p className="mb-2 fw-semibold">{t.title} · {t.subtitle}</p><h1 className="display-5 fw-bold">{t.hero}</h1><p className="lead mt-3 mb-4" style={{ maxWidth: '55rem' }}>{t.intro}</p><a className="btn btn-light" href="#sehat-workspace">{t.requestForm}</a></div></section>}
+    {!admin && <section className="sehat-hero py-5"><div className="container"><p className="mb-2 fw-semibold">{t.title} · {t.subtitle}</p><h1 className="display-5 fw-bold">{hero.title || t.hero}</h1><p className="lead mt-3 mb-4" style={{ maxWidth: '55rem', whiteSpace: 'pre-line' }}>{hero.intro || t.intro}</p><a className="btn btn-light" href="#sehat-workspace">{t.requestForm}</a></div></section>}
     <div className="container py-4 py-md-5">
       <div className="alert alert-warning" role="note">{t.emergency} <a href="tel:112" className="alert-link">112</a> · <a href="https://112.gov.in/" target="_blank" rel="noopener noreferrer">ERSS</a></div>
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">{admin ? <h1 className="h3 mb-0">{t.title}</h1> : <h2 className="h3 mb-0">{t.resources}</h2>}<button type="button" className="btn btn-outline-primary" disabled={busy || loading} onClick={() => { setError(''); load(); }}>{t.refresh}</button></div>

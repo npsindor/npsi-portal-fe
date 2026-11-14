@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Home, Users, CalendarDays, Bell, Settings, LogOut, Menu, X, Globe, MessageSquare } from "lucide-react";
+import { Home, Users, CalendarDays, Bell, Settings, LogOut, Menu, X, Globe, MessageSquare, Wallet } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import LanguageToggle from "@/components/LanguageToggle";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -19,6 +19,7 @@ export default function Layout() {
     { label: t("portal.home"), path: "/portal", icon: Home },
     { label: t("portal.family"), path: "/portal/family", icon: Users },
     { label: t("portal.events"), path: "/portal/events", icon: CalendarDays },
+    { label: "Event Kharcha / कार्यक्रम खर्च", path: "/portal/event-kharcha", icon: Wallet },
     { label: t("portal.notifications"), path: "/portal/notifications", icon: Bell },
     { label: t("portal.feedback"), path: "/portal/feedback", icon: MessageSquare, bottom: false },
     { label: t("portal.settings"), path: "/portal/settings", icon: Settings },
@@ -37,11 +38,11 @@ export default function Layout() {
       <aside className="fixed inset-y-0 left-0 hidden w-[300px] flex-col border-r border-gold/20 bg-card lg:flex">
         <div className="flex items-center gap-3 border-b border-gold/15 px-6 py-6">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-gold/50 bg-maroon shadow-sm">
-            <img src={logoImage} alt="Nimar Patidar Sangathan Indore logo" className="h-full w-full rounded-xl object-contain" />
+            <img src={logoImage} alt="Nimar Patidar Sangathan, Indore logo" className="h-full w-full rounded-xl object-contain" />
           </div>
           <span className="font-display text-base font-semibold leading-tight tracking-wide text-maroon">
             <span className="block">Nimar Patidar</span>
-            <span className="block text-[0.65rem] uppercase tracking-[0.12em] text-muted-foreground">Sangathan Indore</span>
+            <span className="block text-[0.65rem] uppercase tracking-[0.12em] text-muted-foreground">Sangathan, Indore</span>
           </span>
         </div>
 
@@ -98,11 +99,11 @@ export default function Layout() {
         </Link>
         <Link to="/portal" className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-gold/50 bg-maroon">
-            <img src={logoImage} alt="Nimar Patidar Sangathan Indore logo" className="h-full w-full rounded-lg object-contain" />
+            <img src={logoImage} alt="Nimar Patidar Sangathan, Indore logo" className="h-full w-full rounded-lg object-contain" />
           </div>
           <span className="font-display text-xs font-semibold leading-tight tracking-wide text-maroon">
             <span className="block">Nimar Patidar</span>
-            <span className="block text-[0.55rem] uppercase tracking-[0.1em] text-muted-foreground">Sangathan Indore</span>
+            <span className="block text-[0.55rem] uppercase tracking-[0.1em] text-muted-foreground">Sangathan, Indore</span>
           </span>
         </Link>
         <div className="flex items-center gap-2">

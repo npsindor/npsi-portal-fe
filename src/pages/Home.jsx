@@ -1,44 +1,85 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarDays, MapPin, Bell, Users, ShieldCheck, Heart, BookOpen, ChevronRight, UserPlus, GraduationCap, ClipboardCheck, Info, ScrollText, HelpCircle } from "lucide-react";
+import { ArrowRight, CalendarDays, MapPin, Bell, Users, UsersRound, Heart, BookOpen, UserPlus, GraduationCap, ClipboardCheck, Info, ScrollText, HelpCircle, Briefcase, Bus, Stethoscope, House, MessageSquare, Phone, Newspaper, HeartHandshake, Landmark, Sparkles } from "lucide-react";
 import { usePublicCopy } from '@/lib/public-copy';
 import PublicFooter from '@/components/PublicFooter';
-import CommunityHighlights from '@/components/CommunityHighlights';
+import CommunityHighlights, { ParticipationSection } from '@/components/CommunityHighlights';
+import HomeShowcase from '@/components/HomeShowcase';
+import HomeLogoCarousel from '@/components/HomeLogoCarousel';
 import PublicNav from "@/components/PublicNav";
+import { introCopy, usePageContent } from "@/components/PageContent";
 import { base44 } from "@/api/base44Client";
 import { useT, useLang } from "@/lib/i18n";
 import { localizedText } from "@/lib/utils";
-import logoVideo from "@/images/logo.mp4";
+import { publicNavigation } from "@/lib/public-navigation";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+
+// Icon and 3D-tile colours (light, deep) for each service card.
+const serviceIcons = {
+  "About Us": [Landmark, "#3b82c4", "#123a63"],
+  "Events & Programs": [CalendarDays, "#fbbf24", "#c2410c"],
+  "Community Services": [HeartHandshake, "#f472b6", "#be185d"],
+  "Career & Business": [Briefcase, "#818cf8", "#3730a3"],
+  Sandesh: [Newspaper, "#38bdf8", "#0369a1"],
+  Sagun: [UsersRound, "#fb7185", "#9f1239"],
+  Transportation: [Bus, "#facc15", "#b45309"],
+  Medical: [Stethoscope, "#34d399", "#047857"],
+  "Room Hunting": [House, "#a78bfa", "#6d28d9"],
+  Feedback: [MessageSquare, "#2dd4bf", "#0f766e"],
+  "Contact Us": [Phone, "#e6c86e", "#9a6f12"],
+};
+
+// Published events for the homepage: upcoming ones first (soonest first), then completed ones (most recent first).
+const homeEvents = (rows) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const published = rows.filter((e) => e.status === "PUBLISHED").map((e) => ({ ...e, completed: Boolean(e.date) && new Date(e.date) < today }));
+  const time = (e) => (e.date ? new Date(e.date).getTime() : Infinity);
+  const upcoming = published.filter((e) => !e.completed).sort((a, b) => time(a) - time(b));
+  const completed = published.filter((e) => e.completed).sort((a, b) => time(b) - time(a));
+  return [...upcoming, ...completed].slice(0, 9);
+};
 
 export default function Home() {
   const t = useT();
   const c = usePublicCopy();
   const { lang } = useLang();
   const [events, setEvents] = useState([]);
+  const [eventCarouselApi, setEventCarouselApi] = useState(null);
+  const [activeEventSlide, setActiveEventSlide] = useState(0);
+  const [eventSlideCount, setEventSlideCount] = useState(0);
   const [announcements, setAnnouncements] = useState([]);
-  const [stats, setStats] = useState({ families: null, members: null });
-  const keepVideoMuted = (event) => {
-    const video = event.currentTarget;
-    if (!video.muted) video.muted = true;
-    if (video.volume !== 0) video.volume = 0;
-  };
+  // Section heading and text from Admin → Page Content → Home → Events; built-in copy otherwise.
+  const pageContent = usePageContent("home");
+  const eventsCopy = introCopy(pageContent.intro("events"), lang, t("home.upcomingTitle"), t("home.upcomingSub"));
 
   useEffect(() => {
     (async () => {
       try {
-        const evs = await base44.entities.Event.list("-createdAt", 50);
-        setEvents(evs.filter((e) => e.status === "PUBLISHED").slice(0, 3));
+        const evs = await base44.entities.Event.list("-date", 50);
+        setEvents(homeEvents(evs));
       } catch {}
       try {
         const anns = await base44.entities.Announcement.list("-date", 3);
         setAnnouncements(anns.filter((a) => a.status === "Active"));
       } catch {}
-      try {
-        const { families, members } = await base44.stats();
-        setStats((s) => ({ ...s, families, members }));
-      } catch {}
     })();
   }, []);
+
+  useEffect(() => {
+    if (!eventCarouselApi) return;
+    const updateCarouselState = () => {
+      setActiveEventSlide(eventCarouselApi.selectedScrollSnap());
+      setEventSlideCount(eventCarouselApi.scrollSnapList().length);
+    };
+    updateCarouselState();
+    eventCarouselApi.on("select", updateCarouselState);
+    eventCarouselApi.on("reInit", updateCarouselState);
+    return () => {
+      eventCarouselApi.off("select", updateCarouselState);
+      eventCarouselApi.off("reInit", updateCarouselState);
+    };
+  }, [eventCarouselApi]);
 
   const pillars = [
     { icon: Users, title: t("home.p1t"), desc: t("home.p1d") },
@@ -56,233 +97,188 @@ export default function Home() {
     { icon: ScrollText, title: t("home.service6t"), desc: t("home.service6d"), cta: t("home.serviceCta"), to: "/rules" },
     { icon: HelpCircle, title: t("home.service7t"), desc: t("home.service7d"), cta: t("home.serviceCta"), to: "/help" },
   ];
-
+  const menuServices = publicNavigation
+    .filter((item) => item.label !== "Home" && serviceIcons[item.label])
+    .map((item) => ({ ...item, icon: serviceIcons[item.label][0], colors: serviceIcons[item.label].slice(1), title: c(item.label) }));
   return (
     <div className="min-h-screen bg-background">
       <PublicNav />
 
-      {/* Hero band */}
-      <section className="relative overflow-hidden hero-band text-cream">
-        <div className="absolute inset-0 shell-grid opacity-[0.06]" />
-        <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full border border-gold/10" />
-        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full border border-gold/10" />
-        <div className="relative mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:gap-10 sm:px-6 sm:py-14 lg:grid-cols-12 lg:py-24">
-          <div className="min-w-0 lg:col-span-7">
-            <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-left text-[0.7rem] font-semibold leading-tight tracking-wide text-gold sm:text-xs">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              {t("home.badge")}
-            </span>
-            <h1 className="mt-5 break-words font-display text-3xl font-semibold leading-[1.1] text-cream sm:mt-6 sm:text-5xl lg:text-[3.4rem]">
-              {t("home.title")}
-            </h1>
-            <p className="mt-4 max-w-xl text-sm leading-relaxed text-cream/75 sm:mt-5 sm:text-base">
-              {t("home.subtitle")}
-            </p>
-            <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap">
-              <Link
-                to="/register"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gold px-5 py-3 text-sm font-semibold text-maroon shadow-lg transition hover:bg-gold-light sm:w-auto sm:px-6"
-              >
-                {t("home.registerCta")}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/events"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-cream/30 px-5 py-3 text-sm font-semibold text-cream transition hover:bg-cream/10 sm:w-auto sm:px-6"
-              >
-                {lang === "hi" ? "हमारी गतिविधियाँ देखें" : "Explore Our Activities"}
-              </Link>
-              <Link
-                to="/student-register"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-gold/50 bg-gold/10 px-5 py-3 text-sm font-semibold text-gold transition hover:bg-gold/20 sm:w-auto sm:px-6"
-              >
-                <GraduationCap className="h-4 w-4" />
-                {t("nav.students")}
+      <main>
+        <section id="services" className="border-b border-border bg-card">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-12 lg:gap-10">
+            <div className="min-w-0 lg:col-span-5">
+              <HomeLogoCarousel />
+            </div>
+            <div className="min-w-0 lg:col-span-7">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+              <div>
+                <span className="eyebrow">{lang === "hi" ? "एक ही जगह पर" : "One trusted place"}</span>
+                <h1 className="mt-3 section-title">{lang === "hi" ? "समुदाय की सेवाएँ" : "Explore community services"}</h1>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">{lang === "hi" ? "सदस्यता, शिक्षा, कार्यक्रम और सामुदायिक सहयोग के लिए जरूरी सेवाओं तक जल्दी पहुँचें।" : "Quick access to membership, education, events and practical community support."}</p>
+              </div>
+              <Link to="/help" className="inline-flex min-h-10 items-center gap-2 self-start text-sm font-semibold text-maroon hover:text-gold-dark sm:self-auto">
+                {lang === "hi" ? "पोर्टल गाइड" : "Portal guide"} <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-            <div className="mt-9 grid grid-cols-3 gap-3 sm:mt-10 sm:flex sm:items-center sm:gap-8">
-              <div>
-                <div className="font-display text-2xl font-bold text-gold sm:text-3xl">{Number.isFinite(stats.families) ? stats.families : "—"}</div>
-                <div className="text-[0.6rem] uppercase leading-tight tracking-[0.1em] text-cream/60 sm:text-xs sm:tracking-[0.18em]">{t("home.families")}</div>
-              </div>
-              <div className="hidden h-10 w-px bg-cream/15 sm:block" />
-              <div>
-                <div className="font-display text-2xl font-bold text-gold sm:text-3xl">{Number.isFinite(stats.members) ? stats.members : "—"}</div>
-                <div className="text-[0.6rem] uppercase leading-tight tracking-[0.1em] text-cream/60 sm:text-xs sm:tracking-[0.18em]">{t("home.members")}</div>
-              </div>
-              <div className="hidden h-10 w-px bg-cream/15 sm:block" />
-              <div>
-                <div className="font-display text-2xl font-bold text-gold sm:text-3xl">{events.length}</div>
-                <div className="text-[0.6rem] uppercase leading-tight tracking-[0.1em] text-cream/60 sm:text-xs sm:tracking-[0.18em]">{t("home.upcomingEvents")}</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="min-w-0 lg:col-span-5">
-            <div className="rounded-2xl border border-gold/30 bg-maroon-dark/40 p-3 shadow-2xl backdrop-blur sm:p-6">
-              <div className="relative">
-                <video
-                  className="aspect-video w-full rounded-xl border border-gold/20 object-cover"
-                  src={logoVideo}
-                  autoPlay
-                  loop
-                  muted
-                  onLoadedMetadata={keepVideoMuted}
-                  onPlay={keepVideoMuted}
-                  onVolumeChange={keepVideoMuted}
-                  playsInline
-                  controls
-                  preload="metadata"
-                  aria-label={c("Nimar Patidar Sangathan, Indore")}
-                />
-
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Community message marquee */}
-      <div className="overflow-hidden border-b border-gold/20 bg-gold py-2.5 text-maroon" aria-label="Community message">
-        <div className="marquee-track flex w-max whitespace-nowrap">
-          <span className="px-4 text-sm font-semibold tracking-wide">
-            {lang === "hi" ? "एकता हमारी शक्ति • संगठन हमारी पहचान • सहयोग हमारा संस्कार • पारदर्शिता हमारा विश्वास • प्रगति, उन्नति एवं कल्याण हमारा संकल्प।" : "Unity is our strength • Cooperation brings us together • Transparency builds trust • Shared progress and welfare are our commitment."}
-          </span>
-          <span className="px-4 text-sm font-semibold tracking-wide" aria-hidden="true">
-            {lang === "hi" ? "एकता हमारी शक्ति • संगठन हमारी पहचान • सहयोग हमारा संस्कार • पारदर्शिता हमारा विश्वास • प्रगति, उन्नति एवं कल्याण हमारा संकल्प।" : "Unity is our strength • Cooperation brings us together • Transparency builds trust • Shared progress and welfare are our commitment."}
-          </span>
-        </div>
-      </div>
-
-      {/* Official announcements */}
-      <section id="updates" className="border-b border-gold/20 bg-maroon text-cream">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-          <div className="flex items-center gap-2 border-b border-gold/20 pb-3">
-            <Bell className="h-4 w-4 text-gold" />
-            <Link to="/news" className="group inline-flex items-center gap-1.5 font-display text-sm font-semibold tracking-wide text-gold hover:text-gold-light">
-              {t("home.announcements")} <ChevronRight className="h-4 w-4 transition group-hover:translate-x-1" />
-            </Link>
-          </div>
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
-            {announcements.length === 0 && (
-              <p className="text-sm text-cream/60">{t("home.noAnnouncements")}</p>
-            )}
-            {announcements.map((a) => (
-              <div key={a.id} className="rounded-xl border border-gold/15 bg-cream/5 p-3">
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 text-[0.6rem] font-semibold text-gold">{a.type}</span>
-                  <span className="text-[0.65rem] text-cream/50">
-                    {a.date ? new Date(a.date).toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN") : ""}
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
+              {menuServices.map((service) => (
+                <Link key={service.label} to={service.to} className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-sm transition hover:-translate-y-1 hover:border-gold/60 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold">
+                  <span className="service-thumb" style={{ "--c1": service.colors[0], "--c2": service.colors[1], borderRadius: 0 }} aria-hidden="true">
+                    <span className="service-icon-3d">
+                      <service.icon />
+                    </span>
                   </span>
-                </div>
-                <div className="mt-1.5 text-sm font-semibold text-cream">{localizedText(a, "title", lang)}</div>
-                <p className="mt-1 text-xs leading-relaxed text-cream/70 line-clamp-2">{localizedText(a, "body", lang)}</p>
-              </div>
-            ))}
-          </div>
-          <Link to="/news" className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-gold hover:text-gold-light">
-            {t("news.viewAll")} <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-      </section>
-
-      {/* Pillars */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-        <div className="text-center">
-          <div className="mx-auto h-1 w-12 rounded-full bg-gold/60" />
-          <h2 className="mt-4 section-title">{t("home.pillarsTitle")}</h2>
-          <p className="mt-2 text-sm text-muted-foreground">{t("home.pillarsSub")}</p>
-        </div>
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {pillars.map((p) => (
-            <div key={p.title} className="premium-card group p-6 transition hover:-translate-y-1 hover:shadow-lg">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-maroon/10 ring-1 ring-gold/20 transition group-hover:bg-maroon">
-                <p.icon className="h-5 w-5 text-maroon transition group-hover:text-gold" />
-              </div>
-              <h3 className="mt-5 font-display text-base font-semibold text-maroon">{p.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{p.desc}</p>
+                  <span className="flex items-center justify-between gap-2 px-3 py-3 text-sm font-semibold leading-snug text-foreground">
+                    <span className="min-w-0">{service.title}</span>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-gold transition group-hover:translate-x-1" aria-hidden="true" />
+                  </span>
+                </Link>
+              ))}
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Important services */}
-      <section id="services" className="border-y border-gold/20 bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <div className="h-1 w-12 rounded-full bg-gold/60" />
-              <h2 className="mt-4 section-title">{t("home.servicesTitle")}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">{t("home.servicesSub")}</p>
             </div>
           </div>
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {importantServices.map((service) => (
-              <Link
-                key={service.to}
-                to={service.to}
-                className="group premium-card flex min-h-52 flex-col p-6 transition hover:-translate-y-1 hover:border-gold hover:shadow-lg"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-maroon text-gold shadow-sm transition group-hover:bg-gold group-hover:text-maroon">
-                  <service.icon className="h-5 w-5" />
-                </div>
-                <h3 className="mt-5 font-display text-base font-semibold text-maroon">{service.title}</h3>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{service.desc}</p>
-                <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-maroon">
-                  {service.cta} <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-1" />
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Upcoming events */}
-      <section id="events" className="border-y border-gold/20 bg-cream/60">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-          <div className="flex items-end justify-between">
-            <div>
-              <div className="h-1 w-12 rounded-full bg-gold/60" />
-              <h2 className="mt-4 section-title">{t("home.upcomingTitle")}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">{t("home.upcomingSub")}</p>
-            </div>
-            <Link to="/events" className="hidden items-center gap-1 text-sm font-semibold text-maroon hover:gap-2 sm:inline-flex">
-              {t("home.viewAll")} <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
-            {events.length === 0 && (
-              <div className="col-span-full rounded-2xl border border-dashed border-border p-12 text-center text-sm text-muted-foreground">
-                {t("home.noEvents")}
+        <section className="border-y border-gold/20 bg-background">
+          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <span className="eyebrow"><Sparkles className="h-3.5 w-3.5" /> {lang === "hi" ? "शुरुआत करें" : "Get started"}</span>
+                <h2 className="mt-3 section-title">{t("home.servicesTitle")}</h2>
+                <p className="mt-2 text-sm text-muted-foreground">{t("home.servicesSub")}</p>
               </div>
-            )}
-            {events.map((ev) => (
-              <div key={ev.id} className="premium-card group overflow-hidden">
-                <div className="relative aspect-square bg-gradient-to-br from-maroon to-maroon-dark">
-                  {ev.bannerUrl && <img src={ev.bannerUrl} alt={localizedText(ev, "title", lang)} loading="lazy" decoding="async" className="h-full w-full object-contain" />}
+            </div>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {importantServices.slice(0, 4).map((service) => (
+                <Link key={service.to} to={service.to} className="group premium-card flex min-h-48 flex-col p-5 transition hover:-translate-y-1 hover:border-gold/60 hover:shadow-lg sm:p-6">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-maroon text-gold transition group-hover:bg-gold group-hover:text-maroon"><service.icon className="h-5 w-5" /></span>
+                  <h3 className="mt-4 font-display text-base font-semibold text-foreground">{service.title}</h3>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{service.desc}</p>
+                  <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-maroon">{service.cta} <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
 
-                </div>
-                <div className="p-5">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <CalendarDays className="h-3.5 w-3.5 text-gold" />
-                    {ev.date ? new Date(ev.date).toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
-                    <span className="text-border">·</span>
-                    <MapPin className="h-3.5 w-3.5 text-gold" />
-                    {localizedText(ev, "venue", lang)}
+        <ParticipationSection />
+
+        <section id="updates" className="border-y border-border bg-background">
+          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <span className="eyebrow"><Bell className="h-3.5 w-3.5" /> {lang === "hi" ? "आधिकारिक जानकारी" : "From the Sangathan"}</span>
+                <h2 className="mt-3 section-title">{t("home.announcements")}</h2>
+              </div>
+              <Link to="/news" className="hidden items-center gap-2 text-sm font-semibold text-maroon hover:text-gold-dark sm:inline-flex">{t("news.viewAll")} <ArrowRight className="h-4 w-4" /></Link>
+            </div>
+            <div className="mt-7 grid gap-4 md:grid-cols-3">
+              {announcements.length === 0 && <div className="col-span-full rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">{t("home.noAnnouncements")}</div>}
+              {announcements.map((announcement) => (
+                <article key={announcement.id} className="premium-card p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="rounded-full bg-gold/15 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-amber-800">{announcement.type}</span>
+                    <time className="text-xs text-muted-foreground">{announcement.date ? new Date(announcement.date).toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN") : ""}</time>
                   </div>
-                  <h3 className="mt-2 font-display text-base font-semibold text-maroon">{localizedText(ev, "title", lang)}</h3>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground line-clamp-2">{localizedText(ev, "description", lang)}</p>
-                  <Link to="/events" className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-maroon hover:gap-2">
-                    {t("home.viewEvent")} <ChevronRight className="h-3.5 w-3.5" />
-                  </Link>
-                </div>
-              </div>
-            ))}
+                  <h3 className="mt-4 font-display text-base font-semibold text-foreground">{localizedText(announcement, "title", lang)}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-3">{localizedText(announcement, "body", lang)}</p>
+                </article>
+              ))}
+            </div>
+            <Link to="/news" className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-maroon sm:hidden">{t("news.viewAll")} <ArrowRight className="h-4 w-4" /></Link>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <CommunityHighlights />
+        <section className="bg-card">
+          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+            <div className="max-w-2xl">
+              <span className="eyebrow">{lang === "hi" ? "हमारी प्रतिबद्धता" : "What brings us together"}</span>
+              <h2 className="mt-3 section-title">{t("home.pillarsTitle")}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("home.pillarsSub")}</p>
+            </div>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {pillars.map((pillar, index) => (
+                <article key={pillar.title} className="rounded-2xl border border-border bg-background p-5 sm:p-6">
+                  <span className={`flex h-12 w-12 items-center justify-center rounded-2xl ${index % 2 ? "bg-gold/15 text-amber-700" : "bg-maroon/10 text-maroon"}`}><pillar.icon className="h-5 w-5" /></span>
+                  <h3 className="mt-5 font-display text-base font-semibold text-foreground">{pillar.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{pillar.desc}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="events" className="bg-card">
+          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <span className="eyebrow"><CalendarDays className="h-3.5 w-3.5" /> {lang === "hi" ? "समाज कैलेंडर" : "Community calendar"}</span>
+                <h2 className="mt-3 section-title">{eventsCopy.title}</h2>
+                <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">{eventsCopy.intro}</p>
+              </div>
+              <Link to="/events" className="hidden items-center gap-2 text-sm font-semibold text-maroon hover:text-gold-dark sm:inline-flex">{t("home.viewAll")} <ArrowRight className="h-4 w-4" /></Link>
+            </div>
+            {events.length === 0 ? (
+              <div className="mt-8 rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">{t("home.noEvents")}</div>
+            ) : (
+              <>
+                <Carousel
+                  setApi={setEventCarouselApi}
+                  opts={{ align: "start", loop: events.length > 1 }}
+                  aria-label={lang === "hi" ? "आगामी कार्यक्रम कैरोसेल" : "Upcoming events carousel"}
+                  className="mt-8 px-1 sm:px-12"
+                >
+                  <CarouselContent className="-ml-4">
+                    {events.map((event) => (
+                      <CarouselItem key={event.id} className="pl-4 md:basis-1/2 xl:basis-1/3">
+                        <article className="premium-card group h-full overflow-hidden transition hover:-translate-y-1 hover:shadow-lg">
+                          <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-maroon to-maroon-dark">
+                            {event.bannerUrl && <img src={event.bannerUrl} alt={localizedText(event, "title", lang)} loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />}
+                            {!event.bannerUrl && <CalendarDays className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 text-gold/70" />}
+                            {event.completed && <span className="absolute left-3 top-3 rounded-full bg-maroon-dark/85 px-3 py-1 text-xs font-semibold text-cream backdrop-blur">{lang === "hi" ? "संपन्न" : "Completed"}</span>}
+                          </div>
+                          <div className="p-5">
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                              <CalendarDays className="h-3.5 w-3.5 text-gold" />
+                              {event.date ? new Date(event.date).toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                              {localizedText(event, "venue", lang) && <><span className="text-border">·</span><MapPin className="h-3.5 w-3.5 text-gold" /><span className="line-clamp-1">{localizedText(event, "venue", lang)}</span></>}
+                            </div>
+                            <h3 className="mt-3 font-display text-lg font-semibold text-foreground">{localizedText(event, "title", lang)}</h3>
+                            <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-3">{localizedText(event, "description", lang)}</p>
+                            <Link to="/events" className="mt-4 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-maroon">{t("home.viewEvent")} <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></Link>
+                          </div>
+                        </article>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  {eventSlideCount > 1 && <>
+                    <CarouselPrevious aria-label={lang === "hi" ? "पिछला कार्यक्रम" : "Previous event"} className="left-0 border-border bg-background text-foreground shadow-md hover:bg-muted" />
+                    <CarouselNext aria-label={lang === "hi" ? "अगला कार्यक्रम" : "Next event"} className="right-0 border-border bg-background text-foreground shadow-md hover:bg-muted" />
+                  </>}
+                </Carousel>
+                {eventSlideCount > 1 && (
+                  <div className="mt-5 flex justify-center gap-2" role="group" aria-label={lang === "hi" ? "कार्यक्रम स्लाइड चुनें" : "Choose event slide"}>
+                    {Array.from({ length: eventSlideCount }, (_, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        aria-label={`${lang === "hi" ? "कार्यक्रम" : "Event"} ${index + 1}`}
+                        aria-current={activeEventSlide === index ? "true" : undefined}
+                        onClick={() => eventCarouselApi?.scrollTo(index)}
+                        className={`h-2.5 rounded-full transition-all ${activeEventSlide === index ? "w-7 bg-maroon" : "w-2.5 bg-border hover:bg-gold"}`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+            <Link to="/events" className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-maroon sm:hidden">{t("home.viewAll")} <ArrowRight className="h-4 w-4" /></Link>
+          </div>
+        </section>
+
+        <CommunityHighlights afterServices={<HomeShowcase lang={lang} events={events} />} />
+      </main>
       <PublicFooter />
     </div>
   );

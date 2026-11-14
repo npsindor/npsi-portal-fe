@@ -1,6 +1,7 @@
 import { API } from './endpoints';
+import { API_BASE_URL } from './apiBaseUrl';
 
-const localApiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+const localApiBaseUrl = API_BASE_URL;
 
 // The session is an httpOnly cookie set by the API on login; `credentials: 'include'`
 // sends it. The token is never stored where page scripts could read it.
@@ -16,12 +17,23 @@ const request = async (path, options = {}) => {
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
+    if (response.status === 401) redirectToLogin(path);
     const error = new Error(body.error || `Local API request failed: ${response.status}`);
     error.status = response.status;
     throw error;
   }
 
   return response.status === 204 ? null : response.json();
+};
+
+// A session that expired (or belongs to another database) while working in the admin panel or member
+// portal: go to login and come back here afterwards, instead of failing every action with
+// "Authentication required.". The session check and login calls themselves never redirect.
+const redirectToLogin = (path) => {
+  if (typeof window === 'undefined' || path.startsWith(API.auth.me) || path.startsWith(API.auth.sessions)) return;
+  const { pathname, search, hash } = window.location;
+  if (!/^\/(admin|portal)(\/|$)/.test(pathname)) return;
+  window.location.assign(`/login?returnTo=${encodeURIComponent(`${pathname}${search}${hash}`)}`);
 };
 
 // Multipart upload — kept separate from request() above, which always
@@ -90,6 +102,12 @@ const createLocalAuth = () => ({
     return request(API.auth.otpVerifications, { method: 'POST', body: JSON.stringify(data) });
   },
   resendOtp: (email) => request(API.auth.otps, { method: 'POST', body: JSON.stringify({ email }) }),
+  // Mobile OTP (WhatsApp → SMS → email fallback): { mobile, purpose: 'REGISTER' | 'RESET', email?, recaptchaToken? }.
+  requestMobileOtp: (data) => request(API.auth.mobileOtps, { method: 'POST', body: JSON.stringify(data) }),
+  // → { verificationToken } for registerWithMobile / resetPassword({ phone, verificationToken, newPassword }).
+  verifyMobileOtp: (data) => request(API.auth.mobileOtpVerifications, { method: 'POST', body: JSON.stringify(data) }),
+  // The API sets the session cookie.
+  registerWithMobile: (data) => request(API.auth.mobileRegistrations, { method: 'POST', body: JSON.stringify(data) }),
   resetPasswordRequest: (email) => request(API.auth.passwordResets, { method: 'POST', body: JSON.stringify({ email }) }),
   resetPassword: (data) => request(API.auth.passwordResetConfirmations, { method: 'POST', body: JSON.stringify(data) }),
   changePassword: (data) => request(API.auth.password, { method: 'PUT', body: JSON.stringify(data) }),
@@ -139,7 +157,15 @@ export const base44 = {
     mine: () => request(`${API.sagun}/me`),
     browse: (query = {}) => request(`${API.sagun}/profiles?${new URLSearchParams(Object.entries(query).filter(([, value]) => value !== '' && value !== undefined))}`),
     detail: id => request(`${API.sagun}/profiles/${encodeURIComponent(id)}`),
-    save: (id, data, action, ownerUserId) => request(`${API.sagun}/profiles${id ? '/' + encodeURIComponent(id) : ''}`, { method: id ? 'PATCH' : 'POST', body: JSON.stringify({ data, action, ...(ownerUserId ? { ownerUserId } : {}) }) }),
+    save: (id, data, action, ownerUserId, memberId, category) => request(`${API.sagun}/profiles${id ? '/' + encodeURIComponent(id) : ''}`, { method: id ? 'PATCH' : 'POST', body: JSON.stringify({ data, action, ...(ownerUserId ? { ownerUserId } : {}), ...(memberId ? { memberId } : {}), ...(category ? { category } : {}) }) }),
+    eligibleMembers: () => request(`${API.sagun}/eligible-members`),
+    memberPrefill: memberId => request(`${API.sagun}/eligible-members/${encodeURIComponent(memberId)}`),
+    adminStats: () => request(`${API.sagun}/admin/stats`),
+    adminList: (query = {}) => request(`${API.sagun}/admin/profiles?${new URLSearchParams(Object.entries(query).filter(([, value]) => value !== '' && value !== undefined && value !== null))}`),
+    adminEdit: (id, data, remarks) => request(`${API.sagun}/admin/profiles/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ data, remarks }) }),
+    logs: id => request(`${API.sagun}/admin/profiles/${encodeURIComponent(id)}/logs`),
+    settings: () => request(`${API.sagun}/admin/settings`),
+    updateSettings: values => request(`${API.sagun}/admin/settings`, { method: 'PUT', body: JSON.stringify(values) }),
     review: (id, status, notes) => request(`${API.sagun}/admin/profiles/${encodeURIComponent(id)}/review`, { method: 'PATCH', body: JSON.stringify({ status, notes }) }),
     deactivate: id => request(`${API.sagun}/profiles/${encodeURIComponent(id)}/deactivation`, { method: 'PATCH' }),
     withdrawConsent: id => request(`${API.sagun}/profiles/${encodeURIComponent(id)}/consent-withdrawal`, { method: 'PATCH' }),
@@ -151,6 +177,24 @@ export const base44 = {
     upload: async (id, kind, file, consent) => { const body = new FormData(); body.append('file', file); body.append('consent', String(consent)); const response = await fetch(`${localApiBaseUrl}${API.sagun}/profiles/${encodeURIComponent(id)}/files/${encodeURIComponent(kind)}`, { method: 'POST', credentials: 'include', body }); if (!response.ok) throw new Error((await response.json()).error || 'SAGUN_FILE'); return response.json(); },
     file: async id => { const response = await fetch(`${localApiBaseUrl}${API.sagun}/files/${encodeURIComponent(id)}`, { credentials: 'include' }); if (!response.ok) throw new Error('SAGUN_NOT_FOUND'); return response.blob(); },
     deleteFile: id => request(`${API.sagun}/files/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  },
+  eventFinance: {
+    list: () => request(API.eventFinance),
+    detail: id => request(`${API.eventFinance}/${encodeURIComponent(id)}`),
+    categories: () => request(`${API.eventFinance}/admin/categories`),
+    saveCategory: (data, id) => request(`${API.eventFinance}/admin/categories${id ? '/' + encodeURIComponent(id) : ''}`, { method: id ? 'PATCH' : 'POST', body: JSON.stringify(data) }),
+    removeCategory: id => request(`${API.eventFinance}/admin/categories/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    save: (eventId, kind, data, id) => request(`${API.eventFinance}/admin/events/${encodeURIComponent(eventId)}/${kind}${id ? '/' + encodeURIComponent(id) : ''}`, { method: id ? 'PATCH' : 'POST', body: JSON.stringify(data) }),
+    review: (eventId, kind, id, status) => request(`${API.eventFinance}/admin/events/${encodeURIComponent(eventId)}/${kind}/${encodeURIComponent(id)}/review`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+    remove: (eventId, kind, id) => request(`${API.eventFinance}/admin/events/${encodeURIComponent(eventId)}/${kind}/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    roster: eventId => request(`${API.eventFinance}/admin/events/${encodeURIComponent(eventId)}/roster`),
+    saveRoster: (eventId, data, id) => request(`${API.eventFinance}/admin/events/${encodeURIComponent(eventId)}/roster${id ? '/' + encodeURIComponent(id) : ''}`, { method: id ? 'PATCH' : 'POST', body: JSON.stringify(data) }),
+    removeRoster: (eventId, id) => request(`${API.eventFinance}/admin/events/${encodeURIComponent(eventId)}/roster/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    saveTeam: (eventId, data, id) => request(`${API.eventFinance}/admin/events/${encodeURIComponent(eventId)}/teams${id ? '/' + encodeURIComponent(id) : ''}`, { method: id ? 'PATCH' : 'POST', body: JSON.stringify(data) }),
+    removeTeam: (eventId, id) => request(`${API.eventFinance}/admin/events/${encodeURIComponent(eventId)}/teams/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    saveResponsibility: (eventId, data, id) => request(`${API.eventFinance}/admin/events/${encodeURIComponent(eventId)}/responsibilities${id ? '/' + encodeURIComponent(id) : ''}`, { method: id ? 'PATCH' : 'POST', body: JSON.stringify(data) }),
+    members: q => request(`${API.eventFinance}/members?q=${encodeURIComponent(q)}`),
+    importRoster: (eventId, data) => request(`${API.eventFinance}/admin/events/${encodeURIComponent(eventId)}/roster/import`, { method: 'POST', body: JSON.stringify(data) }),
   },
   sehat: {
     public: () => request(`${API.sehat}/public`),
@@ -176,6 +220,63 @@ export const base44 = {
   entities: createLocalEntities(),
   auth: createLocalAuth(),
   users: createLocalUsers(),
+  // Account-first registration with UPI payment proof, and the admin payment review.
+  registrations: {
+    mine: () => request(API.me.registrations),
+    submit: (data) => request(API.me.registrations, { method: 'POST', body: JSON.stringify(data) }),
+    resubmit: (id, data) => request(API.me.registration(id), { method: 'PUT', body: JSON.stringify(data) }),
+    completion: () => request(API.me.profileCompletion),
+    uploadScreenshot: async (file) => {
+      const body = new FormData();
+      body.append('file', file);
+      const response = await fetch(`${localApiBaseUrl}${API.me.paymentScreenshots}`, { method: 'POST', credentials: 'include', body });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw Object.assign(new Error(result.error || 'Upload failed'), { status: response.status });
+      return result;
+    },
+    payments: (status = '', limit = 200) => request(`${API.registrationPayments}?${new URLSearchParams({ limit: String(limit), ...(status ? { status } : {}) })}`),
+    reviewPayment: (id, body) => request(API.registrationPaymentReview(id), { method: 'POST', body: JSON.stringify(body) }),
+    screenshot: async (id) => {
+      const response = await fetch(`${localApiBaseUrl}${API.registrationPaymentScreenshot(id)}`, { credentials: 'include' });
+      if (!response.ok) throw Object.assign(new Error('Record not found'), { status: response.status });
+      return response.blob();
+    },
+  },
+  addressOptions: {
+    list: (kind, city) => request(`${API.addressOptions}?${new URLSearchParams({ kind, ...(city ? { city } : {}) })}`),
+    all: () => request(API.addressOptionsAll),
+    create: (data) => request(API.addressOptions, { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => request(API.addressOption(id), { method: 'PATCH', body: JSON.stringify(data) }),
+    remove: (id) => request(API.addressOption(id), { method: 'DELETE' }),
+  },
+  // Homepage "Community highlights" slides. The public gets live slides; an admin session gets all of them.
+  homeHighlights: {
+    list: (slider) => request(slider ? `${API.homeHighlights}?${new URLSearchParams({ slider })}` : API.homeHighlights),
+    create: (data) => request(API.homeHighlights, { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => request(API.homeHighlight(id), { method: 'PATCH', body: JSON.stringify(data) }),
+    remove: (id) => request(API.homeHighlight(id), { method: 'DELETE' }),
+  },
+  // Community Services page posts. The public gets active posts; an admin session gets all of them.
+  communityPosts: {
+    list: (section) => request(section ? `${API.communityPosts}?${new URLSearchParams({ section })}` : API.communityPosts),
+    create: (data) => request(API.communityPosts, { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => request(API.communityPost(id), { method: 'PATCH', body: JSON.stringify(data) }),
+    remove: (id) => request(API.communityPost(id), { method: 'DELETE' }),
+  },
+  // Admin-managed content of the public menu pages. The public gets active blocks; an admin session gets all of them.
+  pageBlocks: {
+    list: (page) => request(page ? `${API.pageBlocks}?${new URLSearchParams({ page })}` : API.pageBlocks),
+    create: (data) => request(API.pageBlocks, { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => request(API.pageBlock(id), { method: 'PATCH', body: JSON.stringify(data) }),
+    remove: (id) => request(API.pageBlock(id), { method: 'DELETE' }),
+  },
+  seniorDisciplineCommittee: {
+    list: () => request(API.seniorDisciplineCommittee),
+    all: () => request(API.seniorDisciplineCommitteeAll),
+    create: (data) => request(API.seniorDisciplineCommittee, { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => request(API.seniorDisciplineCommitteeMember(id), { method: 'PATCH', body: JSON.stringify(data) }),
+    remove: (id) => request(API.seniorDisciplineCommitteeMember(id), { method: 'DELETE' }),
+  },
   integrations: {
     Core: {
       UploadPublicFile: uploadPublicFile,

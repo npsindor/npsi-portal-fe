@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useHeroText } from '@/components/PageContent';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Bell, Handshake, MapPin, Route, ShieldCheck } from 'lucide-react';
 import PublicNav from '@/components/PublicNav';
@@ -17,6 +18,7 @@ const secondary = 'inline-flex min-h-11 items-center justify-center rounded-xl b
 export default function SafarSaathi() {
   const { lang } = useLang();
   const t = safarCopy[lang];
+  const hero = useHeroText('transportation', lang);
   const { user, isAuthenticated } = useAuth();
   const [capabilities, setCapabilities] = useState(null);
   const [data, setData] = useState(null);
@@ -81,7 +83,7 @@ export default function SafarSaathi() {
   const errorText = error === 'required' ? t.required : (t.errors[error] || t.error);
   const isOffer = form.kind === 'OFFER';
   return <div className="min-h-screen bg-background"><PublicNav /><main>
-    <section className="bg-maroon text-cream"><div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20"><span className="inline-flex items-center gap-2 text-sm font-semibold text-gold"><Route className="h-5 w-5" />{t.title}</span><p className="mt-3 text-sm text-cream/75">{t.subtitle}</p><h1 className="mt-5 max-w-4xl font-display text-3xl font-semibold leading-tight sm:text-5xl">{t.headline}</h1><p className="mt-6 max-w-3xl text-base leading-relaxed text-cream/80">{t.intro}</p><a href="#safar-form" className="mt-7 inline-flex min-h-12 items-center gap-2 rounded-xl bg-gold px-5 py-3 font-semibold text-maroon">{t.submit}<ArrowRight className="h-4 w-4" /></a></div></section>
+    <section className="bg-maroon text-cream"><div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20"><span className="inline-flex items-center gap-2 text-sm font-semibold text-gold"><Route className="h-5 w-5" />{t.title}</span><p className="mt-3 text-sm text-cream/75">{t.subtitle}</p><h1 className="mt-5 max-w-4xl font-display text-3xl font-semibold leading-tight sm:text-5xl">{hero.title || t.headline}</h1><p className="mt-6 max-w-3xl whitespace-pre-line text-base leading-relaxed text-cream/80">{hero.intro || t.intro}</p><a href="#safar-form" className="mt-7 inline-flex min-h-12 items-center gap-2 rounded-xl bg-gold px-5 py-3 font-semibold text-maroon">{t.submit}<ArrowRight className="h-4 w-4" /></a></div></section>
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6"><h2 className="section-title">{t.how}</h2><ol className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{t.steps.map(([title, description], index) => <li key={index} className="rounded-2xl border border-border bg-card p-5"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-maroon font-semibold text-gold">{index + 1}</span><h3 className="mt-4 font-semibold">{title}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p></li>)}</ol></section>
     <section className="border-y border-border bg-card"><div className="mx-auto max-w-7xl px-4 py-12 sm:px-6"><h2 className="section-title">{t.requests}</h2><div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{t.requestCards.map(([title, description]) => <article key={title} className="rounded-xl border border-border p-5"><Handshake className="h-6 w-6 text-gold" /><h3 className="mt-4 font-semibold">{title}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p></article>)}</div><h2 className="mt-10 text-xl font-semibold">{t.why}</h2><ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">{t.benefits.map(text => <li key={text}>{text}</li>)}</ul></div></section>
     <section id="safar-form" className="mx-auto max-w-7xl px-4 py-12 sm:px-6"><h2 className="section-title">{t.formTitle}</h2><p className="mt-3 text-sm text-muted-foreground">{t.membership}</p><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t.channels}</p>

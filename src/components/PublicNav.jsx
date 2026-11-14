@@ -1,12 +1,24 @@
 import { usePublicCopy } from '@/lib/public-copy';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { ChevronDown, GraduationCap, LogIn, Menu, Sparkles, X } from 'lucide-react';
+import { studentLoginPath } from '@/lib/student-flow';
 import { useAuth } from '@/lib/AuthContext';
 import ThemeToggle from '@/components/ThemeToggle';
 import LanguageToggle from '@/components/LanguageToggle';
 import { publicNavigation } from '@/lib/public-navigation';
 import logoImage from '@/images/logo.png';
+import UserMenu from '@/components/UserMenu';
+
+// Phone: a light drawer list. Desktop (xl): a navy bar with a gold underline on the current page.
+const linkClass = [
+  'public-link relative flex w-full items-center justify-between gap-2 rounded-lg px-3 py-3 text-[0.95rem] font-medium text-foreground transition-colors hover:bg-muted',
+  'xl:w-auto xl:whitespace-nowrap xl:rounded-none xl:px-2 xl:py-0 xl:min-h-12 xl:text-[0.8rem] xl:font-semibold xl:text-cream/85 xl:hover:bg-transparent xl:hover:text-gold 2xl:px-3',
+  'xl:after:absolute xl:after:inset-x-2 xl:after:bottom-0 xl:after:h-[3px] xl:after:origin-center xl:after:scale-x-0 xl:after:rounded-t-full xl:after:bg-gold xl:after:transition-transform xl:hover:after:scale-x-100',
+  'aria-[current=page]:bg-maroon/5 aria-[current=page]:text-maroon xl:aria-[current=page]:bg-transparent xl:aria-[current=page]:text-gold xl:aria-[current=page]:after:scale-x-100',
+].join(' ');
+
+const isCurrent = (pathname, to) => (to === '/' ? pathname === '/' : pathname === to.split(/[?#]/)[0] || pathname.startsWith(`${to.split(/[?#]/)[0]}/`));
 
 export default function PublicNav() {
   const c = usePublicCopy();
@@ -14,42 +26,66 @@ export default function PublicNav() {
   const location = useLocation();
   const header = useRef(null);
   const menuButton = useRef(null);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const loginTo = `/login?returnTo=${encodeURIComponent(`${location.pathname}${location.search}${location.hash}`)}`;
+  const closeDropdowns = (except) => header.current?.querySelectorAll('details[open]').forEach(item => { if (item !== except) item.removeAttribute('open'); });
   useEffect(() => {
     setOpen(false);
-    header.current?.querySelectorAll('details[open]').forEach(item => item.removeAttribute('open'));
+    closeDropdowns();
   }, [location]);
   useEffect(() => {
     const close = event => {
       if (event.key === 'Escape') {
         setOpen(false);
-        header.current?.querySelectorAll('details[open]').forEach(item => item.removeAttribute('open'));
+        closeDropdowns();
         menuButton.current?.focus();
       }
     };
+    // A click outside an open dropdown closes it.
+    const outside = event => { if (!event.target.closest?.('details')) closeDropdowns(); };
     document.addEventListener('keydown', close);
-    return () => document.removeEventListener('keydown', close);
+    document.addEventListener('click', outside);
+    return () => {
+      document.removeEventListener('keydown', close);
+      document.removeEventListener('click', outside);
+    };
   }, []);
-  return <header ref={header} className="sticky top-0 z-40 border-b border-gold/30 bg-background shadow-sm">
-    <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
-      <Link to="/" className="flex min-w-0 flex-1 items-center gap-2 sm:flex-none">
-        <img src={logoImage} alt="" className="h-10 w-10 shrink-0 rounded-xl sm:h-12 sm:w-12" />
-        <span className="min-w-0 font-display text-xs font-semibold leading-snug text-maroon sm:text-base">{c("NIMAR PATIDAR SANGATHAN, INDORE")}<span className="mt-1 hidden text-xs font-normal text-muted-foreground sm:block">{c("Unity \u2022 Cooperation \u2022 Respect \u2022 Transparency")}</span></span>
+  return <header ref={header} className="sticky top-0 z-40 border-b border-border bg-background/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/85">
+    <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-2.5 sm:px-6 sm:py-3">
+      <Link to="/" className="flex min-w-0 flex-1 items-center gap-3 sm:flex-none">
+        <img src={logoImage} alt="" className="h-10 w-10 shrink-0 rounded-xl shadow-sm ring-1 ring-gold/30 sm:h-12 sm:w-12" />
+        <span className="min-w-0 leading-tight">
+          <span className="block font-display text-xs font-bold tracking-wide text-maroon sm:text-[0.95rem]">{c("NIMAR PATIDAR SANGATHAN, INDORE")}</span>
+          <span className="mt-1 hidden text-[0.7rem] font-medium uppercase tracking-[0.14em] text-gold-dark sm:block">{c("Unity • Cooperation • Respect • Transparency")}</span>
+        </span>
       </Link>
-      <div className="hidden items-center gap-2 sm:flex"><ThemeToggle /><LanguageToggle /><Link className="public-link" to={isAuthenticated ? (user?.role === 'admin' ? '/admin' : '/portal') : '/login'}>{c(isAuthenticated ? 'My Portal' : 'Member Login')}</Link></div>
-      <div className="sm:hidden"><LanguageToggle /></div>
-      <button ref={menuButton} type="button" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-border xl:hidden" aria-label={c(open ? 'Close navigation menu' : 'Open navigation menu')} aria-expanded={open} aria-controls="public-navigation" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button>
-      <Link to="/register" className="flex min-h-11 w-full items-center justify-center rounded-lg bg-maroon px-4 py-2 text-center text-sm font-semibold text-cream sm:w-auto">{c("Join the Organization")}</Link>
-    </div>
-    <nav id="public-navigation" aria-label={c("Main navigation")} className={`${open ? 'block' : 'hidden'} max-h-[65dvh] overflow-y-auto border-t border-border xl:block xl:overflow-visible`}>
-      <div className="mx-auto flex max-w-7xl flex-col px-4 py-2 xl:flex-row xl:flex-wrap xl:items-center xl:justify-between">
-        {publicNavigation.map(item => item.items ? <details key={item.label} className="group relative" onToggle={event => { if(event.currentTarget.open) header.current?.querySelectorAll('details[open]').forEach(other => { if(other !== event.currentTarget) other.removeAttribute('open'); }); }}>
-          <summary className="cursor-pointer rounded-lg px-2 py-3 text-sm font-medium text-foreground marker:text-gold hover:bg-muted">{c(item.label)}</summary>
-          <div className="border-l-2 border-gold bg-card p-2 xl:absolute xl:left-0 xl:top-full xl:w-60 xl:rounded-lg xl:border xl:border-border xl:shadow-xl">
-            {item.items.map(([label, to]) => <Link key={label} to={to} className="public-link block rounded-md px-3 py-3 text-sm hover:bg-muted">{c(label)}</Link>)}
+      <div className="ml-auto hidden items-center gap-2 sm:flex">
+        <ThemeToggle />
+        <LanguageToggle />
+        {/* Login links sit in the top bar on desktop; below xl they are in the menu drawer. */}
+        {!isAuthenticated && (
+          <div className="hidden items-center gap-1 xl:flex">
+            <Link className="public-link gap-1.5 rounded-full px-3 text-sm font-semibold text-maroon transition-colors hover:bg-muted" to={loginTo}><LogIn className="h-4 w-4" aria-hidden="true" />{c('Member Login')}</Link>
+            <Link className="public-link gap-1.5 rounded-full px-3 text-sm font-semibold text-maroon transition-colors hover:bg-muted" to={studentLoginPath()}><GraduationCap className="h-4 w-4" aria-hidden="true" />{c('Student Login')}</Link>
           </div>
-        </details> : <Link key={item.label} to={item.to} aria-current={location.pathname === item.to ? 'page' : undefined} className="public-link rounded-lg px-2 py-3 text-sm font-medium hover:bg-muted">{c(item.label)}</Link>)}
-        <div className="flex flex-wrap items-center gap-2 border-t border-border pt-2 sm:hidden"><ThemeToggle /><LanguageToggle /><Link className="public-link" to={isAuthenticated ? '/portal' : '/login'}>{c(isAuthenticated ? 'My Portal' : 'Member Login')}</Link></div>
+        )}
+      </div>
+      <div className="sm:hidden"><LanguageToggle /></div>
+      {isAuthenticated && <UserMenu />}
+      <button ref={menuButton} type="button" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border bg-card transition-colors hover:bg-muted xl:hidden" aria-label={c(open ? 'Close navigation menu' : 'Open navigation menu')} aria-expanded={open} aria-controls="public-navigation" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button>
+      {!isAuthenticated && <Link to="/register" className="join-cta lg:w-auto"><Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />{c("Join the Sangathan")}</Link>}
+    </div>
+    <nav id="public-navigation" aria-label={c("Main navigation")} className={`${open ? 'block' : 'hidden'} max-h-[70dvh] overflow-y-auto border-t border-border bg-background xl:block xl:max-h-none xl:overflow-visible xl:border-t-0 xl:bg-maroon`}>
+      <div className="mx-auto flex max-w-7xl flex-col divide-y divide-border/60 px-4 py-2 sm:px-6 xl:flex-row xl:flex-nowrap xl:items-stretch xl:justify-between xl:divide-y-0 xl:py-0">
+        {publicNavigation.map(item => item.items ? <details key={item.label} className="group relative" onToggle={event => { if (event.currentTarget.open) closeDropdowns(event.currentTarget); }}>
+          <summary aria-current={item.items.some(([, to]) => isCurrent(location.pathname, to)) ? 'page' : undefined} className={`${linkClass} cursor-pointer list-none [&::-webkit-details-marker]:hidden`}>
+            {c(item.label)}<ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 opacity-70 transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="mb-2 ml-3 border-l-2 border-gold/60 pl-2 xl:absolute xl:left-0 xl:top-full xl:z-50 xl:mb-0 xl:ml-0 xl:mt-0 xl:w-64 xl:rounded-xl xl:border xl:border-border xl:bg-card xl:p-2 xl:pl-2 xl:shadow-xl">
+            {item.items.map(([label, to]) => <Link key={label} to={to} className="public-link block rounded-lg px-3 py-2.5 text-sm text-foreground transition-colors hover:bg-muted hover:text-maroon">{c(label)}</Link>)}
+          </div>
+        </details> : <Link key={item.label} to={item.to} aria-current={isCurrent(location.pathname, item.to) ? 'page' : undefined} className={linkClass}>{c(item.label)}</Link>)}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3 xl:hidden"><span className="sm:hidden"><ThemeToggle /></span>{!isAuthenticated && <Link className="public-link gap-1.5 font-semibold text-maroon" to={loginTo}><LogIn className="h-4 w-4" aria-hidden="true" />{c('Member Login')}</Link>}{!isAuthenticated && <Link className="public-link gap-1.5 font-semibold text-maroon" to={studentLoginPath()}><GraduationCap className="h-4 w-4" aria-hidden="true" />{c('Student Login')}</Link>}</div>
       </div>
     </nav>
   </header>;

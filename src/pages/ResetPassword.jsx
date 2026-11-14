@@ -6,10 +6,12 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Lock, Loader2, AlertTriangle } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
+import { translateError } from "@/lib/registration-copy";
 
 export default function ResetPassword() {
   const t = useT();
+  const { lang } = useLang();
   const [searchParams] = useSearchParams();
   const resetToken = searchParams.get("token");
 
@@ -40,7 +42,7 @@ export default function ResetPassword() {
       await base44.auth.resetPassword({ resetToken, newPassword: effectiveNewPassword });
       window.location.href = "/login";
     } catch (err) {
-      setError(err.message || t("auth.resetFailed"));
+      setError(translateError(err.message, lang) || t("auth.resetFailed"));
     } finally {
       setLoading(false);
     }

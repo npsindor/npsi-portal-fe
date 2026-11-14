@@ -18,6 +18,18 @@ const has = (method, url) => {
 
 // The calls base44Client.js makes, by method.
 const CALLS = [
+  ['GET', API.eventFinance], ['GET', `${API.eventFinance}/NPSI-EVT-1`], ['GET', `${API.eventFinance}/admin/categories`],
+  ['GET', `${API.eventFinance}/members?q=patidar`],
+  ['POST', `${API.eventFinance}/admin/categories`], ['PATCH', `${API.eventFinance}/admin/categories/id`], ['DELETE', `${API.eventFinance}/admin/categories/id`],
+  ['POST', `${API.eventFinance}/admin/events/event/contributions`], ['PATCH', `${API.eventFinance}/admin/events/event/contributions/id`],
+  ['PATCH', `${API.eventFinance}/admin/events/event/contributions/id/review`], ['DELETE', `${API.eventFinance}/admin/events/event/contributions/id`],
+  ['POST', `${API.eventFinance}/admin/events/event/expenses`], ['PATCH', `${API.eventFinance}/admin/events/event/expenses/id`],
+  ['PATCH', `${API.eventFinance}/admin/events/event/expenses/id/review`], ['DELETE', `${API.eventFinance}/admin/events/event/expenses/id`],
+  ['GET', `${API.eventFinance}/admin/events/event/roster`], ['POST', `${API.eventFinance}/admin/events/event/roster`],
+  ['PATCH', `${API.eventFinance}/admin/events/event/roster/id`], ['DELETE', `${API.eventFinance}/admin/events/event/roster/id`],
+  ['POST', `${API.eventFinance}/admin/events/event/roster/import`], ['POST', `${API.eventFinance}/admin/events/event/teams`],
+  ['PATCH', `${API.eventFinance}/admin/events/event/teams/id`], ['DELETE', `${API.eventFinance}/admin/events/event/teams/id`],
+  ['POST', `${API.eventFinance}/admin/events/event/responsibilities`], ['PATCH', `${API.eventFinance}/admin/events/event/responsibilities/id`],
   ['GET', `${API.sagun}/schema`], ['GET', `${API.sagun}/me`], ['GET', `${API.sagun}/admin`],
   ['GET', `${API.sagun}/profiles`], ['POST', `${API.sagun}/profiles`],
   ['GET', `${API.sagun}/profiles/id`], ['PATCH', `${API.sagun}/profiles/id`], ['DELETE', `${API.sagun}/profiles/id`],
@@ -57,6 +69,11 @@ const CALLS = [
   ['GET', API.mobileAvailability('9876543210')],
   ['GET', API.emailAvailability('a@b.c')],
   ['GET', API.stats],
+  ['GET', API.seniorDisciplineCommittee],
+  ['GET', API.seniorDisciplineCommitteeAll],
+  ['POST', API.seniorDisciplineCommittee],
+  ['PATCH', API.seniorDisciplineCommitteeMember('id-1')],
+  ['DELETE', API.seniorDisciplineCommitteeMember('id-1')],
 ];
 const REVIEWED = ['Application', 'StudentApplication', 'TransferRequest'];
 const BATCH = ['FamilyMember', 'Notification'];

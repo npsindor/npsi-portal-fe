@@ -1,0 +1,107 @@
+// Built-in lists for the registration address pickers. Admin → Address options adds more (shown first).
+// The English name is the saved value (stable in both languages); `hi` is shown in Hindi.
+const toOptions = (rows) => rows.map(([en, hi]) => ({ value: en, en, hi }));
+
+// Indore areas / colonies where community families live (the Sangathan's own list first).
+export const INDORE_AREAS = toOptions([
+  ['Vijay Nagar', 'विजय नगर'],
+  ['Sukhliya', 'सुखलिया'],
+  ['Rajendra Nagar', 'राजेंद्र नगर'],
+  ['Vaishali Nagar', 'वैशाली नगर'],
+  ['Bijalpur', 'बिजलपुर'],
+  ['Silicon City', 'सिलिकॉन सिटी'],
+  ['Rau', 'राऊ'],
+  ['Star City', 'स्टार सिटी'],
+  ['Shivsagar', 'शिवसागर'],
+  ['Satellite Township', 'सैटेलाइट टाउनशिप'],
+  ['Treasure Town', 'ट्रेज़र टाउन'],
+  ['VIP Paraspar Nagar', 'वीआईपी परस्पर नगर'],
+  ['Treasure Fantasy', 'ट्रेज़र फैंटेसी'],
+  ['Mangliya', 'मांगलिया'],
+  ['Sanchar Nagar', 'संचार नगर'],
+  ['Bangali Square', 'बंगाली चौराहा'],
+  ['Vaibhav Nagar', 'वैभव नगर'],
+  ['Palasia', 'पलासिया'],
+  ['Bhawarkuan', 'भंवरकुआं'],
+  ['Sudama Nagar', 'सुदामा नगर'],
+  ['Annapurna', 'अन्नपूर्णा'],
+  ['Khajrana', 'खजराना'],
+  ['Nipania', 'निपानिया'],
+  ['Rajwada', 'राजवाड़ा'],
+  ['Mhow', 'महू'],
+]);
+
+// The 62 native villages of the community in Nimar (Khargone).
+export const NATIVE_VILLAGES = toOptions([
+  ['Aghawan (Temla)', 'अघावन (टेमला)'],
+  ['Aghawan-Khedi', 'अघावन-खेड़ी'],
+  ['Akawlya', 'अकावल्या'],
+  ['Asangaon', 'आसनगांव'],
+  ['Idaratpur (Badi Chhalpa)', 'इदारतपुर (बड़ी छालपा)'],
+  ['Ichhapur', 'इच्छापुर'],
+  ['Oon', 'ऊन'],
+  ['Ubdi', 'उबदी'],
+  ['Kamodwada', 'कमोदवाड़ा'],
+  ['Keli', 'केली'],
+  ['Khedi', 'खेड़ी'],
+  ['Khedi Khanpura', 'खेड़ी खानपुरा'],
+  ['Ghughri', 'घुघरी'],
+  ['Ghotiya', 'घोटिया'],
+  ['Ghegaon', 'घेगांव'],
+  ['Gandhawad', 'गंधावड़'],
+  ['Gawla', 'गवला'],
+  ['Gaonsan', 'गांवसन'],
+  ['Golwadi', 'गोलवाड़ी'],
+  ['Gopalpura (Narayanpura)', 'गोपालपुरा (नारायणपुरा)'],
+  ['Chandawad', 'चंदावड़'],
+  ['Chhoti Chhalpa', 'छोटी छालपा'],
+  ['Jaljyoti', 'जलज्योति'],
+  ['Temla', 'टेमला'],
+  ['Temarni', 'टेमरनी'],
+  ['Dabri', 'डाबरी'],
+  ['Dabhad (Surpala)', 'दाभड (सुरपाला)'],
+  ['Dalka', 'डालका'],
+  ['Dongargaon', 'डोंगरगांव'],
+  ['Dasanga', 'दसंगा'],
+  ['Dasnawal', 'दसनावाल'],
+  ['Dehri (Deri)', 'देहरी (डेरी)'],
+  ['Nandgaon-Bagud', 'नंदगांव-बगुद'],
+  ['Nandgaon-Road', 'नंदगांव-रोड'],
+  ['Nayanagar', 'नयानगर'],
+  ['Pandhaniya', 'पंधानिया'],
+  ['Pipri', 'पिपरी'],
+  ['Piprata', 'पिपराटा'],
+  ['Pokhar', 'पोखर'],
+  ['Bangwa', 'बंगवा'],
+  ['Banihar', 'बनिहार'],
+  ['Balwadi', 'बलवाड़ी'],
+  ['Bejapura', 'बेजापुरा'],
+  ['Begandi', 'बेगन्दी'],
+  ['Maltar', 'मलतार'],
+  ['Mengaon', 'मेनगांव'],
+  ['Mothapura', 'मोठापुरा'],
+  ['Rajur', 'रजुर'],
+  ['Rangaon', 'रणगांव'],
+  ['Ramangaon', 'रमनगांव'],
+  ['Rampura', 'रामपुरा'],
+  ['Rampur (Bamkhal)', 'रामपुर (बामखल)'],
+  ['Likkhi', 'लिक्खी'],
+  ['Lonara', 'लोनारा'],
+  ['Singun', 'सिनगुण'],
+  ['Sinkheda', 'सिंखेड़ा'],
+  ['Saikheda', 'साईखेड़ा'],
+  ['Sontalav', 'सोनतलाव'],
+  ['Sonipura', 'सोनिपुरा'],
+  ['Surpala', 'सुरपाला'],
+  ['Segaon', 'सेगांव'],
+  ['Hatola', 'हतोला'],
+]);
+
+// Admin-managed rows ({ value, labelHi }) first, then the built-in options they don't already cover
+// (matched on the English or Hindi name, ignoring case and spaces).
+const key = (text) => String(text || '').toLowerCase().replace(/\s+/g, '');
+export const mergeOptions = (managed, builtIn) => {
+  const own = (managed || []).map((row) => ({ value: row.value, en: row.value, hi: row.labelHi || row.value }));
+  const seen = new Set(own.flatMap((option) => [key(option.en), key(option.hi)]));
+  return [...own, ...builtIn.filter((option) => !seen.has(key(option.en)) && !seen.has(key(option.hi)))];
+};

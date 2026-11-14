@@ -44,6 +44,9 @@ export default function ApplicationStatus() {
             <div>
               <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("status.appId")}</label>
               <input
+                id="application-id"
+                autoComplete="off"
+                autoCapitalize="characters"
                 value={applicationId}
                 onChange={(e) => setApplicationId(e.target.value)}
                 placeholder="NPSI-APP-2026-000125"
@@ -54,6 +57,11 @@ export default function ApplicationStatus() {
             <div>
               <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("status.mobile")}</label>
               <input
+                id="application-mobile"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                maxLength={20}
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value)}
                 placeholder="9876543210"

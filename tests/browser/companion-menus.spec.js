@@ -24,11 +24,11 @@ for (const lang of ['en', 'hi']) {
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       }
       if (width < 1280) await page.getByRole('button', { name: hi ? 'नेविगेशन मेनू खोलें' : 'Open navigation menu', exact: true }).click();
-      const details = nav.locator('details').filter({ has: page.locator('summary').filter({ hasText: hi ? 'सामुदायिक सेवाएँ' : 'Community Services' }) });
-      await details.locator('summary').click();
-      await expect(details.getByRole('link')).toHaveCount(3);
-      await expect(details.getByRole('link', { name: hi ? 'किराया और संपत्ति' : 'Rent & Property', exact: true })).toHaveCount(0);
-      await expect(details.getByRole('link', { name: hi ? 'परिवहन' : 'Transport', exact: true })).toHaveCount(0);
+      // Community Services is a direct link to one page with its three sections (no dropdown).
+      await expect(nav.locator('summary').filter({ hasText: hi ? 'सामुदायिक सेवाएँ' : 'Community Services' })).toHaveCount(0);
+      await nav.getByRole('link', { name: hi ? 'सामुदायिक सेवाएँ' : 'Community Services', exact: true }).click();
+      await expect(page).toHaveURL(/\/community-services$/);
+      for (const id of ['blood-donation', 'emergency-help', 'social-welfare']) await expect(page.locator(`#${id}`)).toHaveCount(1);
       await page.goto('/medical');
       await expect(page.locator('#health-category')).toBeVisible();
 

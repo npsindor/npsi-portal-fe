@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { mockApi, NOT_LOGGED_IN } from './mock-api';
 import { publicNavigation } from '../../src/lib/public-navigation.js';
+import { publicHindi } from '../../src/lib/public-copy.js';
 
 const setup = async (page, lang = 'en') => {
   await page.addInitScript(value => localStorage.setItem('pss_lang', value), lang);
@@ -21,11 +22,11 @@ for (const lang of ['en', 'hi']) {
       const item = publicNavigation[index];
       for (const [childIndex, [, to]] of (item.items || [[item.label, item.to]]).entries()) {
         if (item.items) {
-          const details = nav.locator('details').nth(index);
+          const details = nav.locator('details').nth(publicNavigation.slice(0, index).filter((other) => other.items).length);
           await details.locator('summary').click();
           await details.getByRole('link').nth(childIndex).click();
         } else {
-          await nav.getByRole('link', { name: lang === 'hi' ? ({ Feedback: 'सुझाव', 'Contact Us': 'संपर्क करें', 'Room Hunting': 'आवास साथी', Transportation: 'सफ़र साथी', Medical: 'सेहत साथी' }[item.label]) : item.label, exact: true }).click();
+          await nav.getByRole('link', { name: lang === 'hi' ? ({ Feedback: 'सुझाव', 'Contact Us': 'संपर्क करें', 'Room Hunting': 'आवास साथी', Transportation: 'सफ़र साथी', Medical: 'सेहत साथी', Sagun: 'सगुन' }[item.label] || publicHindi[item.label]) : item.label, exact: true }).click();
         }
         await expect(page).toHaveURL(new URL(to, 'http://127.0.0.1:4173').href);
         await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
@@ -35,33 +36,22 @@ for (const lang of ['en', 'hi']) {
     }
   });
 
-  test(`${lang}: listings search, filter, detail, submission and session reset`, async ({ page }) => {
+  test(`${lang}: Career & Business shows admin-managed jobs and businesses in five sections`, async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    const calls = await setup(page, lang);
     const hi = lang === 'hi';
+    await page.addInitScript(value => localStorage.setItem('pss_lang', value), lang);
+    const block = (o) => ({ role: 'ITEM', titleHi: null, subtitle: null, subtitleHi: null, body: null, bodyHi: null, mediaType: 'NONE', mediaUrl: null, linkUrl: null, ctaLabel: null, ctaLabelHi: null, sortOrder: 0, active: true, page: 'careers', ...o });
+    const calls = await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN, 'GET /page-blocks': [
+      block({ id: 'j1', section: 'job-opportunities', title: 'Accounts Executive', titleHi: 'अकाउंट्स एग्जीक्यूटिव', subtitle: 'Patidar Traders · Indore', body: 'B.Com, 2 years experience.', linkUrl: 'https://example.com/apply', ctaLabel: 'Apply', ctaLabelHi: 'आवेदन करें' }),
+      block({ id: 'b1', section: 'business-directory', title: 'Shree Electricals', subtitle: 'Electrical contractor' }),
+    ] });
     await page.goto('/career-business');
-    await page.getByLabel(hi ? 'लिस्टिंग खोजें' : 'Search listings', { exact: true }).fill(hi ? 'अकाउंट्स' : 'Accounts');
-    await expect(page.getByRole('button', { name: hi ? 'विवरण देखें' : 'View Details', exact: true })).toHaveCount(1);
-    await page.getByRole('button', { name: hi ? 'विवरण देखें' : 'View Details', exact: true }).click();
-    await expect(page.getByRole('dialog')).toContainText(hi ? 'काल्पनिक रिक्ति' : 'Fictional vacancy');
-    await page.keyboard.press('Escape');
-    await page.getByLabel(hi ? 'लिस्टिंग खोजें' : 'Search listings', { exact: true }).fill('no-match-123');
-    await expect(page.getByText(hi ? 'कोई परिणाम नहीं मिला। दूसरी खोज या श्रेणी आज़माएँ।' : 'No results found. Try another search or category.')).toBeVisible();
-    await page.getByRole('button', { name: hi ? 'फ़िल्टर हटाएँ' : 'Clear filters' }).click();
-    await page.locator('#careers-filter').selectOption('business-directory');
-    await expect(page.getByRole('button', { name: hi ? 'विवरण देखें' : 'View Details', exact: true })).toHaveCount(1);
-    await page.locator('#careers-title').fill('Demo Example 123');
-    await page.locator('#careers-location').fill('Sample city');
-    await page.locator('#careers-description').fill('Fictional test listing');
-    await page.locator('#careers-category').selectOption('business-promotion');
-    await page.getByRole('checkbox').check();
-    await page.getByRole('button', { name: hi ? 'डेमो जमा करें' : 'Submit Demo', exact: true }).click();
-    await expect(page.getByRole('status')).toContainText(hi ? 'संगठन को कुछ नहीं' : 'Nothing has been sent');
-    await expect(page.getByRole('heading', { name: 'Demo Example 123' })).toBeVisible();
-    await page.reload();
-    await expect(page.getByRole('heading', { name: 'Demo Example 123' })).toBeVisible();
-    await page.getByRole('button', { name: hi ? 'डेमो रीसेट करें' : 'Reset Demo' }).click();
-    await expect(page.getByRole('heading', { name: 'Demo Example 123' })).toHaveCount(0);
+    for (const id of ['job-opportunities', 'post-a-vacancy', 'business-directory', 'career-guidance', 'business-promotion']) await expect(page.locator(`#${id}`)).toHaveCount(1);
+    const jobs = page.locator('#job-opportunities');
+    await expect(jobs.getByRole('heading', { name: hi ? 'अकाउंट्स एग्जीक्यूटिव' : 'Accounts Executive' })).toBeVisible();
+    await expect(jobs.getByRole('link', { name: hi ? 'आवेदन करें' : 'Apply' })).toHaveAttribute('target', '_blank');
+    await expect(page.locator('#business-directory').getByRole('heading', { name: 'Shree Electricals' })).toBeVisible();
+    await expect(page.getByLabel(hi ? 'लिस्टिंग खोजें' : 'Search listings', { exact: true })).toHaveCount(0);
     expect(calls.filter(call => call.key.startsWith('POST '))).toHaveLength(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
@@ -95,16 +85,16 @@ test('mobile language toggle persists and translates existing drafts without los
   await page.setViewportSize({ width: 320, height: 900 });
   await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN });
   await page.goto('/community-services');
-  await page.locator('#services-title').fill('Draft example');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Standing together when it matters most');
   await switchLanguage(page, true);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('समाज को सामुदायिक संसाधनों से जोड़ना');
-  await expect(page.locator('#services-title')).toHaveValue('Draft example');
-  await expect(page.getByRole('heading', { name: 'रक्तदान जागरूकता शिविर' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('ज़रूरत के समय एक-दूसरे के साथ');
+  for (const name of ['रक्तदान', 'आपातकालीन सहायता', 'समाज कल्याण']) await expect(page.getByRole('heading', { level: 2, name, exact: true })).toBeVisible();
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('lang', 'hi');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('समाज को सामुदायिक संसाधनों से जोड़ना');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('ज़रूरत के समय एक-दूसरे के साथ');
   await switchLanguage(page, false);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Connecting People with Community Resources');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Standing together when it matters most');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
 test('live event details and news use authored Hindi content alongside separate samples', async ({ page }) => {
@@ -124,5 +114,6 @@ test('live event details and news use authored Hindi content alongside separate 
   await page.goto('/news');
   await expect(page.getByRole('heading', { name: 'प्रकाशित सूचना' })).toBeVisible();
   await expect(page.getByText('पुष्ट सूचना का पूरा विवरण')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'नमूना संदेश' })).toBeVisible();
+  await expect(page.locator('#notices').getByRole('heading', { name: 'प्रकाशित सूचना' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'नमूना संदेश' })).toHaveCount(0);
 });

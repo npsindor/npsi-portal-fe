@@ -26,12 +26,16 @@ test('admin creates Deepotsav through API; published event appears on public pag
   await page.locator('#event-status').selectOption('PUBLISHED');
   await page.getByRole('button', { name: 'Create Event', exact: true }).last().click();
   await expect.poll(() => events.length).toBe(1);
-  expect(createdPayload).toMatchObject({ title: 'Sneh Deepotsav 2026', titleHi: 'स्नेह दीपोत्सव 2026', status: 'PUBLISHED', date: '2026-11-15', venue: 'Test venue only' });
+  expect(createdPayload).toMatchObject({ title: 'Sneh Deepotsav 2026', titleHi: 'स्नेह दीपोत्सव 2026', category: 'CULTURAL', status: 'PUBLISHED', date: '2026-11-15', venue: 'Test venue only' });
+  // Old ?category= links land on the matching section of the single Events page.
   await page.goto('/events?category=cultural');
-  await expect(page.getByRole('heading', { name: 'Sneh Deepotsav 2026', exact: true })).toBeVisible();
-  await expect(page.getByRole('img', { name: 'Sneh Deepotsav 2026', exact: true })).toHaveCSS('object-fit', 'contain');
+  const cultural = page.locator('#cultural');
+  await expect(cultural.getByRole('heading', { name: 'Sneh Deepotsav 2026', exact: true })).toBeVisible();
+  await expect(cultural).toBeInViewport();
+  await expect(cultural.getByRole('img', { name: 'Sneh Deepotsav 2026', exact: true })).toHaveCSS('object-fit', 'contain');
+  await expect(page.locator('#calendar').getByRole('heading', { name: 'Sneh Deepotsav 2026', exact: true })).toBeVisible();
   await page.locator('header').getByRole('button', { name: 'हिंदी में देखें', exact: true }).filter({ visible: true }).first().click();
-  await expect(page.getByRole('heading', { name: 'स्नेह दीपोत्सव 2026', exact: true })).toBeVisible();
+  await expect(cultural.getByRole('heading', { name: 'स्नेह दीपोत्सव 2026', exact: true })).toBeVisible();
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'स्नेह दीपोत्सव 2026', exact: true })).toBeVisible();
   // Public UI also excludes drafts when an admin session receives all records.

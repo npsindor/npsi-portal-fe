@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Bell, Shield, Globe, HelpCircle, FileText, Info, LogOut, ChevronRight, Camera, MessageSquare, KeyRound, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
 import LanguageToggle from "@/components/LanguageToggle";
 import MembershipPass from "@/components/MembershipPass";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
+import { translateError } from "@/lib/registration-copy";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -17,10 +18,13 @@ export default function Settings() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const t = useT();
+  const { lang } = useLang();
   const [uploading, setUploading] = useState(false);
   const [family, setFamily] = useState(null);
   const [loadingFam, setLoadingFam] = useState(true);
-  const [pwdOpen, setPwdOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  // "Change Password" in the header account menu links here with ?changePassword=1.
+  const [pwdOpen, setPwdOpen] = useState(() => searchParams.get("changePassword") === "1");
   const [pwdSaving, setPwdSaving] = useState(false);
   const [pwdForm, setPwdForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [pwdError, setPwdError] = useState("");
@@ -79,7 +83,7 @@ export default function Settings() {
       setPwdForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
       setPwdOpen(false);
     } catch (err) {
-      setPwdError(err.message || t("settings.pwdUpdateFailed"));
+      setPwdError(translateError(err.message, lang) || t("settings.pwdUpdateFailed"));
     } finally {
       setPwdSaving(false);
     }
@@ -163,7 +167,7 @@ export default function Settings() {
       </Link>
 
       {/* Change password */}
-      <Dialog open={pwdOpen} onOpenChange={(open) => { setPwdOpen(open); if (!open) { setPwdError(""); setPwdForm({ currentPassword: "", newPassword: "", confirmPassword: "" }); } }}>
+      <Dialog open={pwdOpen} onOpenChange={(open) => { setPwdOpen(open); if (!open) { if (searchParams.has("changePassword")) setSearchParams({}, { replace: true }); setPwdError(""); setPwdForm({ currentPassword: "", newPassword: "", confirmPassword: "" }); } }}>
         <DialogTrigger asChild>
           <button className="flex w-full items-center gap-3 rounded-2xl border border-gold/30 bg-card px-5 py-4 hover:bg-gold/5">
             <KeyRound className="h-5 w-5 text-maroon" />

@@ -5,31 +5,60 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, LogIn, Mail, Lock, Loader2 } from "lucide-react";
+import { ArrowLeft, GraduationCap, LogIn, Mail, Lock, Loader2, ShieldCheck } from "lucide-react";
+import { isStudentReturn } from "@/lib/student-flow";
 import AuthLayout from "@/components/AuthLayout";
 import { safeReturnTo } from "@/lib/authReturnTo";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
+import { regCopy, translateError } from "@/lib/registration-copy";
 
 export default function Login() {
   const t = useT();
+  const { lang } = useLang();
+  const rt = regCopy[lang];
   const [email, setEmail] = useState("");
+  // Unverified account: the server just emailed a fresh code; verify it here.
+  const [needsCode, setNeedsCode] = useState(false);
+  const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const returnTo = safeReturnTo();
+  // Arriving from "Student Login": same login, then the student registration (₹100).
+  const student = isStudentReturn(returnTo);
+
+  const goOn = (result) => {
+    // If the user landed on /login directly (no returnTo from a protected
+    // route), send them to their portal instead of the public homepage.
+    window.location.href = returnTo !== "/" ? returnTo : result?.user?.role === "admin" ? "/admin" : "/portal";
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      const result = await base44.auth.loginViaEmailPassword(email, password);
-      // If the user landed on /login directly (no returnTo from a protected
-      // route), send them to their portal instead of the public homepage.
-      const destination = returnTo !== "/" ? returnTo : result?.user?.role === "admin" ? "/admin" : "/portal";
-      window.location.href = destination;
+      const identifier = email.trim();
+      // A mobile number is sent as its 10 digits ("+91 98765-43210" → "9876543210").
+      const digits = identifier.replace(/\D/g, "");
+      const loginId = identifier.includes("@") ? identifier : digits.length >= 10 ? digits.slice(-10) : identifier;
+      goOn(await base44.auth.loginViaEmailPassword(loginId, password));
     } catch (err) {
-      setError(err.message || "Invalid email or password");
+      if (err.status === 403 && email.includes("@")) setNeedsCode(true);
+      setError(err.status === 403 ? rt.notVerified : translateError(err.message || "Invalid email/phone or password.", lang));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyCode = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      goOn(await base44.auth.verifyOtp({ email: email.trim(), otpCode: code }));
+    } catch (err) {
+      setError(translateError(err.message, lang));
     } finally {
       setLoading(false);
     }
@@ -37,9 +66,9 @@ export default function Login() {
 
   return (
     <AuthLayout
-      icon={LogIn}
-      title={t("auth.loginTitle")}
-      subtitle={t("auth.loginSub")}
+      icon={student ? GraduationCap : LogIn}
+      title={student ? (lang === "hi" ? "विद्यार्थी लॉगिन" : "Student Login") : t("auth.loginTitle")}
+      subtitle={student ? (lang === "hi" ? "लॉगिन करें या नया खाता बनाएँ, फिर ₹100 शुल्क के साथ विद्यार्थी पंजीकरण पूरा करें।" : "Log in or create an account, then complete your student registration (₹100 fee).") : t("auth.loginSub")}
       footer={
         <>
           {t("auth.noAccount")}{" "}
@@ -58,17 +87,40 @@ export default function Login() {
         </div>
       )}
 
+      {needsCode && (
+        <form onSubmit={verifyCode} className="space-y-3 mb-6">
+          <Label htmlFor="login-code">{rt.enterCode}</Label>
+          <div className="relative">
+            <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Input
+              id="login-code"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              className="pl-10 h-12 tracking-[0.5em]"
+              required
+            />
+          </div>
+          <Button type="submit" className="w-full h-12" disabled={loading}>
+            {rt.verify}
+          </Button>
+        </form>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">{t("auth.email")}</Label>
+          <Label htmlFor="email">{rt.identifier}</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
               id="email"
-              type="email"
-              autoComplete="email"
+              type="text"
+              inputMode="email"
+              autoComplete="username"
               autoFocus
-              placeholder="you@example.com"
+              placeholder="98765 43210 / you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="pl-10 h-12"

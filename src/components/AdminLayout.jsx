@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FileCheck, Users, CalendarDays, CreditCard, Bell, Settings, LogOut, Shield, ScrollText, Menu, X, Landmark, Globe, GraduationCap, MessageSquare, ArrowRightLeft, TicketCheck, Lightbulb, Newspaper } from "lucide-react";
+import { LayoutDashboard, FileCheck, Users, CalendarDays, CreditCard, Bell, Settings, LogOut, Shield, ScrollText, Menu, X, Landmark, Globe, GraduationCap, MessageSquare, ArrowRightLeft, TicketCheck, Lightbulb, Newspaper, Wallet, Sparkles, HeartHandshake, LayoutTemplate } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import LanguageToggle from "@/components/LanguageToggle";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -24,9 +24,16 @@ export default function AdminLayout() {
     { label: t("admin.transfers"), path: "/admin/transfers", icon: ArrowRightLeft },
     { label: t("admin.families"), path: "/admin/families", icon: Users },
     { label: t("admin.samiti"), path: "/admin/samiti", icon: Landmark },
+    { label: lang === "hi" ? "वरिष्ठजन एवं अनुशासन समिति" : "Senior & Discipline Committee", path: "/admin/senior-discipline-committee", icon: Shield },
     { label: t("admin.events"), path: "/admin/events", icon: CalendarDays },
+    { label: lang === "hi" ? "कार्यक्रम वित्त एवं रोस्टर" : "Event Finance & Roster", path: "/admin/event-finance", icon: Wallet },
     { label: t("admin.eventRegs"), path: "/admin/event-registrations", icon: TicketCheck },
     { label: t("admin.transactions"), path: "/admin/transactions", icon: CreditCard },
+    { label: lang === "hi" ? "रजिस्ट्रेशन भुगतान" : "Registration payments", path: "/admin/registration-payments", icon: FileCheck },
+    { label: lang === "hi" ? "पता सूची" : "Address lists", path: "/admin/address-options", icon: Globe },
+    { label: lang === "hi" ? "पेज सामग्री" : "Page Content", path: "/admin/page-content", icon: LayoutTemplate },
+    { label: lang === "hi" ? "समाज की झलक (होमपेज)" : "Community highlights", path: "/admin/home-highlights", icon: Sparkles },
+    { label: lang === "hi" ? "सामुदायिक सेवाएँ" : "Community Services", path: "/admin/community-services", icon: HeartHandshake },
     { label: t("admin.notifications"), path: "/admin/notifications", icon: Bell },
     { label: t("contacts.title"), path: "/admin/contact-info", icon: Users },
     { label: t("admin.feedback"), path: "/admin/feedback", icon: MessageSquare },
