@@ -6,7 +6,7 @@ import { fill } from '@/lib/sagun-copy';
 // Lists the members of the logged-in user's registered family. Eligibility (age from the recorded date of
 // birth, gender, active status, no existing application) is decided by the server; only eligible members get
 // an enabled checkbox, and "Apply" loads the member's family data to pre-fill the form. Coming from My Family's
-// "Show in Sagun" (`initialMemberId`), that member is chosen and the form opens straight away.
+// "Show in Shagun Bandhan" (`initialMemberId`), that member is chosen and the form opens straight away.
 export default function SagunMemberPicker({ t, lang, candidateType, onApply, onOpenApplication, onError, initialMemberId = '' }) {
   const [state, setState] = useState({ loading: true, data: null, error: '' });
   const [selected, setSelected] = useState('');

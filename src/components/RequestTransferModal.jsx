@@ -51,7 +51,7 @@ export default function RequestTransferModal({ open, onClose, student, family, m
       try {
         const { family: fam } = await base44.verifyFamily(targetFamilyId.trim());
         if (fam?.status === "ACTIVE") target = fam;
-      } catch (e) { /* not found */ }
+      } catch { /* not found */ }
       if (!target) {
         toast({ title: t("tr.targetNotFound"), variant: "destructive" });
         setSubmitting(false);

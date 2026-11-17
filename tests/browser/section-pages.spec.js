@@ -1,5 +1,9 @@
 import { expect, test } from '@playwright/test';
 import { ADMIN, mockApi, NOT_LOGGED_IN } from './mock-api.js';
+import { navLink } from './nav-helpers.js';
+
+// Event dates relative to today, so upcoming events stay upcoming whatever day the tests run.
+const daysAhead = (days) => new Date(Date.now() + days * 86400000).toISOString().slice(0, 10);
 
 const shot = async (page, name) => { if (process.env.SHOTS) await page.screenshot({ path: `${process.env.SHOTS}/${name}.png`, fullPage: true }); };
 const noOverflow = async (page) => expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -14,8 +18,8 @@ const ANNOUNCEMENTS = [
 ];
 const EVENTS = [
   { id: 'e1', status: 'PUBLISHED', category: 'GARBA', title: 'Maa Na Garba 2027', venue: 'Lalbagh Palace', date: '2027-10-01', startTime: '19:00', fee: 200, description: 'Nine nights of garba.' },
-  { id: 'e2', status: 'PUBLISHED', category: 'CULTURAL', title: 'Sneh Deepotsav', venue: 'Patidar Bhawan', date: '2026-11-20', description: 'Festival of lights.' },
-  { id: 'e3', status: 'PUBLISHED', category: 'GENERAL', title: 'Blood camp meeting', venue: 'Office', date: '2026-12-02', description: 'Planning meeting.' },
+  { id: 'e2', status: 'PUBLISHED', category: 'CULTURAL', title: 'Sneh Deepotsav', venue: 'Patidar Bhawan', date: daysAhead(3), description: 'Festival of lights.' },
+  { id: 'e3', status: 'PUBLISHED', category: 'GENERAL', title: 'Blood camp meeting', venue: 'Office', date: daysAhead(5), description: 'Planning meeting.' },
   { id: 'e4', status: 'PUBLISHED', category: 'CULTURAL', title: 'Holi Milan 2026', venue: 'Garden', date: '2026-03-10', description: 'Past event.' },
   { id: 'e5', status: 'DRAFT', category: 'GARBA', title: 'Draft garba', venue: 'x', date: '2026-12-10' },
 ];
@@ -27,15 +31,15 @@ const POSTS = [
 ];
 
 for (const width of [390, 1280]) {
-  test(`${width}px: every header menu item is a direct link to one page (no dropdowns)`, async ({ page }) => {
+  test(`${width}px: every header menu item reaches its page; related services are grouped in three small dropdowns`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
     await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN });
     await page.goto('/');
     const nav = page.locator('#public-navigation');
     if (width < 1280) await page.getByRole('button', { name: 'Open navigation menu' }).click();
-    await expect(nav.locator('summary')).toHaveCount(0);
-    for (const label of ['Home', 'About Us', 'Events & Programs', 'Community Services', 'Career & Business', 'Sandesh', 'Sagun', 'Transportation', 'Medical', 'Room Hunting', 'Feedback', 'Contact Us']) await expect(nav.getByRole('link', { name: label, exact: true })).toBeVisible();
+    await expect(nav.locator('summary')).toHaveCount(3);
+    for (const label of ['Home', 'About Us', 'Events & Programs', 'Community Services', 'Career & Business', 'Sandesh', 'Shagun Bandhan', 'Transportation', 'Health Support', 'Room Hunting', 'Feedback', 'Contact Us']) await expect(await navLink(page, label)).toBeVisible();
     await expect(nav.getByRole('link', { name: 'Home', exact: true })).toHaveAttribute('aria-current', 'page');
     await shot(page, `header-${width}`);
     await nav.getByRole('link', { name: 'Sandesh', exact: true }).click();
@@ -80,7 +84,8 @@ test('Events & Programs shows Garba, Cultural and a month-by-month calendar of p
   await expect(page.locator('#garba').getByText('Featured')).toBeVisible();
   await expect(page.locator('#cultural').getByRole('heading', { level: 3 })).toHaveText(['Sneh Deepotsav', 'Holi Milan 2026']);
   const calendar = page.locator('#calendar');
-  await expect(calendar.getByRole('heading', { level: 3, name: /November 2026/ })).toBeVisible();
+  const month = new Date(`${daysAhead(3)}T00:00:00`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+  await expect(calendar.getByRole('heading', { level: 3, name: new RegExp(month) }).first()).toBeVisible();
   await expect(calendar.getByRole('heading', { name: 'Blood camp meeting' })).toBeVisible();
   await expect(page.getByText('Draft garba')).toHaveCount(0);
   await calendar.getByText('Past events (1)').click();

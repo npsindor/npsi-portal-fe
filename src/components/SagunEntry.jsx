@@ -1,11 +1,14 @@
 import { Link } from 'react-router-dom';
-import { useHeroText } from '@/components/PageContent';
+import { HeroBackdrop, useHeroText } from '@/components/PageContent';
 import { BadgeCheck, Camera, ChevronRight, CreditCard, Lock, Mars, Users, Venus } from 'lucide-react';
+import { Shubh, Toran, WeddingArt } from '@/components/sagun/SagunDecor';
 
 const copy = {
   en: {
     kicker: 'Nimar Patidar Sangathan, Indore',
-    title: 'Sagun Registration',
+    shubh: 'Shubh Vivah',
+    blessing: 'A sacred bond of two families, begun with blessings.',
+    title: 'Shagun Bandhan Registration',
     subtitle: 'Register a matrimonial profile for a member of your family. Choose a category to begin.',
     trust: ['Private by default', 'Verified by the committee', 'Shared only with your consent'],
     choose: 'Choose a registration category',
@@ -24,7 +27,9 @@ const copy = {
   },
   hi: {
     kicker: 'निमाड़ पाटीदार संगठन, इंदौर',
-    title: 'सगुन पंजीकरण',
+    shubh: 'शुभ विवाह',
+    blessing: 'दो परिवारों का पवित्र बंधन, आशीर्वाद के साथ आरंभ।',
+    title: 'शगुन बंधन पंजीकरण',
     subtitle: 'अपने परिवार के सदस्य का वैवाहिक परिचय पंजीकृत करें। शुरू करने के लिए एक विकल्प चुनें।',
     trust: ['डिफ़ॉल्ट रूप से निजी', 'समिति द्वारा सत्यापित', 'केवल आपकी सहमति से साझा'],
     choose: 'पंजीकरण का प्रकार चुनें',
@@ -54,11 +59,16 @@ export default function SagunEntry({ lang, selection, onSelect, isAuthenticated 
   const trustIcons = [Lock, BadgeCheck, Users];
   const readyIcons = [Camera, CreditCard, Users];
   return (
-    <main className="sagun-entry">
-      <section className="sagun-entry-hero">
-        <div className="sagun-entry-wrap">
-          <p className="sagun-entry-kicker">{c.kicker} · सगुन</p>
+    <main className="sagun-entry sagun-theme">
+      <section className="sagun-entry-hero isolate">
+        <HeroBackdrop block={hero.block} className="opacity-20" />
+        <Toran className="sagun-hero-toran" />
+        <div className="sagun-entry-wrap sagun-hero-grid">
+          <div className="sagun-hero-text">
+          <Shubh className="sagun-shubh-hero">॥ {c.shubh} ॥</Shubh>
+          <p className="sagun-entry-kicker">{c.kicker} · शगुन बंधन</p>
           <h1>{hero.title || c.title}</h1>
+          <p className="sagun-entry-blessing">{c.blessing}</p>
           <p className="sagun-entry-subtitle">{hero.intro || c.subtitle}</p>
           <ul className="sagun-entry-trust">
             {c.trust.map((text, index) => {
@@ -71,6 +81,8 @@ export default function SagunEntry({ lang, selection, onSelect, isAuthenticated 
               );
             })}
           </ul>
+          </div>
+          <WeddingArt className="sagun-hero-art" />
         </div>
       </section>
       <div className="sagun-entry-wrap sagun-entry-body">

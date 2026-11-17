@@ -20,6 +20,16 @@ const translations = {
     "nav.registerBtn": "Register Family",
     "nav.membersHint": "{n} members registered",
     "common.backToWebsite": "Back to Website",
+    "portal.eventKharcha": "Event Kharcha",
+    "portal.roomHunting": "Room Hunting",
+    "brand.line1": "Nimar Patidar",
+    "brand.line2": "Sangathan, Indore",
+    "brand.logoAlt": "Nimar Patidar Sangathan, Indore logo",
+    "common.nextPage": "Next page",
+    "common.previousPage": "Previous page",
+    "common.showPassword": "Show password",
+    "common.hidePassword": "Hide password",
+    "common.notifications": "Notifications",
 
     // Home
     "home.badge": "Nimar Patidar Sangathan, Indore",
@@ -276,7 +286,7 @@ const translations = {
     "auth.newTitle": "New password",
     "auth.newSub": "Enter your new password below",
     "auth.resetFailed": "Failed to reset password",
-    "auth.pwdMinLength": "Password must be at least 6 characters",
+    "auth.pwdMinLength": "Password must be at least 8 characters",
 
     // Member portal nav
     "portal.home": "Home",
@@ -638,6 +648,16 @@ const translations = {
     "nav.registerBtn": "परिवार रजिस्ट्रेशन",
     "nav.membersHint": "{n} सदस्य रजिस्टर्ड",
     "common.backToWebsite": "वेबसाइट पर वापस",
+    "portal.eventKharcha": "कार्यक्रम खर्च",
+    "portal.roomHunting": "आवास सहयोग",
+    "brand.line1": "निमाड़ पाटीदार",
+    "brand.line2": "संगठन, इंदौर",
+    "brand.logoAlt": "निमाड़ पाटीदार संगठन, इंदौर का लोगो",
+    "common.nextPage": "अगला पेज",
+    "common.previousPage": "पिछला पेज",
+    "common.showPassword": "पासवर्ड दिखाएँ",
+    "common.hidePassword": "पासवर्ड छिपाएँ",
+    "common.notifications": "सूचनाएँ",
 
     "home.badge": "निमाड़ पाटीदार संगठन, इंदौर",
     "home.title": "एक एकत्रित समुदाय, एक समय में एक परिवार।",
@@ -886,7 +906,7 @@ const translations = {
     "auth.newTitle": "नया पासवर्ड",
     "auth.newSub": "नीचे अपना नया पासवर्ड दर्ज करें",
     "auth.resetFailed": "पासवर्ड रीसेट विफल",
-    "auth.pwdMinLength": "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए",
+    "auth.pwdMinLength": "पासवर्ड कम से कम 8 अक्षरों का होना चाहिए",
 
     "portal.home": "होम",
     "portal.family": "परिवार",

@@ -21,7 +21,7 @@ export default function TablePagination({ page, totalPages, totalItems, pageSize
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1}
             className="rounded-full border border-border p-1.5 text-maroon hover:bg-muted disabled:opacity-40"
-            aria-label="Previous page"
+            aria-label={lang === "hi" ? "पिछला पेज" : "Previous page"}
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -30,7 +30,7 @@ export default function TablePagination({ page, totalPages, totalItems, pageSize
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages}
             className="rounded-full border border-border p-1.5 text-maroon hover:bg-muted disabled:opacity-40"
-            aria-label="Next page"
+            aria-label={lang === "hi" ? "अगला पेज" : "Next page"}
           >
             <ChevronRight className="h-4 w-4" />
           </button>

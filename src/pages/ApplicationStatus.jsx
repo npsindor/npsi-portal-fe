@@ -20,7 +20,7 @@ export default function ApplicationStatus() {
     try {
       const app = await base44.trackApplication(applicationId.trim(), mobile.trim());
       setResult(app || null);
-    } catch (err) {
+    } catch {
       setResult(null);
     } finally {
       setLoading(false);
@@ -42,7 +42,7 @@ export default function ApplicationStatus() {
         <form onSubmit={handleSearch} className="rounded-2xl border border-gold/30 bg-card p-6 shadow-sm">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("status.appId")}</label>
+              <label htmlFor="application-id" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("status.appId")}</label>
               <input
                 id="application-id"
                 autoComplete="off"
@@ -55,7 +55,7 @@ export default function ApplicationStatus() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("status.mobile")}</label>
+              <label htmlFor="application-mobile" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("status.mobile")}</label>
               <input
                 id="application-mobile"
                 type="tel"

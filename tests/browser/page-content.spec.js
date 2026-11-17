@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { ADMIN, mockApi, NOT_LOGGED_IN } from './mock-api.js';
-import { publicNavigation } from '../../src/lib/public-navigation.js';
+import { flatNavigation } from '../../src/lib/public-navigation.js';
 
 const block = (o) => ({ role: 'ITEM', title: null, titleHi: null, subtitle: null, subtitleHi: null, body: null, bodyHi: null, mediaType: 'NONE', mediaUrl: null, linkUrl: null, ctaLabel: null, ctaLabelHi: null, sortOrder: 0, active: true, createdAt: '', updatedAt: '', ...o });
 
@@ -9,7 +9,7 @@ for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
     await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
     await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN });
-    for (const { to } of publicNavigation) {
+    for (const { to } of flatNavigation) {
       await page.goto(to);
       await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
       const result = await page.evaluate(() => {
@@ -106,4 +106,31 @@ test('an expired session in the admin panel goes to login and back instead of fa
   await gallery.getByLabel('Title (English)', { exact: true }).fill('Sammelan');
   await gallery.getByRole('button', { name: 'Save' }).click();
   await expect(page).toHaveURL(/\/login\?returnTo=%2Fadmin%2Fpage-content$/);
+});
+
+test('a banner photo set in Admin → Page Content shows on Transportation, Health Support, Room Hunting and Shagun', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  await page.route('**/admin-banner.png', (route) => route.fulfill({ contentType: 'image/png', body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/l9kAAAAASUVORK5CYII=', 'base64') }));
+  const hero = (pageKey) => ({ id: `hero-${pageKey}`, page: pageKey, section: 'hero', role: 'INTRO', title: `Banner ${pageKey}`, titleHi: null, subtitle: null, subtitleHi: null, body: null, bodyHi: null, mediaType: 'IMAGE', mediaUrl: '/admin-banner.png', linkUrl: null, ctaLabel: null, ctaLabelHi: null, sortOrder: 0, active: true });
+  await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN, 'GET /page-blocks': ['transportation', 'medical', 'room-hunting', 'sagun'].map(hero) });
+  for (const [key, path] of [['transportation', '/transportation'], ['medical', '/medical'], ['room-hunting', '/room-hunting'], ['sagun', '/sagun']]) {
+    await page.goto(path);
+    await expect(page.getByRole('heading', { level: 1, name: `Banner ${key}` })).toBeVisible();
+    await expect(page.locator('img[src="/admin-banner.png"]').first()).toBeAttached();
+  }
+});
+
+test('banner tagline, heading, text and button come from Admin → Page Content on Career, Sandesh, Health Support and Room Hunting', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'hi'));
+  const hero = (pageKey) => ({ id: `hero-${pageKey}`, page: pageKey, section: 'hero', role: 'INTRO', title: `Admin heading ${pageKey}`, titleHi: `एडमिन शीर्षक ${pageKey}`, subtitle: 'Admin tagline', subtitleHi: 'एडमिन टैगलाइन', body: 'Admin text', bodyHi: 'एडमिन विवरण', mediaType: 'NONE', mediaUrl: null, linkUrl: '/contact', ctaLabel: 'Contact us', ctaLabelHi: 'संपर्क करें', sortOrder: 0, active: true });
+  await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN, 'GET /page-blocks': ['careers', 'news', 'medical', 'room-hunting'].map(hero) });
+  for (const [key, path] of [['careers', '/career-business'], ['news', '/news'], ['medical', '/medical'], ['room-hunting', '/room-hunting']]) {
+    await page.goto(path);
+    await expect(page.getByRole('heading', { level: 1, name: `एडमिन शीर्षक ${key}` })).toBeVisible();
+    await expect(page.getByText('एडमिन टैगलाइन', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('एडमिन विवरण', { exact: true }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: 'संपर्क करें' }).first()).toHaveAttribute('href', '/contact');
+    if (key !== 'room-hunting') await expect(page.locator('svg.page-hero-art')).toHaveCount(1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  }
 });

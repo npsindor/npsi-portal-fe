@@ -6,7 +6,8 @@ import { inDateRange } from "./dateRangeFilter";
 // a from/to date range, then slices the result into pages. Any filter change
 // jumps back to page 1 so results stay in view.
 export function useTableControls(items, { searchFields = [], pageSize = 10, dateField = null } = {}) {
-  const [search, setSearchRaw] = useState("");
+  // A "?q=" in the address (links from the global search) pre-fills the table search.
+  const [search, setSearchRaw] = useState(() => (typeof window === "undefined" ? "" : new URLSearchParams(window.location.search).get("q") || ""));
   const [rawPage, setRawPage] = useState(1);
   const [dateFrom, setDateFromRaw] = useState("");
   const [dateTo, setDateToRaw] = useState("");

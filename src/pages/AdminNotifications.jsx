@@ -8,6 +8,9 @@ import SearchBox from "@/components/admin/SearchBox";
 import TablePagination from "@/components/admin/TablePagination";
 
 const TYPES = ["Announcement", "Event", "Registration", "Approval", "Correction", "Payment", "Campaign"];
+// Stored type → [English, Hindi] label.
+const TYPE_LABELS = { Announcement: ["Announcement", "घोषणा"], Event: ["Event", "कार्यक्रम"], Registration: ["Registration", "पंजीकरण"], Approval: ["Approval", "स्वीकृति"], Correction: ["Correction", "सुधार"], Payment: ["Payment", "भुगतान"], Campaign: ["Campaign", "अभियान"], room_hunting: ["Room Hunting", "आवास सहयोग"], sagun: ["Shagun Bandhan", "शगुन बंधन"] };
+const typeLabel = (type, lang) => TYPE_LABELS[type]?.[lang === "hi" ? 1 : 0] || type;
 
 const EMPTY = { title: "", message: "", type: "Announcement", recipientFamilyId: "", deepLink: "" };
 
@@ -70,7 +73,7 @@ export default function AdminNotifications() {
   const load = async () => {
     setLoading(true);
     try { setNotifs(await base44.entities.Notification.listAll("-date")); }
-    catch (e) {} finally { setLoading(false); }
+    catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
@@ -151,7 +154,7 @@ export default function AdminNotifications() {
               </div>
               <div className="flex items-start gap-2">
                 <div className="text-right">
-                  <span className="gold-badge text-[0.6rem]">{n.type}</span>
+                  <span className="gold-badge text-[0.6rem]">{typeLabel(n.type, lang)}</span>
                   <div className="mt-1 text-xs text-muted-foreground">{n.date ? new Date(n.date).toLocaleDateString(locale) : ""}</div>
                 </div>
                 <button onClick={() => openEdit(n)} className="rounded-full p-1.5 text-maroon hover:bg-maroon/10"><Pencil className="h-3.5 w-3.5" /></button>
@@ -185,7 +188,7 @@ export default function AdminNotifications() {
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblType}</label>
                 <select value={editing.type} onChange={(e) => setEditing({ ...editing, type: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">
-                  {TYPES.map((tp) => <option key={tp}>{tp}</option>)}
+                  {TYPES.map((tp) => <option key={tp} value={tp}>{typeLabel(tp, lang)}</option>)}
                 </select>
               </div>
               <div>

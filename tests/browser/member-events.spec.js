@@ -1,7 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { MEMBER, mockApi } from './mock-api.js';
 
-const event = (id, title) => ({ id, title, status: 'PUBLISHED', date: '2026-12-01', venue: 'Hall', fee: 0, createdAt: '2026-10-01T10:00:00.000Z', updatedAt: '2026-10-01T10:00:00.000Z' });
+// Event dates relative to today, so upcoming events stay upcoming whatever day the tests run.
+const daysAhead = (days) => new Date(Date.now() + days * 86400000).toISOString().slice(0, 10);
+
+const event = (id, title) => ({ id, title, status: 'PUBLISHED', date: daysAhead(14), venue: 'Hall', fee: 0, createdAt: '2026-10-01T10:00:00.000Z', updatedAt: '2026-10-01T10:00:00.000Z' });
 const family = { family: { id: 'f-1', familyId: 'NPSI-FAM-000001', familyName: 'Patidar' }, members: [{ id: 'm-1', name: 'Ram Patidar', relationship: 'Head' }], student: null };
 
 test('events the family is registered for show "Registered"; a cancelled registration can register again', async ({ page }) => {

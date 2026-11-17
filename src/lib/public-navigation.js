@@ -1,15 +1,14 @@
-// Header / footer navigation: every menu item is one page with its own in-page sections (no dropdowns).
+// Header navigation: a few top-level pages and three small dropdowns, so the bar stays uncluttered.
+// Every entry is a public page; admin-only pages never appear here.
 export const publicNavigation = [
   { label: 'Home', to: '/' },
   { label: 'About Us', to: '/about' },
   { label: 'Events & Programs', to: '/events' },
-  { label: 'Community Services', to: '/community-services' },
-  { label: 'Career & Business', to: '/career-business' },
   { label: 'Sandesh', to: '/news' },
-  { label: 'Sagun', to: '/sagun' },
-  { label: 'Transportation', to: '/transportation' },
-  { label: 'Medical', to: '/medical' },
-  { label: 'Room Hunting', to: '/room-hunting' },
-  { label: 'Feedback', to: '/public-feedback' },
-  { label: 'Contact Us', to: '/contact' },
+  { label: 'Services', items: [['Shagun Bandhan', '/sagun'], ['Transportation', '/transportation'], ['Room Hunting', '/room-hunting'], ['Health Support', '/medical']] },
+  { label: 'Community', items: [['Community Services', '/community-services'], ['Career & Business', '/career-business']] },
+  { label: 'Contact', items: [['Contact Us', '/contact'], ['Feedback', '/public-feedback']] },
 ];
+
+// Every page in menu order ({ label, to }), for the footer, the home page service cards and tests.
+export const flatNavigation = publicNavigation.flatMap((item) => (item.items ? item.items.map(([label, to]) => ({ label, to })) : [item]));

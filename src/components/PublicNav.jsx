@@ -1,7 +1,7 @@
 import { usePublicCopy } from '@/lib/public-copy';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown, GraduationCap, LogIn, Menu, Sparkles, X } from 'lucide-react';
+import { ChevronDown, GraduationCap, LogIn, Menu, Search, Sparkles, X } from 'lucide-react';
 import { studentLoginPath } from '@/lib/student-flow';
 import { useAuth } from '@/lib/AuthContext';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -9,11 +9,12 @@ import LanguageToggle from '@/components/LanguageToggle';
 import { publicNavigation } from '@/lib/public-navigation';
 import logoImage from '@/images/logo.png';
 import UserMenu from '@/components/UserMenu';
+import GlobalSearch from '@/components/GlobalSearch';
 
 // Phone: a light drawer list. Desktop (xl): a navy bar with a gold underline on the current page.
 const linkClass = [
   'public-link relative flex w-full items-center justify-between gap-2 rounded-lg px-3 py-3 text-[0.95rem] font-medium text-foreground transition-colors hover:bg-muted',
-  'xl:w-auto xl:whitespace-nowrap xl:rounded-none xl:px-2 xl:py-0 xl:min-h-12 xl:text-[0.8rem] xl:font-semibold xl:text-cream/85 xl:hover:bg-transparent xl:hover:text-gold 2xl:px-3',
+  'xl:w-auto xl:whitespace-nowrap xl:rounded-none xl:px-2 xl:py-0 xl:min-h-14 xl:text-[0.95rem] xl:font-bold xl:tracking-wide xl:text-cream xl:hover:bg-transparent xl:hover:text-gold 2xl:px-3 2xl:text-base',
   'xl:after:absolute xl:after:inset-x-2 xl:after:bottom-0 xl:after:h-[3px] xl:after:origin-center xl:after:scale-x-0 xl:after:rounded-t-full xl:after:bg-gold xl:after:transition-transform xl:hover:after:scale-x-100',
   'aria-[current=page]:bg-maroon/5 aria-[current=page]:text-maroon xl:aria-[current=page]:bg-transparent xl:aria-[current=page]:text-gold xl:aria-[current=page]:after:scale-x-100',
 ].join(' ');
@@ -23,6 +24,11 @@ const isCurrent = (pathname, to) => (to === '/' ? pathname === '/' : pathname ==
 export default function PublicNav() {
   const c = usePublicCopy();
   const [open, setOpen] = useState(false);
+  // Desktop: the search is a round icon; clicking it slides a full-width search bar over the menu.
+  const [searching, setSearching] = useState(false);
+  const searchButton = useRef(null);
+  const searchingRef = useRef(false);
+  searchingRef.current = searching;
   const location = useLocation();
   const header = useRef(null);
   const menuButton = useRef(null);
@@ -31,14 +37,18 @@ export default function PublicNav() {
   const closeDropdowns = (except) => header.current?.querySelectorAll('details[open]').forEach(item => { if (item !== except) item.removeAttribute('open'); });
   useEffect(() => {
     setOpen(false);
+    setSearching(false);
     closeDropdowns();
   }, [location]);
   useEffect(() => {
     const close = event => {
       if (event.key === 'Escape') {
+        const wasSearching = searchingRef.current;
         setOpen(false);
+        setSearching(false);
         closeDropdowns();
-        menuButton.current?.focus();
+        if (wasSearching) requestAnimationFrame(() => searchButton.current?.focus());
+        else menuButton.current?.focus();
       }
     };
     // A click outside an open dropdown closes it.
@@ -76,15 +86,21 @@ export default function PublicNav() {
       {!isAuthenticated && <Link to="/register" className="join-cta lg:w-auto"><Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />{c("Join the Sangathan")}</Link>}
     </div>
     <nav id="public-navigation" aria-label={c("Main navigation")} className={`${open ? 'block' : 'hidden'} max-h-[70dvh] overflow-y-auto border-t border-border bg-background xl:block xl:max-h-none xl:overflow-visible xl:border-t-0 xl:bg-maroon`}>
-      <div className="mx-auto flex max-w-7xl flex-col divide-y divide-border/60 px-4 py-2 sm:px-6 xl:flex-row xl:flex-nowrap xl:items-stretch xl:justify-between xl:divide-y-0 xl:py-0">
+      <div className="relative mx-auto flex max-w-7xl flex-col divide-y divide-border/60 px-4 py-2 sm:px-6 xl:flex-row xl:flex-nowrap xl:items-stretch xl:justify-between xl:divide-y-0 xl:py-0">
+        <div className="py-3 xl:hidden"><GlobalSearch onNavigate={() => setOpen(false)} /></div>
         {publicNavigation.map(item => item.items ? <details key={item.label} className="group relative" onToggle={event => { if (event.currentTarget.open) closeDropdowns(event.currentTarget); }}>
           <summary aria-current={item.items.some(([, to]) => isCurrent(location.pathname, to)) ? 'page' : undefined} className={`${linkClass} cursor-pointer list-none [&::-webkit-details-marker]:hidden`}>
             {c(item.label)}<ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 opacity-70 transition-transform group-open:rotate-180" />
           </summary>
-          <div className="mb-2 ml-3 border-l-2 border-gold/60 pl-2 xl:absolute xl:left-0 xl:top-full xl:z-50 xl:mb-0 xl:ml-0 xl:mt-0 xl:w-64 xl:rounded-xl xl:border xl:border-border xl:bg-card xl:p-2 xl:pl-2 xl:shadow-xl">
-            {item.items.map(([label, to]) => <Link key={label} to={to} className="public-link block rounded-lg px-3 py-2.5 text-sm text-foreground transition-colors hover:bg-muted hover:text-maroon">{c(label)}</Link>)}
+          <div className="mb-2 ml-3 border-l-2 border-gold/60 pl-2 xl:absolute xl:left-0 xl:top-full xl:z-50 xl:mb-0 xl:ml-0 xl:mt-0 xl:flex xl:w-64 xl:flex-col xl:rounded-xl xl:border xl:border-border xl:bg-card xl:p-2 xl:pl-2 xl:shadow-xl">
+            {item.items.map(([label, to]) => <Link key={label} to={to} className="public-link flex w-full rounded-lg px-3 py-2.5 text-sm text-foreground transition-colors hover:bg-muted hover:text-maroon">{c(label)}</Link>)}
           </div>
         </details> : <Link key={item.label} to={item.to} aria-current={isCurrent(location.pathname, item.to) ? 'page' : undefined} className={linkClass}>{c(item.label)}</Link>)}
+        <button ref={searchButton} type="button" aria-label={c('Open search')} aria-expanded={searching} onClick={() => setSearching(true)} className={`${searching ? 'xl:invisible' : ''} hidden h-10 w-10 shrink-0 items-center justify-center self-center rounded-full border border-gold/60 bg-cream/10 text-cream transition-colors hover:bg-gold hover:text-maroon focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold xl:flex`}><Search className="h-5 w-5" aria-hidden="true" /></button>
+        {searching && <div className="absolute inset-0 z-50 hidden items-center gap-3 bg-maroon px-4 duration-200 animate-in fade-in slide-in-from-right-8 sm:px-6 xl:flex">
+          <GlobalSearch autoFocus className="flex-1" onNavigate={() => setSearching(false)} />
+          <button type="button" aria-label={c('Close search')} onClick={() => { setSearching(false); requestAnimationFrame(() => searchButton.current?.focus()); }} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gold/60 text-cream transition-colors hover:bg-gold hover:text-maroon"><X className="h-5 w-5" aria-hidden="true" /></button>
+        </div>}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3 xl:hidden"><span className="sm:hidden"><ThemeToggle /></span>{!isAuthenticated && <Link className="public-link gap-1.5 font-semibold text-maroon" to={loginTo}><LogIn className="h-4 w-4" aria-hidden="true" />{c('Member Login')}</Link>}{!isAuthenticated && <Link className="public-link gap-1.5 font-semibold text-maroon" to={studentLoginPath()}><GraduationCap className="h-4 w-4" aria-hidden="true" />{c('Student Login')}</Link>}</div>
       </div>
     </nav>

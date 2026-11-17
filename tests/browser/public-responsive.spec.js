@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { mockApi, NOT_LOGGED_IN } from './mock-api';
+import { navLink } from './nav-helpers.js';
 
 for (const width of [320, 390, 768, 1440]) {
   test(`public pages and navigation fit ${width}px`, async ({ page }) => {
@@ -11,8 +12,8 @@ for (const width of [320, 390, 768, 1440]) {
     const menu = page.getByRole('button', { name: 'Open navigation menu' });
     if (width < 1280) await menu.click();
     const nav = page.getByRole('navigation', { name: 'Main navigation' });
-    await nav.getByRole('link', { name: 'Community Services', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Standing together when it matters most' })).toBeVisible();
+    await (await navLink(page, 'Community Services')).click();
+    await expect(page.getByRole('heading', { name: 'One message. The whole samaj stands with you.' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Blood Donation', level: 2 })).toBeVisible();
     if (width < 1280) await expect(nav).toBeHidden();
     for (const path of ['/', '/community-services', '/career-business', '/sagun', '/contact', '/public-feedback']) {

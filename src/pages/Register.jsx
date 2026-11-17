@@ -33,7 +33,7 @@ export default function Register() {
   const create = async (e) => {
     e.preventDefault();
     setError("");
-    if (password.length < 6) return setError(translateError("Password must be at least 6 characters.", lang));
+    if (password.length < 8) return setError(translateError("Password must be at least 8 characters.", lang));
     if (password !== confirm) return setError(t.passwordsDiffer);
     setBusy(true);
     try {
@@ -58,7 +58,7 @@ export default function Register() {
   const legacyCreate = async (e) => {
     e.preventDefault();
     setError("");
-    if (password.length < 6) return setError(translateError("Password must be at least 6 characters.", lang));
+    if (password.length < 8) return setError(translateError("Password must be at least 8 characters.", lang));
     if (password !== confirm) return setError(t.passwordsDiffer);
     setBusy(true);
     try {
@@ -151,8 +151,8 @@ export default function Register() {
           <p className="text-sm text-muted-foreground">+91 {legacyContact.mobile}</p>
           <div className="space-y-2"><Label htmlFor="legacy-register-email">{lang === "hi" ? "ईमेल" : "Email"}</Label><Input id="legacy-register-email" type="email" autoComplete="email" value={legacyContact.email} onChange={(event) => setLegacyContact((current) => ({ ...current, email: event.target.value }))} required /></div>
           <div className="space-y-2"><Label htmlFor="reg-name">{t.fullName}</Label><Input id="reg-name" autoComplete="name" maxLength={255} value={fullName} onChange={(event) => setFullName(event.target.value)} required /></div>
-          <div className="space-y-2"><Label htmlFor="reg-password">{t.createPassword}</Label><PasswordInput id="reg-password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} className="h-12" required minLength={6} /></div>
-          <div className="space-y-2"><Label htmlFor="reg-confirm">{t.confirmPassword}</Label><PasswordInput id="reg-confirm" autoComplete="new-password" value={confirm} onChange={(event) => setConfirm(event.target.value)} className="h-12" required minLength={6} /></div>
+          <div className="space-y-2"><Label htmlFor="reg-password">{t.createPassword}</Label><PasswordInput id="reg-password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} className="h-12" required minLength={8} /></div>
+          <div className="space-y-2"><Label htmlFor="reg-confirm">{t.confirmPassword}</Label><PasswordInput id="reg-confirm" autoComplete="new-password" value={confirm} onChange={(event) => setConfirm(event.target.value)} className="h-12" required minLength={8} /></div>
           <Button type="submit" className="h-12 w-full" disabled={busy}>{busy ? t.creating : t.createAccount}</Button>
         </form>
       ) : (
@@ -174,7 +174,7 @@ export default function Register() {
             <Label htmlFor="reg-password">{t.createPassword}</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-              <PasswordInput id="reg-password" autoComplete="new-password" autoFocus value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 h-12" required minLength={6} />
+              <PasswordInput id="reg-password" autoComplete="new-password" autoFocus value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 h-12" required minLength={8} />
             </div>
             <p className="text-xs text-muted-foreground">{t.passwordRule}</p>
           </div>
@@ -182,7 +182,7 @@ export default function Register() {
             <Label htmlFor="reg-confirm">{t.confirmPassword}</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-              <PasswordInput id="reg-confirm" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="pl-10 h-12" required minLength={6} />
+              <PasswordInput id="reg-confirm" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="pl-10 h-12" required minLength={8} />
             </div>
           </div>
           <Button type="submit" className="w-full h-12" disabled={busy}>

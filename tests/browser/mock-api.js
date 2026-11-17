@@ -6,7 +6,10 @@ export const mockApi = async (page, routes = {}) => {
   // shown this session, so nothing covers the page.
   await page.addInitScript(() => {
     for (const key of ['nps_curtain_opened', 'nps_garba_popup_seen']) sessionStorage.setItem(key, '1');
+    // Google reCAPTCHA v3 stub: protected forms get this token without loading Google's script.
+    if (!window.grecaptcha) window.grecaptcha = { ready: (callback) => callback(), execute: async () => 'test-recaptcha-token' };
   });
+  await page.route('https://www.google.com/recaptcha/**', route => route.abort());
   // Keep browser checks deterministic when Google Fonts is slow or unavailable.
   await page.route('https://fonts.googleapis.com/**', route => route.abort());
   await page.route('https://fonts.gstatic.com/**', route => route.abort());
@@ -19,6 +22,9 @@ export const mockApi = async (page, routes = {}) => {
     const body = request.postData();
     calls.push({ key, query: url.search, body: body && request.headers()['content-type']?.includes('json') ? JSON.parse(body) : body });
     const answer = routes[key];
+    // Tests describe the session through 'GET /auth/me'; an unmocked GET /auth/sessions/current answers 404 like an
+    // older API, so the app falls back to /auth/me (the test's answer). The current-session route has its own test.
+    if (answer === undefined && key === 'GET /auth/sessions/current') return route.fulfill({ status: 404, json: { error: 'Not mocked' } });
     if (answer === undefined) {
       return route.fulfill(request.method() === 'GET' ? { json: [] } : { status: 404, json: { error: 'Not mocked' } });
     }

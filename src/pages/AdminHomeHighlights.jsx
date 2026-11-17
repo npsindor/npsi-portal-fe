@@ -3,13 +3,14 @@ import { Image as ImageIcon, Loader2, Megaphone, Pencil, Plus, Trash2, Type, Upl
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { useLang } from "@/lib/i18n";
+import ADVERTISING_IMAGES from "virtual:advertising";
 
 const words = {
   en: {
     title: "Community highlights", sub: "Manage the homepage “Community highlights” section: the text slider on the left and the image / video / ad slider on the right.",
     textTab: "Text slider (left)", mediaTab: "Media slider (right)", add: "Add slide", edit: "Edit slide", save: "Save", cancel: "Cancel", remove: "Delete", empty: "No slides yet — the homepage shows the default slides until you add one.",
     type: "Slide type", IMAGE: "Image", VIDEO: "Video", TEXT: "Text", sponsored: "Advertisement / sponsored (shows an “Ad” label)",
-    image: "Image", upload: "Upload image", uploading: "Uploading…", orUrl: "or paste an image URL", imageHint: "JPG, PNG or WebP, up to 5 MB. Wide images (16:9) look best.",
+    image: "Image", upload: "Upload image", uploading: "Uploading…", orUrl: "or paste an image URL", imageHint: "JPG, PNG or WebP, up to 5 MB. Wide images (16:9) look best.", fromFolder: "Or choose an image from the advertising folder (public/advertising):", folderNote: "Images in that folder already run in the homepage ad slider on their own; choose one here only to add a title, text or a link to it.",
     video: "Video link", videoHint: "A YouTube link (youtube.com / youtu.be) or a direct .mp4 / .webm URL.",
     eyebrow: "Small heading", titleEn: "Title (English) *", titleHi: "Title (Hindi)", body: "Text (English)", bodyHi: "Text (Hindi)", eyebrowHi: "Small heading (Hindi)",
     cta: "Button text (English)", ctaHi: "Button text (Hindi)", link: "Button link", linkHint: "A page on this site (/events) or a full https:// address.",
@@ -20,7 +21,7 @@ const words = {
     title: "समाज की झलक", sub: "होमपेज के “समाज की झलक” भाग को संभालें: बाईं ओर टेक्स्ट स्लाइडर और दाईं ओर इमेज / वीडियो / विज्ञापन स्लाइडर।",
     textTab: "टेक्स्ट स्लाइडर (बायाँ)", mediaTab: "मीडिया स्लाइडर (दायाँ)", add: "स्लाइड जोड़ें", edit: "स्लाइड बदलें", save: "सहेजें", cancel: "रद्द करें", remove: "हटाएँ", empty: "अभी कोई स्लाइड नहीं — जब तक आप स्लाइड नहीं जोड़ते, होमपेज पर डिफ़ॉल्ट स्लाइड दिखेंगी।",
     type: "स्लाइड का प्रकार", IMAGE: "इमेज", VIDEO: "वीडियो", TEXT: "टेक्स्ट", sponsored: "विज्ञापन / प्रायोजित (“विज्ञापन” लेबल दिखेगा)",
-    image: "इमेज", upload: "इमेज अपलोड करें", uploading: "अपलोड हो रहा है…", orUrl: "या इमेज का URL डालें", imageHint: "JPG, PNG या WebP, अधिकतम 5 MB। चौड़ी (16:9) इमेज सबसे अच्छी दिखती है।",
+    image: "इमेज", upload: "इमेज अपलोड करें", uploading: "अपलोड हो रहा है…", orUrl: "या इमेज का URL डालें", imageHint: "JPG, PNG या WebP, अधिकतम 5 MB। चौड़ी (16:9) इमेज सबसे अच्छी दिखती है।", fromFolder: "या विज्ञापन फ़ोल्डर (public/advertising) से इमेज चुनें:", folderNote: "उस फ़ोल्डर की इमेज होमपेज के विज्ञापन स्लाइडर में अपने आप चलती हैं; शीर्षक, विवरण या लिंक जोड़ना हो तभी यहाँ चुनें।",
     video: "वीडियो लिंक", videoHint: "YouTube लिंक (youtube.com / youtu.be) या सीधा .mp4 / .webm URL।",
     eyebrow: "छोटा शीर्षक (अंग्रेज़ी)", titleEn: "शीर्षक (अंग्रेज़ी) *", titleHi: "शीर्षक (हिंदी)", body: "विवरण (अंग्रेज़ी)", bodyHi: "विवरण (हिंदी)", eyebrowHi: "छोटा शीर्षक (हिंदी)",
     cta: "बटन टेक्स्ट (अंग्रेज़ी)", ctaHi: "बटन टेक्स्ट (हिंदी)", link: "बटन लिंक", linkHint: "इस साइट का पेज (/events) या पूरा https:// पता।",
@@ -161,6 +162,19 @@ export default function AdminHomeHighlights() {
                         </label>
                       </span>
                       <input className={input} placeholder={t.orUrl} value={editing.mediaUrl || ""} onChange={set("mediaUrl")} />
+                      {ADVERTISING_IMAGES.length > 0 && (
+                        <div className="space-y-2 pt-1">
+                          <p className="text-xs font-medium">{t.fromFolder}</p>
+                          <div role="radiogroup" aria-label={t.fromFolder} className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                            {ADVERTISING_IMAGES.map((src) => (
+                              <button key={src} type="button" role="radio" aria-checked={editing.mediaUrl === src} aria-label={decodeURIComponent(src.split("/").pop())} onClick={() => setEditing((current) => ({ ...current, mediaUrl: src, sponsored: true }))} className={`overflow-hidden rounded-lg border-2 ${editing.mediaUrl === src ? "border-maroon ring-2 ring-maroon/30" : "border-transparent hover:border-gold"}`}>
+                                <img src={src} alt="" loading="lazy" className="aspect-video w-full object-cover" />
+                              </button>
+                            ))}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{t.folderNote}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Field>

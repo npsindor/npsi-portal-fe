@@ -4,6 +4,7 @@ import { CalendarDays, Bell, Users, ArrowRight, UserPlus } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import MembershipPass from "@/components/MembershipPass";
 import ProfileCompletionCard from "@/components/ProfileCompletionCard";
+import MyEventMemberships from "@/components/event-members/MyEventMemberships";
 import RequestTransferModal from "@/components/RequestTransferModal";
 import { ArrowRightLeft } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -11,6 +12,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { useLang } from "@/lib/i18n";
 import { resolveMyFamily } from "@/lib/resolveMyFamily";
 import { localizedText } from "@/lib/utils";
+import { calendarDate } from "@/lib/dates";
 
 const L = {
   en: {
@@ -25,7 +27,7 @@ const L = {
     noNotif: "No notifications.",
     noFamily: "No active family membership found linked to your account.",
     registerFamily: "Register Your Family",
-    sagunWorkspace: "Sagun profiles and requests",
+    sagunWorkspace: "Shagun Bandhan profiles and requests",
     upcomingEvents: "Upcoming Events",
     noEvents: "No upcoming events.",
     viewEvent: "View Event",
@@ -50,7 +52,7 @@ const L = {
     noNotif: "कोई सूचना नहीं।",
     noFamily: "आपके खाते से कोई सक्रिय परिवार सदस्यता जुड़ी नहीं है।",
     registerFamily: "अपना परिवार रजिस्टर करें",
-    sagunWorkspace: "सगुन परिचय और अनुरोध",
+    sagunWorkspace: "शगुन बंधन परिचय और अनुरोध",
     upcomingEvents: "आगामी कार्यक्रम",
     noEvents: "कोई आगामी कार्यक्रम नहीं।",
     viewEvent: "कार्यक्रम देखें",
@@ -90,7 +92,7 @@ export default function MemberDashboard() {
         setEvents(evs.filter((e) => e.status === "PUBLISHED"));
         const notifs = await base44.entities.Notification.list("-date", 5);
         setNotifications(notifs);
-      } catch (e) {
+      } catch {
       } finally {
         setLoading(false);
       }
@@ -112,6 +114,7 @@ export default function MemberDashboard() {
       </div>
 
       {user?.role !== "admin" && <ProfileCompletionCard nudge />}
+      {user?.role !== "admin" && <MyEventMemberships />}
       {user?.role !== "admin" && <Link to="/sagun/workspace" className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-card px-4 py-3 text-sm font-semibold text-maroon hover:border-maroon">{t.sagunWorkspace}<ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>}
 
       {family ? (
@@ -193,7 +196,7 @@ export default function MemberDashboard() {
               <div className="p-3.5">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <CalendarDays className="h-3.5 w-3.5" />
-                  {ev.date ? new Date(ev.date).toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN", { day: "numeric", month: "short" }) : "—"}
+                  {ev.date ? calendarDate(ev.date).toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN", { day: "numeric", month: "short" }) : "—"}
                 </div>
                 <h3 className="mt-1 font-display text-sm font-semibold text-maroon">{localizedText(ev, "title", lang)}</h3>
                 <p className="mt-1 text-xs text-muted-foreground line-clamp-1">{ev.venue}</p>

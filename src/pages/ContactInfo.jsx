@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/compone
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { getRecaptchaToken } from '@/lib/recaptcha';
 
 export default function ContactInfo() {
   const { lang, setLang, t } = useLang();
@@ -35,7 +36,8 @@ export default function ContactInfo() {
     submitting.current = true;
     setBusy(true);
     try {
-      await base44.contactInfo.create({ fullName, contactNumber, ...(email ? { email } : {}), indoreArea, nativeVillage, isStudent: form.isStudent, lang });
+      const recaptchaToken = await getRecaptchaToken('contact_info');
+      await base44.contactInfo.create({ fullName, contactNumber, ...(email ? { email } : {}), indoreArea, nativeVillage, isStudent: form.isStudent, lang, recaptchaToken });
       setSaved(true);
     } catch (cause) {
       setError(cause.status === 429 ? 'contact.limited' : 'contact.failed');

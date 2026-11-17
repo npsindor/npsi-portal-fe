@@ -1,0 +1,58 @@
+/* Room Hunting (आवास सहयोग) hero: dusk over the city, plum night to a saffron horizon, with a row of rooftops and
+   twinkling windows along the bottom. */
+.room-hero {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 2.25rem;
+  background:
+    radial-gradient(circle at 88% 18%, rgb(242 166 90 / 34%), transparent 40%),
+    radial-gradient(circle at 6% 100%, rgb(232 121 45 / 22%), transparent 45%),
+    linear-gradient(160deg, #24133a 0%, #3b1f5c 40%, #6b2a52 75%, #8a3448 100%);
+}
+/* rooftops along the bottom edge */
+.room-hero::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 2.25rem;
+  background:
+    conic-gradient(from 135deg at 50% 0, #1a0f29 90deg, transparent 0) 0 0 / 56px 100% repeat-x,
+    linear-gradient(transparent 45%, #1a0f29 45%);
+  opacity: .9;
+}
+/* lit windows in the rooftops */
+.room-hero::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: .55rem;
+  height: 6px;
+  background: repeating-linear-gradient(90deg, transparent 0 22px, #ffd27a 22px 30px, transparent 30px 56px);
+  opacity: .8;
+  animation: room-lights 4s ease-in-out infinite alternate;
+}
+@keyframes room-lights { from { opacity: .45; } to { opacity: .9; } }
+
+.room-art { display: block; max-width: 40rem; margin: 0 auto; filter: drop-shadow(0 1rem 1.5rem rgb(0 0 0 / 28%)); }
+.room-art .room-window { animation: room-twinkle 3.2s ease-in-out infinite; }
+.room-art .room-star { animation: room-twinkle 2.6s ease-in-out infinite; }
+.room-art .room-sign { transform-box: fill-box; transform-origin: 50% 0; animation: room-swing 3s ease-in-out infinite; }
+.room-art .room-key { transform-box: fill-box; transform-origin: 50% 0; animation: room-swing 2.4s ease-in-out infinite; }
+.room-art .room-pin { animation: room-bob 2.2s ease-in-out infinite; }
+.room-art .room-route { animation: room-dash 1.6s linear infinite; }
+.room-art .room-walk { animation: room-step 1.2s ease-in-out infinite alternate; }
+@keyframes room-twinkle { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+@keyframes room-swing { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+@keyframes room-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes room-dash { to { stroke-dashoffset: -32; } }
+@keyframes room-step { from { transform: translateY(0); } to { transform: translateY(-1.5px); } }
+@media (prefers-reduced-motion: reduce) {
+  .room-hero::after, .room-art .room-window, .room-art .room-star, .room-art .room-sign, .room-art .room-key,
+  .room-art .room-pin, .room-art .room-route, .room-art .room-walk { animation: none; }
+}
+.dark .room-hero {
+  background:
+    radial-gradient(circle at 88% 18%, rgb(242 166 90 / 18%), transparent 40%),
+    linear-gradient(160deg, #140a22 0%, #24133a 50%, #3d1a33 100%);
+}

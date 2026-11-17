@@ -16,7 +16,7 @@ export default function MemberProfileChip({ compact = false, variant = "chip" })
           setDisplayName(mine.headName);
           return;
         }
-      } catch (e) {
+      } catch {
       } finally {
         if (active && !displayName) setDisplayName(user?.fullName || "Member");
       }
@@ -56,7 +56,7 @@ export default function MemberProfileChip({ compact = false, variant = "chip" })
       {!compact && (
         <div className="hidden text-right leading-tight sm:block">
           <div className="text-sm font-semibold text-maroon">{name}</div>
-          <div className="text-[0.65rem] uppercase tracking-wide text-muted-foreground">{user?.email}</div>
+          <div className="text-[0.65rem] text-muted-foreground break-all">{user?.email}</div>
         </div>
       )}
       <div className="relative">

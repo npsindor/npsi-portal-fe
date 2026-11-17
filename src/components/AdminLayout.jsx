@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FileCheck, Users, CalendarDays, CreditCard, Bell, Settings, LogOut, Shield, ScrollText, Menu, X, Landmark, Globe, GraduationCap, MessageSquare, ArrowRightLeft, TicketCheck, Lightbulb, Newspaper, Wallet, Sparkles, HeartHandshake, LayoutTemplate } from "lucide-react";
+import { Contact, HandHeart, IdCard, Stethoscope, UsersRound, LayoutDashboard, FileCheck, Users, CalendarDays, CreditCard, Bell, Settings, LogOut, Shield, ScrollText, Menu, X, Landmark, Globe, GraduationCap, MessageSquare, ArrowRightLeft, TicketCheck, Lightbulb, Newspaper, Wallet, Sparkles, HeartHandshake, LayoutTemplate, House, Route } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import LanguageToggle from "@/components/LanguageToggle";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -12,34 +12,38 @@ export default function AdminLayout() {
   const { logout, user } = useAuth();
   const t = useT();
   const { lang } = useLang();
-  const sehatLabel = lang === "hi" ? "सेहत साथी" : "Sehat Saathi";
+  const sehatLabel = lang === "hi" ? "स्वास्थ्य सहयोग" : "Health Support";
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navItems = [
-    { label: lang === "hi" ? "सगुन" : "Sagun", path: "/admin/sagun", icon: Users },
-    { label: sehatLabel, path: "/admin/sehat-saathi", icon: Users },
     { label: t("admin.dashboard"), path: "/admin", icon: LayoutDashboard },
     { label: t("admin.registrations"), path: "/admin/applications", icon: FileCheck },
+    { label: t("admin.families"), path: "/admin/families", icon: Users },
     { label: t("admin.students"), path: "/admin/students", icon: GraduationCap },
     { label: t("admin.transfers"), path: "/admin/transfers", icon: ArrowRightLeft },
-    { label: t("admin.families"), path: "/admin/families", icon: Users },
-    { label: t("admin.samiti"), path: "/admin/samiti", icon: Landmark },
-    { label: lang === "hi" ? "वरिष्ठजन एवं अनुशासन समिति" : "Senior & Discipline Committee", path: "/admin/senior-discipline-committee", icon: Shield },
+    { label: lang === "hi" ? "रजिस्ट्रेशन भुगतान" : "Registration payments", path: "/admin/registration-payments", icon: FileCheck },
+    { label: lang === "hi" ? "शगुन बंधन" : "Shagun Bandhan", path: "/admin/sagun", icon: HeartHandshake },
+    { label: lang === "hi" ? "शगुन डिजिटल कार्ड" : "Shagun Digital Cards", path: "/admin/sagun-cards", icon: IdCard },
+    { label: lang === "hi" ? "आवास सहयोग" : "Room Hunting", path: "/admin/room-hunting", icon: House },
+    { label: lang === "hi" ? "यातायात सहयोग" : "Transportation", path: "/admin/transportation", icon: Route },
+    { label: sehatLabel, path: "/admin/sehat-saathi", icon: Stethoscope },
     { label: t("admin.events"), path: "/admin/events", icon: CalendarDays },
     { label: lang === "hi" ? "कार्यक्रम वित्त एवं रोस्टर" : "Event Finance & Roster", path: "/admin/event-finance", icon: Wallet },
     { label: t("admin.eventRegs"), path: "/admin/event-registrations", icon: TicketCheck },
     { label: t("admin.transactions"), path: "/admin/transactions", icon: CreditCard },
-    { label: lang === "hi" ? "रजिस्ट्रेशन भुगतान" : "Registration payments", path: "/admin/registration-payments", icon: FileCheck },
-    { label: lang === "hi" ? "पता सूची" : "Address lists", path: "/admin/address-options", icon: Globe },
+    { label: t("admin.samiti"), path: "/admin/samiti", icon: Landmark },
+    { label: lang === "hi" ? "एनपीएसआई इवेंट सदस्य बनें" : "Become a NPSI Event Member", path: "/admin/event-members", icon: UsersRound },
+    { label: lang === "hi" ? "वरिष्ठजन एवं अनुशासन समिति" : "Senior & Discipline Committee", path: "/admin/senior-discipline-committee", icon: Shield },
+    { label: t("admin.news"), path: "/admin/news", icon: Newspaper },
     { label: lang === "hi" ? "पेज सामग्री" : "Page Content", path: "/admin/page-content", icon: LayoutTemplate },
     { label: lang === "hi" ? "समाज की झलक (होमपेज)" : "Community highlights", path: "/admin/home-highlights", icon: Sparkles },
-    { label: lang === "hi" ? "सामुदायिक सेवाएँ" : "Community Services", path: "/admin/community-services", icon: HeartHandshake },
-    { label: t("admin.notifications"), path: "/admin/notifications", icon: Bell },
-    { label: t("contacts.title"), path: "/admin/contact-info", icon: Users },
-    { label: t("admin.feedback"), path: "/admin/feedback", icon: MessageSquare },
+    { label: lang === "hi" ? "सामुदायिक सेवाएँ" : "Community Services", path: "/admin/community-services", icon: HandHeart },
     { label: t("admin.rules"), path: "/admin/rules", icon: ScrollText },
     { label: t("admin.principles"), path: "/admin/principles", icon: Lightbulb },
-    { label: t("admin.news"), path: "/admin/news", icon: Newspaper },
+    { label: lang === "hi" ? "पता सूची" : "Address lists", path: "/admin/address-options", icon: Globe },
+    { label: t("admin.notifications"), path: "/admin/notifications", icon: Bell },
+    { label: t("contacts.title"), path: "/admin/contact-info", icon: Contact },
+    { label: t("admin.feedback"), path: "/admin/feedback", icon: MessageSquare },
     { label: t("admin.settings"), path: "/admin/settings", icon: Settings },
   ];
 

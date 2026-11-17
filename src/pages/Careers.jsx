@@ -5,6 +5,7 @@ import PublicFooter from "@/components/PublicFooter";
 import PublicNav from "@/components/PublicNav";
 import { BlockCard, BlockLink, BlockMedia, usePageContent } from "@/components/PageContent";
 import { CardSkeleton, EmptyState, PageHero, SectionBlock, SectionOverview, useSectionLanding } from "@/components/PageSections";
+import { CareerHeroArt } from "@/components/hero/HeroArt";
 import { useLang } from "@/lib/i18n";
 import { blockText } from "@/lib/page-content";
 
@@ -61,7 +62,7 @@ export default function Careers() {
     <div className="min-h-screen bg-background">
       <PublicNav />
       <main id="main-content">
-        <PageHero eyebrow={t.eyebrow} title={t.title} intro={t.intro} icon={BriefcaseBusiness} lang={lang} block={content.intro("hero")} />
+        <PageHero eyebrow={t.eyebrow} title={t.title} intro={t.intro} icon={BriefcaseBusiness} lang={lang} block={content.intro("hero")} theme="career" art={<CareerHeroArt lang={lang} />} tagline={lang === "hi" ? "रोज़गार · व्यापार · मार्गदर्शन — समाज के साथ आगे बढ़ें" : "Jobs · Business · Guidance — grow together with the samaj"} />
         <SectionOverview
           lang={lang}
           sections={[

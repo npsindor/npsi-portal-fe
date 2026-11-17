@@ -5,8 +5,12 @@
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME} !-l
-  RewriteRule . /index.html [L]
+  # Only the app's own pages are served the app (HTTP 200). Keep this list in step with the routes in
+  # src/App.jsx (src/routes.test.js checks it). Any other path is a real 404, still rendered by the app
+  # through ErrorDocument below, so search engines and tools see the right status.
+  RewriteRule ^(about|admin|application-status|career-business|community-services|contact|core-team|events|forgot-password|help|login|medical|news|portal|principles|public-feedback|register|register-account|reset-password|room-hunting|rules|sagun|search|student-register|teams|transportation|verify)(/.*)?$ /index.html [L]
 </IfModule>
+ErrorDocument 404 /index.html
 
 # Browsers and the CDN must check for a new index.html on every visit, so a deploy
 # reaches everyone at once (an old page would call the API it was built for). The
@@ -35,7 +39,7 @@
   Header always set Cross-Origin-Opener-Policy "same-origin"
   # Content Security Policy in report-only mode first: check the browser console on the live site for
   # "[Report Only]" violations, then rename the header to Content-Security-Policy to enforce it.
-  Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' https://www.google.com https://www.gstatic.com https://www.recaptcha.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://*.npsindore.org https://i.ytimg.com https://static.wixstatic.com https://media.base44.com; connect-src 'self' https://*.npsindore.org https://api.postalpincode.in https://www.google.com; frame-src https://www.youtube-nocookie.com https://www.google.com https://www.recaptcha.net; media-src 'self' https://*.npsindore.org; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+  Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' https://www.google.com https://www.gstatic.com https://www.recaptcha.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://*.npsindore.org https://i.ytimg.com https://static.wixstatic.com https://media.base44.com; connect-src 'self' https://*.npsindore.org https://api.postalpincode.in https://www.google.com; frame-src https://www.youtube-nocookie.com https://www.google.com https://www.recaptcha.net; media-src 'self' https://*.npsindore.org; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
 </IfModule>
 
 # Never serve source maps, dotfiles or backups if one ever lands in the web root.

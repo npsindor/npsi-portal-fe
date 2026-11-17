@@ -26,7 +26,14 @@ export function usePageContent(page) {
 export function useHeroText(page, lang) {
   const content = usePageContent(page);
   const block = content.intro('hero');
-  return { title: blockText(block, 'title', lang), intro: blockText(block, 'body', lang) };
+  return { title: blockText(block, 'title', lang), intro: blockText(block, 'body', lang), subtitle: blockText(block, 'subtitle', lang), block };
+}
+
+// The banner photo set in Admin → Page Content, faded behind a page's own (dark) hero. The hero needs
+// `relative isolate overflow-hidden`: the photo then sits above the hero's background and below all its content.
+export function HeroBackdrop({ block, className = 'opacity-25' }) {
+  if (block?.mediaType !== 'IMAGE' || !block.mediaUrl) return null;
+  return <img src={block.mediaUrl} alt="" aria-hidden="true" decoding="async" className={`pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover ${className}`} />;
 }
 
 // Section heading/intro with the admin's override when set.

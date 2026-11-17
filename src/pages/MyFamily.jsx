@@ -7,9 +7,9 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { useLang } from "@/lib/i18n";
-import { useT } from "@/lib/i18n";
 import { resolveMyFamily } from "@/lib/resolveMyFamily";
 import { sagunApi } from "@/api/sagunApi";
+import { isPastBirthDate, latestBirthDate } from "@/lib/dates";
 
 const relationships = ["Spouse", "Son", "Daughter", "Father", "Mother", "Brother", "Sister", "Other"];
 const genders = ["Male", "Female", "Other"];
@@ -69,7 +69,7 @@ const L = {
     invalidDob: "Invalid date of birth",
     year4: "Year must be 4 digits.",
     badDate: "Invalid date of birth.",
-    futureDob: "Date of birth cannot be in the future.",
+    futureDob: "Date of birth must be before today.",
     invalidMobile: "Invalid mobile",
     mobile10: "Mobile number must be 10 digits.",
     updated: "Member updated",
@@ -82,13 +82,13 @@ const L = {
     removedDesc: "removed from your family.",
     failRemove: "Failed to remove member",
     requestTransfer: "Transfer to another family",
-    sagunShow: "Show in Sagun (matrimonial)",
-    sagunHint: "Tick to open the Sagun form filled from this member's details; add the photo and consent, then submit for approval.",
-    sagunComplete: "Complete Sagun profile",
-    sagunWithdrawConfirm: "Remove this member from Sagun? Their consent is withdrawn and the profile is hidden.",
-    sagunWithdrawn: "Removed from Sagun",
+    sagunShow: "Show in Shagun Bandhan (matrimonial)",
+    sagunHint: "Tick to open the Shagun Bandhan form filled from this member's details; add the photo and consent, then submit for approval.",
+    sagunComplete: "Complete Shagun Bandhan profile",
+    sagunWithdrawConfirm: "Remove this member from Shagun Bandhan? Their consent is withdrawn and the profile is hidden.",
+    sagunWithdrawn: "Removed from Shagun Bandhan",
     sagunOther: "Created by another family account",
-    sagunStatus: { DRAFT: "Draft", SUBMITTED: "Submitted", UNDER_REVIEW: "Under review", APPROVED: "Visible in Sagun", REJECTED: "Rejected", INACTIVE: "Hidden" },
+    sagunStatus: { DRAFT: "Draft", SUBMITTED: "Submitted", UNDER_REVIEW: "Under review", APPROVED: "Visible in Shagun Bandhan", REJECTED: "Rejected", INACTIVE: "Hidden" },
   },
   hi: {
     family: "परिवार",
@@ -127,7 +127,7 @@ const L = {
     invalidDob: "अमान्य जन्म तिथि",
     year4: "वर्ष 4 अंकों का होना चाहिए।",
     badDate: "अमान्य जन्म तिथि।",
-    futureDob: "जन्म तिथि भविष्य में नहीं हो सकती।",
+    futureDob: "जन्म तिथि आज से पहले की होनी चाहिए।",
     invalidMobile: "अमान्य मोबाइल",
     mobile10: "मोबाइल नंबर 10 अंकों का होना चाहिए।",
     updated: "सदस्य अपडेट हुआ",
@@ -140,13 +140,13 @@ const L = {
     removedDesc: "आपके परिवार से हटाया गया।",
     failRemove: "सदस्य हटाने में विफल",
     requestTransfer: "दूसरे परिवार में ट्रांसफर",
-    sagunShow: "सगुन (वैवाहिक) में दिखाएँ",
-    sagunHint: "टिक करें — इस सदस्य की जानकारी से भरा सगुन फ़ॉर्म खुलेगा; फ़ोटो और सहमति जोड़कर स्वीकृति के लिए भेजें।",
-    sagunComplete: "सगुन प्रोफ़ाइल पूरी करें",
-    sagunWithdrawConfirm: "इस सदस्य को सगुन से हटाएँ? सहमति वापस ली जाएगी और प्रोफ़ाइल छिप जाएगी।",
-    sagunWithdrawn: "सगुन से हटाया गया",
+    sagunShow: "शगुन बंधन (वैवाहिक) में दिखाएँ",
+    sagunHint: "टिक करें — इस सदस्य की जानकारी से भरा शगुन बंधन फ़ॉर्म खुलेगा; फ़ोटो और सहमति जोड़कर स्वीकृति के लिए भेजें।",
+    sagunComplete: "शगुन बंधन प्रोफ़ाइल पूरी करें",
+    sagunWithdrawConfirm: "इस सदस्य को शगुन बंधन से हटाएँ? सहमति वापस ली जाएगी और प्रोफ़ाइल छिप जाएगी।",
+    sagunWithdrawn: "शगुन बंधन से हटाया गया",
     sagunOther: "किसी अन्य परिवार खाते ने बनाया",
-    sagunStatus: { DRAFT: "ड्राफ्ट", SUBMITTED: "जमा", UNDER_REVIEW: "समीक्षा में", APPROVED: "सगुन में दिख रहा है", REJECTED: "अस्वीकृत", INACTIVE: "छिपा हुआ" },
+    sagunStatus: { DRAFT: "ड्राफ्ट", SUBMITTED: "जमा", UNDER_REVIEW: "समीक्षा में", APPROVED: "शगुन बंधन में दिख रहा है", REJECTED: "अस्वीकृत", INACTIVE: "छिपा हुआ" },
   },
 };
 
@@ -163,7 +163,7 @@ function validDob(dob, t) {
   if (parts[0].length !== 4) return { ok: false, msg: t.year4 };
   const d = new Date(dob);
   if (isNaN(d.getTime())) return { ok: false, msg: t.badDate };
-  if (d > new Date()) return { ok: false, msg: t.futureDob };
+  if (!isPastBirthDate(dob)) return { ok: false, msg: t.futureDob };
   return { ok: true };
 }
 
@@ -191,7 +191,6 @@ export default function MyFamily() {
       .then((data) => setSagun(Object.fromEntries((data?.members || []).map((row) => [row.id, row]))))
       .catch(() => setSagun({}));
   }, []);
-  const tt = useT();
 
   const relLabel = (r) => (r && relLabels[r] ? relLabels[r][lang] : r) || "";
   const genderLabel = (g) => (g && genderLabels[g] ? genderLabels[g][lang] : g) || "";
@@ -201,7 +200,7 @@ export default function MyFamily() {
       const { family: mine, members: mems } = await resolveMyFamily(user);
       setFamily(mine);
       setMembers(mems);
-    } catch (e) {} finally { setLoading(false); }
+    } catch {} finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, [user]);
@@ -419,7 +418,7 @@ export default function MyFamily() {
               </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.dob}</label>
-                <input type="date" max={new Date().toISOString().split("T")[0]} value={form.dob} onChange={(e) => setForm({ ...form, dob: e.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
+                <input type="date" max={latestBirthDate()} value={form.dob} onChange={(e) => setForm({ ...form, dob: e.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
                 <p className="mt-1 text-[0.65rem] text-muted-foreground">{t.dobNote}</p>
               </div>
               <div>
@@ -482,7 +481,7 @@ export default function MyFamily() {
   );
 }
 
-// "Show in Sagun" for one member: shown when the member is old enough (or already has a profile).
+// "Show in Shagun Bandhan" for one member: shown when the member is old enough (or already has a profile).
 function SagunToggle({ member, info, t, busy, onToggle }) {
   if (!info) return null;
   const application = info.application;

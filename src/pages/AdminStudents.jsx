@@ -10,6 +10,7 @@ import SearchBox from "@/components/admin/SearchBox";
 import TablePagination from "@/components/admin/TablePagination";
 import ExportMenu from "@/components/ExportMenu";
 import DateRangeFilter from "@/components/admin/DateRangeFilter";
+import { latestBirthDate } from "@/lib/dates";
 
 const STATUSES = ["DRAFT", "SUBMITTED", "PENDING_VERIFICATION", "CORRECTION_REQUIRED", "APPROVED", "REJECTED"];
 
@@ -206,7 +207,7 @@ export default function AdminStudents() {
     try {
       const list = await base44.entities.StudentApplication.listAll("-submittedDate");
       setApps(list);
-    } catch (e) {} finally { setLoading(false); }
+    } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
@@ -470,7 +471,7 @@ export default function AdminStudents() {
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblFatherName}</label><input value={editing.fatherName || ""} onChange={(e) => setEditing({ ...editing, fatherName: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblMobile} *</label><input value={editing.mobile} onChange={(e) => setEditing({ ...editing, mobile: sanitizeMobile(e.target.value) })} inputMode="numeric" maxLength={10} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblEmail}</label><input value={editing.email} onChange={(e) => setEditing({ ...editing, email: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblDob}</label><input type="date" value={editing.dob} onChange={(e) => setEditing({ ...editing, dob: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblDob}</label><input type="date" max={latestBirthDate()} value={editing.dob} onChange={(e) => setEditing({ ...editing, dob: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblGender}</label><input value={editing.gender} onChange={(e) => setEditing({ ...editing, gender: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblCourse}</label><input value={editing.course} onChange={(e) => setEditing({ ...editing, course: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblInstitution}</label><input value={editing.institution} onChange={(e) => setEditing({ ...editing, institution: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>

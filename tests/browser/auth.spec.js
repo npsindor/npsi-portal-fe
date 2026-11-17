@@ -112,3 +112,109 @@ test('logging in relies on the session cookie: no token is kept in localStorage'
   expect(await page.evaluate(() => localStorage.getItem('base44_access_token'))).toBeNull();
   void calls;
 });
+
+// Family Member Login vs Student Login: the page sends the chosen portal and follows the server's decision.
+const FAMILY_MSG = 'Your account is registered as an NPS Family Member. Please use Family Member Login to access your account.';
+const loginWith = async (page, answer) => {
+  const sent = [];
+  let me = null;
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  await mockApi(page);
+  await page.route('**/api/v1/auth/**', async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path.endsWith('/auth/sessions') && route.request().method() === 'POST') {
+      const body = JSON.parse(route.request().postData());
+      sent.push(body);
+      const reply = answer(body);
+      if (reply.status === 200) me = { ...reply.json.user, account: reply.json.account };
+      return route.fulfill(reply);
+    }
+    if (path.endsWith('/auth/me')) return route.fulfill(me ? { json: me } : { status: 401, json: { error: 'Authentication required.' } });
+    return route.fallback();
+  });
+  return sent;
+};
+const submit = async (page) => {
+  await page.fill('#email', 'member@example.com');
+  await page.fill('#password', 'Secret@123');
+  await page.locator('form button[type="submit"]').click();
+};
+
+test('Student Login sends the STUDENT portal; a Family Member account is refused and offered Family Member Login', async ({ page }) => {
+  const sent = await loginWith(page, (body) =>
+    body.portal === 'STUDENT'
+      ? { status: 403, json: { error: FAMILY_MSG } }
+      : { status: 200, json: { user: MEMBER, accessToken: 'a'.repeat(64), account: { type: 'FAMILY', status: 'ACTIVE' } } },
+  );
+  await page.goto('/login?portal=student');
+  await expect(page.getByRole('heading', { name: 'Student Login' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Student Login' })).toHaveAttribute('aria-pressed', 'true');
+  await submit(page);
+  await expect(page.getByRole('alert')).toContainText(FAMILY_MSG);
+  await expect(page.locator('#login-code')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Go to Family Member Login' }).click();
+  await expect(page.getByRole('button', { name: 'Family Member Login' })).toHaveAttribute('aria-pressed', 'true');
+  await submit(page);
+  await expect(page).toHaveURL(/\/portal$/);
+  expect(sent.map((body) => body.portal)).toEqual(['STUDENT', 'FAMILY']);
+});
+
+test('a Student account lands on its dashboard and family pages are closed to it', async ({ page }) => {
+  await loginWith(page, () => ({ status: 200, json: { user: MEMBER, accessToken: 'a'.repeat(64), account: { type: 'STUDENT', status: 'ACTIVE' } } }));
+  await page.goto('/login?portal=student&returnTo=%2Fportal%2Ffamily');
+  await submit(page);
+  await expect(page).toHaveURL(/\/portal$/);
+  await expect(page.locator('a[href="/portal/family"]')).toHaveCount(0);
+  await page.goto('/portal/event-kharcha');
+  await expect(page).toHaveURL(/\/portal$/);
+});
+
+test('Hindi: the portal refusal is shown in Hindi', async ({ page }) => {
+  await loginWith(page, () => ({ status: 403, json: { error: FAMILY_MSG } }));
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'hi'));
+  await page.goto('/login?portal=student');
+  await submit(page);
+  await expect(page.getByRole('alert')).toContainText('परिवार सदस्य लॉगिन का उपयोग करें');
+  await expect(page.getByRole('button', { name: 'परिवार सदस्य लॉगिन पर जाएँ' })).toBeVisible();
+});
+
+test('login, password reset by email and by mobile send a reCAPTCHA token', async ({ page }) => {
+  const sent = {};
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN });
+  for (const [key, glob, reply] of [
+    ['login', '**/api/v1/auth/sessions', { status: 401, json: { error: 'Invalid email or password.' } }],
+    ['reset', '**/api/v1/auth/password-resets', { json: { ok: true } }],
+    ['mobile', '**/api/v1/auth/mobile-otps', { json: { ok: true, channel: 'WHATSAPP', expiresInSeconds: 600 } }],
+  ]) await page.route(glob, (route) => { sent[key] = route.request().postDataJSON(); return route.fulfill(reply); });
+  await page.goto('/login');
+  await page.fill('#email', 'member@example.com');
+  await page.fill('#password', 'Secret@123');
+  await page.locator('form button[type="submit"]').click();
+  await expect.poll(() => sent.login?.recaptchaToken).toBe('test-recaptcha-token');
+  await page.goto('/forgot-password');
+  await page.locator('#otp-mobile').fill('9926877375');
+  await page.getByRole('button', { name: 'Send code' }).click();
+  await expect.poll(() => sent.mobile).toMatchObject({ mobile: '9926877375', purpose: 'RESET', recaptchaToken: 'test-recaptcha-token' });
+  await page.getByRole('tab', { name: 'Using email' }).click();
+  await page.locator('#fp-email').fill('member@example.com');
+  await page.locator('#fp-email').press('Enter');
+  await expect.poll(() => sent.reset).toEqual({ email: 'member@example.com', recaptchaToken: 'test-recaptcha-token' });
+});
+
+test('the session check uses GET /auth/sessions/current: a visitor gets no 401 in the console, a member is logged in', async ({ page }) => {
+  // Checks the desktop sidebar / header links (on phones they sit in the menu).
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const errors = [];
+  page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  const calls = await mockApi(page, { 'GET /auth/sessions/current': { user: null } });
+  await page.goto('/');
+  await expect(page.getByRole('link', { name: 'Member Login' }).first()).toBeVisible();
+  expect(calls.some((call) => call.key === 'GET /auth/me')).toBe(false);
+  expect(errors.filter((text) => /401|Unauthorized/.test(text))).toEqual([]);
+  const member = await page.context().newPage();
+  await mockApi(member, { 'GET /auth/sessions/current': { user: MEMBER } });
+  await member.goto('/portal');
+  await expect(member).toHaveURL(/\/portal$/);
+});

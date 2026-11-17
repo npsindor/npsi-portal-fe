@@ -1,6 +1,6 @@
 // Locations for the Sagun "Village/City" picker. Values are what gets saved (Hindi names for villages, kept as
 // before so existing profiles still match); `en` / `hi` are the labels shown in each language.
-import { base44 } from '@/api/base44Client';
+import { base44, apiFetch } from '@/api/base44Client';
 
 export const SAGUN_CITY_OPTIONS = [
   { value: 'Indore', en: 'Indore', hi: 'इंदौर', district: 'Indore', pincode: '452001' },
@@ -65,7 +65,7 @@ export async function lookupSagunPincode(area, city) {
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 6000);
-    const response = await fetch(`https://api.postalpincode.in/postoffice/${encodeURIComponent(area)}`, { signal: controller.signal });
+    const response = await apiFetch(`https://api.postalpincode.in/postoffice/${encodeURIComponent(area)}`, { signal: controller.signal });
     clearTimeout(timer);
     const [result] = await response.json();
     const offices = Array.isArray(result?.PostOffice) ? result.PostOffice : [];

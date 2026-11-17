@@ -20,7 +20,7 @@ export default function AdminRules() {
     try {
       const data = await base44.entities.Rule.listAll("sectionNumber");
       setRules(data);
-    } catch (e) {
+    } catch {
       toast({ title: "Failed to load rules", variant: "destructive" });
     } finally {
       setLoading(false);

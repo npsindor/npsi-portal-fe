@@ -1,18 +1,19 @@
 import { API } from './endpoints';
 import { API_BASE_URL } from './apiBaseUrl';
+import { apiFetch } from '@/api/base44Client';
 
 // Sagun talks directly to this portal's NestJS REST API. It does not use a
 // third-party backend client, identity provider, database, storage or hosting.
 const apiBase = API_BASE_URL;
 const request = async (path, options = {}) => {
-  const response = await fetch(`${apiBase}${path}`, {
+  const response = await apiFetch(`${apiBase}${path}`, {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
     ...options,
   });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    throw Object.assign(new Error(body.error || `Sagun API request failed: ${response.status}`), { status: response.status });
+    throw Object.assign(new Error(body.error || `Shagun API request failed: ${response.status}`), { status: response.status });
   }
   return response.status === 204 ? null : response.json();
 };
@@ -43,14 +44,32 @@ export const sagunApi = { sagun: {
   configure: overrides => request(`${API.sagun}/admin/schema`, { method: 'PATCH', body: JSON.stringify({ overrides }) }),
   inquire: (id, message, consent) => request(`${API.sagun}/profiles/${encodeURIComponent(id)}/inquiries`, { method: 'POST', body: JSON.stringify({ message, consent }) }),
   inquiryAction: (id, action, shareSagun) => request(`${API.sagun}/inquiries/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ action, shareSagun }) }),
-  upload: async (id, kind, file, consent) => {
+  // onProgress(0..100) reports upload progress (XMLHttpRequest: fetch can't). Resolves only after the server stored the file.
+  upload: async (id, kind, file, consent, onProgress) => {
     const body = new FormData(); body.append('file', file); body.append('consent', String(consent));
-    const response = await fetch(`${apiBase}${API.sagun}/profiles/${encodeURIComponent(id)}/files/${encodeURIComponent(kind)}`, { method: 'POST', credentials: 'include', body });
-    if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || 'SAGUN_FILE');
+    if (onProgress && typeof XMLHttpRequest !== 'undefined') {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${apiBase}${API.sagun}/profiles/${encodeURIComponent(id)}/files/${encodeURIComponent(kind)}`);
+        xhr.withCredentials = true;
+        xhr.upload.onprogress = (event) => { if (event.lengthComputable) onProgress(Math.round((event.loaded / event.total) * 100)); };
+        xhr.onerror = () => reject(new Error('SAGUN_FILE_NETWORK'));
+        xhr.onload = () => {
+          let json = {}; try { json = JSON.parse(xhr.responseText || '{}'); } catch { json = {}; }
+          if (xhr.status === 413) return reject(new Error('SAGUN_FILE_SIZE'));
+          if (xhr.status < 200 || xhr.status >= 300) return reject(Object.assign(new Error(/too large/i.test(json.error || '') ? 'SAGUN_FILE_SIZE' : json.error || 'SAGUN_FILE'), { status: xhr.status }));
+          onProgress(100); resolve(json);
+        };
+        xhr.send(body);
+      });
+    }
+    const response = await apiFetch(`${apiBase}${API.sagun}/profiles/${encodeURIComponent(id)}/files/${encodeURIComponent(kind)}`, { method: 'POST', credentials: 'include', body });
+    if (response.status === 413) throw new Error('SAGUN_FILE_SIZE');
+    if (!response.ok) { const error = (await response.json().catch(() => ({}))).error || 'SAGUN_FILE'; throw new Error(/too large/i.test(error) ? 'SAGUN_FILE_SIZE' : error); }
     return response.json();
   },
   file: async id => {
-    const response = await fetch(`${apiBase}${API.sagun}/files/${encodeURIComponent(id)}`, { credentials: 'include' });
+    const response = await apiFetch(`${apiBase}${API.sagun}/files/${encodeURIComponent(id)}`, { credentials: 'include' });
     if (!response.ok) throw new Error('SAGUN_NOT_FOUND');
     return response.blob();
   },

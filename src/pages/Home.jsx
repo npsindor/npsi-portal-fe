@@ -5,14 +5,19 @@ import { usePublicCopy } from '@/lib/public-copy';
 import PublicFooter from '@/components/PublicFooter';
 import CommunityHighlights, { ParticipationSection } from '@/components/CommunityHighlights';
 import HomeShowcase from '@/components/HomeShowcase';
+import CommunityCounters from '@/components/CommunityCounters';
 import HomeLogoCarousel from '@/components/HomeLogoCarousel';
 import PublicNav from "@/components/PublicNav";
 import { introCopy, usePageContent } from "@/components/PageContent";
 import { base44 } from "@/api/base44Client";
 import { useT, useLang } from "@/lib/i18n";
 import { localizedText } from "@/lib/utils";
-import { publicNavigation } from "@/lib/public-navigation";
+
+// Announcement `type` values (Admin → Sandesh) → [English, Hindi] badge text.
+const ANNOUNCEMENT_TYPES = { Notice: ["Notice", "सूचना"], Urgent: ["Urgent", "अत्यावश्यक"], News: ["News", "समाचार"], Festival: ["Festival", "त्योहार"], General: ["General", "सामान्य"], Event: ["Event", "कार्यक्रम"] };
+import { flatNavigation } from "@/lib/public-navigation";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { calendarDate } from "@/lib/dates";
 
 // Icon and 3D-tile colours (light, deep) for each service card.
 const serviceIcons = {
@@ -21,9 +26,9 @@ const serviceIcons = {
   "Community Services": [HeartHandshake, "#f472b6", "#be185d"],
   "Career & Business": [Briefcase, "#818cf8", "#3730a3"],
   Sandesh: [Newspaper, "#38bdf8", "#0369a1"],
-  Sagun: [UsersRound, "#fb7185", "#9f1239"],
+  "Shagun Bandhan": [UsersRound, "#fb7185", "#9f1239"],
   Transportation: [Bus, "#facc15", "#b45309"],
-  Medical: [Stethoscope, "#34d399", "#047857"],
+  "Health Support": [Stethoscope, "#34d399", "#047857"],
   "Room Hunting": [House, "#a78bfa", "#6d28d9"],
   Feedback: [MessageSquare, "#2dd4bf", "#0f766e"],
   "Contact Us": [Phone, "#e6c86e", "#9a6f12"],
@@ -33,8 +38,8 @@ const serviceIcons = {
 const homeEvents = (rows) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const published = rows.filter((e) => e.status === "PUBLISHED").map((e) => ({ ...e, completed: Boolean(e.date) && new Date(e.date) < today }));
-  const time = (e) => (e.date ? new Date(e.date).getTime() : Infinity);
+  const published = rows.filter((e) => e.status === "PUBLISHED").map((e) => ({ ...e, completed: Boolean(e.date) && calendarDate(e.date) < today }));
+  const time = (e) => (e.date ? calendarDate(e.date).getTime() : Infinity);
   const upcoming = published.filter((e) => !e.completed).sort((a, b) => time(a) - time(b));
   const completed = published.filter((e) => e.completed).sort((a, b) => time(b) - time(a));
   return [...upcoming, ...completed].slice(0, 9);
@@ -97,7 +102,7 @@ export default function Home() {
     { icon: ScrollText, title: t("home.service6t"), desc: t("home.service6d"), cta: t("home.serviceCta"), to: "/rules" },
     { icon: HelpCircle, title: t("home.service7t"), desc: t("home.service7d"), cta: t("home.serviceCta"), to: "/help" },
   ];
-  const menuServices = publicNavigation
+  const menuServices = flatNavigation
     .filter((item) => item.label !== "Home" && serviceIcons[item.label])
     .map((item) => ({ ...item, icon: serviceIcons[item.label][0], colors: serviceIcons[item.label].slice(1), title: c(item.label) }));
   return (
@@ -105,12 +110,13 @@ export default function Home() {
       <PublicNav />
 
       <main>
+        <CommunityCounters lang={lang} />
         <section id="services" className="border-b border-border bg-card">
           <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-12 lg:gap-10">
-            <div className="min-w-0 lg:col-span-5">
+            <div className="min-w-0 lg:col-span-4">
               <HomeLogoCarousel />
             </div>
-            <div className="min-w-0 lg:col-span-7">
+            <div className="min-w-0 lg:col-span-8">
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
               <div>
                 <span className="eyebrow">{lang === "hi" ? "एक ही जगह पर" : "One trusted place"}</span>
@@ -178,7 +184,7 @@ export default function Home() {
               {announcements.map((announcement) => (
                 <article key={announcement.id} className="premium-card p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="rounded-full bg-gold/15 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-amber-800">{announcement.type}</span>
+                    <span className="rounded-full bg-gold/15 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-amber-800">{ANNOUNCEMENT_TYPES[announcement.type]?.[lang === "hi" ? 1 : 0] || announcement.type}</span>
                     <time className="text-xs text-muted-foreground">{announcement.date ? new Date(announcement.date).toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN") : ""}</time>
                   </div>
                   <h3 className="mt-4 font-display text-base font-semibold text-foreground">{localizedText(announcement, "title", lang)}</h3>
@@ -241,7 +247,7 @@ export default function Home() {
                           <div className="p-5">
                             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                               <CalendarDays className="h-3.5 w-3.5 text-gold" />
-                              {event.date ? new Date(event.date).toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                              {event.date ? calendarDate(event.date).toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
                               {localizedText(event, "venue", lang) && <><span className="text-border">·</span><MapPin className="h-3.5 w-3.5 text-gold" /><span className="line-clamp-1">{localizedText(event, "venue", lang)}</span></>}
                             </div>
                             <h3 className="mt-3 font-display text-lg font-semibold text-foreground">{localizedText(event, "title", lang)}</h3>

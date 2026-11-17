@@ -10,6 +10,8 @@ import DateRangeFilter from "@/components/admin/DateRangeFilter";
 import { inDateRange } from "@/lib/dateRangeFilter";
 
 const TYPES = ["Family Registration", "Membership Payment", "Event Registration", "Donation", "Other"];
+// Stored type → Hindi label (the stored English value stays the same).
+const TYPE_HI = { "Family Registration": "परिवार पंजीकरण", "Student Registration": "विद्यार्थी पंजीकरण", "Membership Payment": "सदस्यता भुगतान", "Event Registration": "कार्यक्रम पंजीकरण", Donation: "दान", Other: "अन्य" };
 const METHODS = ["UPI", "QR", "Card", "Net Banking", "Cash"];
 const STATUSES = ["PENDING", "SUCCESS", "FAILED", "REFUNDED"];
 
@@ -122,7 +124,7 @@ export default function AdminTransactions() {
   const load = async () => {
     setLoading(true);
     try { setTxns(await base44.entities.Transaction.listAll("-date")); }
-    catch (e) {} finally { setLoading(false); }
+    catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
@@ -258,7 +260,7 @@ export default function AdminTransactions() {
         </select>
         <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="rounded-full border border-gold/40 bg-card px-4 py-2.5 text-sm outline-none focus:border-maroon">
           <option value="All">{t.allTypes}</option>
-          {TYPES.map((tp) => <option key={tp}>{tp}</option>)}
+          {TYPES.map((tp) => <option key={tp} value={tp}>{lang === "hi" ? TYPE_HI[tp] || tp : tp}</option>)}
         </select>
         <DateRangeFilter from={dateFrom} to={dateTo} onFromChange={setDateFrom} onToChange={setDateTo} />
       </div>
@@ -283,7 +285,7 @@ export default function AdminTransactions() {
               <tr key={tx.id} className="border-b border-border last:border-0 hover:bg-muted/30">
                 <td className="px-4 py-3 text-muted-foreground">{startIndex + i + 1}</td>
                 <td className="px-4 py-3 font-semibold text-maroon">{tx.transactionId}</td>
-                <td className="px-4 py-3">{tx.type}</td>
+                <td className="px-4 py-3">{lang === "hi" ? TYPE_HI[tx.type] || tx.type : tx.type}</td>
                 <td className="px-4 py-3 font-semibold">₹{parseAmount(tx.amount).toLocaleString(locale)}</td>
                 <td className="px-4 py-3 text-muted-foreground">{tx.paymentMethod}</td>
                 <td className="px-4 py-3 text-muted-foreground">{tx.referenceId || "—"}</td>
@@ -313,7 +315,7 @@ export default function AdminTransactions() {
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblTxnId} *</label><input value={editing.transactionId} onChange={(e) => setEditing({ ...editing, transactionId: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblType} *</label>
-                <select value={editing.type} onChange={(e) => setEditing({ ...editing, type: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">{TYPES.map((tp) => <option key={tp}>{tp}</option>)}</select>
+                <select value={editing.type} onChange={(e) => setEditing({ ...editing, type: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">{TYPES.map((tp) => <option key={tp} value={tp}>{lang === "hi" ? TYPE_HI[tp] || tp : tp}</option>)}</select>
               </div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblAmount} *</label><input type="number" value={editing.amount} onChange={(e) => setEditing({ ...editing, amount: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblMethod}</label>

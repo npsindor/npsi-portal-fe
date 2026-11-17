@@ -17,11 +17,19 @@ export const AuthProvider = ({ children }) => {
   const checkUserAuth = async () => {
     try {
       setIsLoadingAuth(true);
-      const currentUser = await base44.auth.me();
-      setUser(currentUser);
-      setIsAuthenticated(true);
+      const currentUser = await base44.auth.currentSession();
+      if (currentUser) {
+        setUser(currentUser);
+        setIsAuthenticated(true);
+      } else {
+        // Not logged in (the normal answer for a visitor). Drop any token an older version stored.
+        setUser(null);
+        setIsAuthenticated(false);
+        try { localStorage.removeItem('base44_access_token'); } catch {}
+      }
     } catch (error) {
-      console.error('User auth check failed:', error);
+      // 401/403 is the normal answer for a visitor who isn't logged in; only real failures are errors.
+      if (error.status !== 401 && error.status !== 403) console.error('User auth check failed:', error);
       setIsAuthenticated(false);
       // 401/403 just means "not logged in" (public pages stay public; protected
       // routes show their login prompt). Drop any token an older version stored.

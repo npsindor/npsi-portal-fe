@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Check, X, AlertCircle, Eye, Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
 import { base44 } from "@/api/base44Client";
+import VillageCombobox from "@/components/VillageCombobox";
 import { useToast } from "@/components/ui/use-toast";
 import { useLang } from "@/lib/i18n";
 import { sanitizeMobile, sanitizePincode } from "@/lib/utils";
@@ -163,7 +164,7 @@ const normalizeMembersPayload = (value) => {
     try {
       const parsed = JSON.parse(value || "[]");
       return Array.isArray(parsed) ? parsed : [];
-    } catch (error) {
+    } catch {
       return [];
     }
   }
@@ -195,7 +196,7 @@ export default function AdminApplications() {
     try {
       const list = await base44.entities.Application.listAll("-submittedDate");
       setApps(list);
-    } catch (e) {} finally { setLoading(false); }
+    } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
@@ -476,8 +477,8 @@ export default function AdminApplications() {
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblState}</label><input value={editing.state} onChange={(e) => setEditing({ ...editing, state: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblPincode}</label><input value={editing.pincode} onChange={(e) => setEditing({ ...editing, pincode: sanitizePincode(e.target.value) })} inputMode="numeric" maxLength={6} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblGotra}</label><input value={editing.gotra} onChange={(e) => setEditing({ ...editing, gotra: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblNative}</label><input value={editing.nativePlace} onChange={(e) => setEditing({ ...editing, nativePlace: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblVillage}</label><input value={editing.village} onChange={(e) => setEditing({ ...editing, village: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label htmlFor="app-nativePlace" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblNative}</label><VillageCombobox id="app-nativePlace" hideLabel label={t.lblNative} value={editing.nativePlace} onChange={(v) => setEditing((cur) => ({ ...cur, nativePlace: v }))} inputClassName="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label htmlFor="app-village" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblVillage}</label><VillageCombobox id="app-village" hideLabel label={t.lblVillage} value={editing.village} onChange={(v) => setEditing((cur) => ({ ...cur, village: v }))} inputClassName="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblRemarks}</label><textarea value={editing.adminRemarks} onChange={(e) => setEditing({ ...editing, adminRemarks: e.target.value })} rows={2} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
             </div>
             <button onClick={saveEdit} disabled={saving} className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-maroon py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark disabled:opacity-60">

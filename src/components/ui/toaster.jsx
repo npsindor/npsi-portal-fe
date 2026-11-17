@@ -1,4 +1,5 @@
 import { useToast } from "@/components/ui/use-toast";
+import { useT } from "@/lib/i18n";
 import {
   Toast,
   ToastClose,
@@ -10,6 +11,7 @@ import {
 
 export function Toaster() {
   const { toasts } = useToast();
+  const t = useT();
 
   return (
     <ToastProvider>
@@ -27,7 +29,7 @@ export function Toaster() {
           </Toast>
         );
       })}
-      <ToastViewport />
+      <ToastViewport label={`${t("common.notifications")} (F8)`} />
     </ToastProvider>
   );
 } 

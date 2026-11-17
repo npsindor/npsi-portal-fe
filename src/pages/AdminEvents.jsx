@@ -8,6 +8,7 @@ import { useTableControls } from "@/lib/useTableControls";
 import SearchBox from "@/components/admin/SearchBox";
 import TablePagination from "@/components/admin/TablePagination";
 import { localizedText } from "@/lib/utils";
+import { calendarDate } from "@/lib/dates";
 
 const EMPTY_FORM = {
   title: "", titleHi: "", description: "", descriptionHi: "", date: "", startTime: "", endTime: "",
@@ -143,7 +144,7 @@ export default function AdminEvents() {
 
   const load = async () => {
     try { setEvents(await base44.entities.Event.listAll("-date")); }
-    catch (e) {} finally { setLoading(false); }
+    catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
@@ -217,7 +218,7 @@ export default function AdminEvents() {
 
   const duplicate = async (ev) => {
     try {
-      const { id, createdAt, updatedAt, created_by_id, ...rest } = ev;
+      const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, created_by_id: _createdById, ...rest } = ev;
       await base44.entities.Event.create({ ...rest, title: `${ev.title} (Copy)`, slug: `${ev.slug || ""}-copy` });
       toast({ title: t.duplicated });
       await load();
@@ -271,7 +272,7 @@ export default function AdminEvents() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <CalendarDays className="h-3.5 w-3.5" />
-                  {ev.date ? new Date(ev.date).toLocaleDateString(locale) : "—"}
+                  {ev.date ? calendarDate(ev.date).toLocaleDateString(locale) : "—"}
                 </div>
                 <StatusBadge status={ev.status} />
               </div>

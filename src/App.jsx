@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useRef } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -6,10 +6,12 @@ import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'r
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import ScrollToTop from './components/ScrollToTop';
+import RouteTitle from '@/components/RouteTitle';
 import { LanguageProvider } from '@/lib/i18n';
 import { ThemeProvider } from '@/lib/ThemeContext';
 // Add page imports here
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { safeReturnTo } from '@/lib/authReturnTo';
 import Layout from '@/components/Layout';
 import AdminLayout from '@/components/AdminLayout';
 // import LaunchCurtain from '@/components/LaunchCurtain';
@@ -17,6 +19,16 @@ import AdminLayout from '@/components/AdminLayout';
 // Pages are lazy-loaded per route so the initial bundle only ships the
 // shell + whichever page is actually visited, instead of all ~37 pages.
 const Sagun = lazy(() => import('@/pages/Sagun'));
+const MyRoomHunting = lazy(() => import('@/pages/MyRoomHunting'));
+const SearchResults = lazy(() => import('@/pages/SearchResults'));
+const AdminRoomHunting = lazy(() => import('@/pages/AdminRoomHunting'));
+const AdminSagunCards = lazy(() => import('@/pages/AdminSagunCards'));
+const SagunVerify = lazy(() => import('@/pages/SagunVerify'));
+const EventPage = lazy(() => import('@/pages/EventPage'));
+const CoreTeam = lazy(() => import('@/pages/CoreTeam'));
+const AdminEventMembers = lazy(() => import('@/pages/AdminEventMembers'));
+const TeamPage = lazy(() => import('@/pages/TeamPage'));
+const AdminTransportation = lazy(() => import('@/pages/AdminTransportation'));
 const SehatSaathi = lazy(() => import('@/pages/SehatSaathi'));
 const SafarSaathi = lazy(() => import('@/pages/SafarSaathi'));
 const RoomHunting = lazy(() => import('@/pages/RoomHunting'));
@@ -93,6 +105,9 @@ const AuthenticatedApp = () => {
       <Route path="/" element={<Home />} />
       <Route path="/about" element={<About />} />
       <Route path="/events" element={<Events />} />
+      <Route path="/events/:slug" element={<EventPage />} />
+      <Route path="/core-team" element={<CoreTeam />} />
+      <Route path="/teams/:key" element={<TeamPage />} />
       {/* Registration is account-first now: sign up with mobile OTP, then register (with payment) in the portal. */}
       <Route path="/register" element={<RegistrationEntry />} />
       <Route path="/student-register" element={<StudentRegistration />} />
@@ -109,15 +124,17 @@ const AuthenticatedApp = () => {
       <Route path="/transportation" element={<SafarSaathi />} />
       <Route path="/medical" element={<SehatSaathi />} />
       <Route path="/room-hunting" element={<RoomHunting />} />
+      <Route path="/search" element={<SearchResults />} />
       <Route path="/community-services" element={<CommunityServices />} />
       <Route path="/career-business" element={<Careers />} />
       <Route path="/sagun" element={<Sagun />} />
+      <Route path="/sagun/verify/:token" element={<SagunVerify />} />
       <Route path="/sagun/workspace" element={<Sagun workspace />} />
       <Route path="/contact" element={<CommunityPage kind="contact" />} />
       <Route path="/public-feedback" element={<CommunityPage kind="feedback" />} />
       {/* Auth routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register-account" element={<Register />} />
+      <Route path="/login" element={<GuestOnly><Login /></GuestOnly>} />
+      <Route path="/register-account" element={<GuestOnly><Register /></GuestOnly>} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
@@ -126,9 +143,10 @@ const AuthenticatedApp = () => {
         <Route element={<Layout />}>
           <Route path="/portal" element={<MemberDashboard />} />
           <Route path="/portal/registration" element={<PortalRegistration />} />
-          <Route path="/portal/family" element={<MyFamily />} />
+          <Route path="/portal/family" element={<FamilyOnly><MyFamily /></FamilyOnly>} />
           <Route path="/portal/events" element={<MemberEvents />} />
-          <Route path="/portal/event-kharcha" element={<MemberEventKharcha />} />
+          <Route path="/portal/event-kharcha" element={<FamilyOnly><MemberEventKharcha /></FamilyOnly>} />
+          <Route path="/portal/room-hunting" element={<MyRoomHunting />} />
           <Route path="/portal/notifications" element={<Notifications />} />
           <Route path="/portal/settings" element={<Settings />} />
           <Route path="/portal/feedback" element={<Feedback />} />
@@ -163,6 +181,12 @@ const AuthenticatedApp = () => {
           <Route path="/admin/feedback" element={<AdminFeedback />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/news" element={<AdminNews />} />
+          <Route path="/admin/room-hunting" element={<AdminRoomHunting />} />
+          <Route path="/admin/sagun-cards" element={<AdminSagunCards />} />
+          <Route path="/admin/event-members" element={<AdminEventMembers />} />
+          {/* The old Core Team admin page: Core Team members are managed with every other team now. */}
+          <Route path="/admin/core-team" element={<Navigate to="/admin/event-members?section=CORE_TEAM" replace />} />
+          <Route path="/admin/transportation" element={<AdminTransportation />} />
         </Route>
       </Route>
 
@@ -173,10 +197,31 @@ const AuthenticatedApp = () => {
 };
 
 
+// Family pages are not part of a Student account's portal (the API refuses their data anyway): a direct URL goes
+// back to the dashboard. The account type comes from the server (/auth/me), never from browser storage.
+function FamilyOnly({ children }) {
+  const { user } = useAuth();
+  return user?.account?.type === 'STUDENT' ? <Navigate to="/portal" replace /> : children;
+}
+
 // Protected pages send logged-out visitors to /login and bring them back afterwards.
 function LoginRedirect() {
   const location = useLocation();
   return <Navigate to={`/login?returnTo=${encodeURIComponent(location.pathname + location.search)}`} replace />;
+}
+
+// Login and sign-up are for visitors: someone already logged in goes on to where they were heading
+// (a safe ?returnTo=), else to their portal. Decided once, when the session check finishes, so a
+// login completing on this page keeps its own redirect.
+function GuestOnly({ children }) {
+  const { isAuthenticated, isLoadingAuth, user } = useAuth();
+  const decision = useRef(null);
+  if (isLoadingAuth && decision.current === null) return null;
+  if (decision.current === null) {
+    const returnTo = safeReturnTo();
+    decision.current = isAuthenticated ? (returnTo !== '/' ? returnTo : user?.role === 'admin' ? '/admin' : '/portal') : '';
+  }
+  return decision.current ? <Navigate to={decision.current} replace /> : children;
 }
 
 // The old public registration links: members register from their account now.
@@ -195,8 +240,9 @@ function App() {
         <AuthProvider>
           <LanguageProvider>
             <QueryClientProvider client={queryClientInstance}>
-              <Router>
+              <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                 <ScrollToTop />
+                <RouteTitle />
                 <AuthenticatedApp />
               </Router>
               <Toaster />
