@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { localizedText } from '@/lib/utils';
 import logoImage from '@/images/logo.png';
+import ADVERTISING_IMAGES from 'virtual:advertising';
 
 // Garba highlights video (also used by GarbaVideoPopup). Replace or remove the slide below if the file is deleted.
 const VIDEO_SRC = '/videos/maanagarba.mp4';
@@ -44,9 +45,10 @@ function useAutoplay(api, delay, paused) {
 
 const copy = {
   en: {
-    eyebrow: 'Community highlights',
-    title: 'Life in our samaj',
-    mediaLabel: 'Community gallery',
+    eyebrow: 'Advertisements & sponsors',
+    title: 'Featured on our website',
+    mediaLabel: 'Advertisements',
+    adAlt: 'Advertisement',
     textLabel: 'Community highlights',
     prev: 'Previous slide',
     next: 'Next slide',
@@ -59,8 +61,8 @@ const copy = {
     texts: [
       { icon: Quote, eyebrow: 'Our values', title: 'Unity, cooperation, respect and transparency', body: 'Together we preserve our Nimar heritage and build a stronger future for every family.', to: '/about', cta: 'About us' },
       { icon: GraduationCap, eyebrow: 'Education', title: 'Support for every student', body: 'Register students, find guidance and stay connected with education programmes of the samaj.', to: '/student-register', cta: 'Student registration' },
-      { icon: HeartHandshake, eyebrow: 'Sagun', title: 'Matrimonial registration is open', body: 'Verified families can register a private, consent-based Sagun profile for a family member.', to: '/sagun', cta: 'Register now' },
-      { icon: Stethoscope, eyebrow: 'Sehat Saathi', title: 'Health help, close to home', body: 'Medicine support and trusted health resources shared by community members.', to: '/medical', cta: 'Explore Sehat Saathi' },
+      { icon: HeartHandshake, eyebrow: 'Shagun Bandhan', title: 'Matrimonial registration is open', body: 'Verified families can register a private, consent-based Shagun Bandhan profile for a family member.', to: '/sagun', cta: 'Register now' },
+      { icon: Stethoscope, eyebrow: 'Health Support', title: 'Health help, close to home', body: 'Medicine support and trusted health resources shared by community members.', to: '/medical', cta: 'Explore Health Support' },
     ],
     identityTitle: 'Nimar Patidar Sangathan, Indore',
     identityBody: 'Unity • Cooperation • Respect • Transparency',
@@ -76,9 +78,10 @@ const copy = {
     textSlideCta: 'Join the Sangathan',
   },
   hi: {
-    eyebrow: 'समाज की झलक',
-    title: 'हमारे समाज का जीवन',
-    mediaLabel: 'सामुदायिक गैलरी',
+    eyebrow: 'विज्ञापन और प्रायोजक',
+    title: 'हमारी वेबसाइट पर विशेष',
+    mediaLabel: 'विज्ञापन',
+    adAlt: 'विज्ञापन',
     textLabel: 'समाज की मुख्य बातें',
     prev: 'पिछली स्लाइड',
     next: 'अगली स्लाइड',
@@ -91,8 +94,8 @@ const copy = {
     texts: [
       { icon: Quote, eyebrow: 'हमारे मूल्य', title: 'एकता, सहयोग, सम्मान और पारदर्शिता', body: 'मिलकर हम अपनी निमाड़ विरासत को सँजोते हैं और हर परिवार के लिए बेहतर भविष्य बनाते हैं।', to: '/about', cta: 'हमारे बारे में' },
       { icon: GraduationCap, eyebrow: 'शिक्षा', title: 'हर विद्यार्थी के लिए सहयोग', body: 'विद्यार्थियों का पंजीकरण करें, मार्गदर्शन पाएँ और समाज के शिक्षा कार्यक्रमों से जुड़े रहें।', to: '/student-register', cta: 'विद्यार्थी पंजीकरण' },
-      { icon: HeartHandshake, eyebrow: 'सगुन', title: 'वैवाहिक पंजीकरण शुरू', body: 'सत्यापित परिवार अपने सदस्य का निजी, सहमति-आधारित सगुन परिचय पंजीकृत कर सकते हैं।', to: '/sagun', cta: 'अभी पंजीकरण करें' },
-      { icon: Stethoscope, eyebrow: 'सेहत साथी', title: 'स्वास्थ्य सहायता, आपके पास', body: 'समाज के सदस्यों द्वारा साझा दवा सहायता और भरोसेमंद स्वास्थ्य संसाधन।', to: '/medical', cta: 'सेहत साथी देखें' },
+      { icon: HeartHandshake, eyebrow: 'शगुन बंधन', title: 'वैवाहिक पंजीकरण शुरू', body: 'सत्यापित परिवार अपने सदस्य का निजी, सहमति-आधारित शगुन बंधन परिचय पंजीकृत कर सकते हैं।', to: '/sagun', cta: 'अभी पंजीकरण करें' },
+      { icon: Stethoscope, eyebrow: 'स्वास्थ्य सहयोग', title: 'स्वास्थ्य सहायता, आपके पास', body: 'समाज के सदस्यों द्वारा साझा दवा सहायता और भरोसेमंद स्वास्थ्य संसाधन।', to: '/medical', cta: 'स्वास्थ्य सहयोग देखें' },
     ],
     identityTitle: 'निमाड़ पाटीदार संगठन, इंदौर',
     identityBody: 'एकता • सहयोग • सम्मान • पारदर्शिता',
@@ -195,7 +198,16 @@ export default function HomeShowcase({ lang, events = [] }) {
       : { kind: 'image', key: 'event', src: logoImage, contain: true, eyebrow: c.eventEyebrow, title: c.eventFallbackTitle, body: c.eventFallbackBody, to: '/events', cta: c.eventCta },
     { kind: 'text', key: 'join', eyebrow: c.textSlideEyebrow, title: c.textSlideTitle, body: c.textSlideBody, to: '/register', cta: c.textSlideCta },
   ];
-  const mediaSlides = adminMedia.length ? adminMedia : defaultMedia;
+  // The ads in public/advertising always run; admin media slides (Admin → Community highlights → Media) join them.
+  // An admin slide that uses a folder image replaces that image's plain slide (it adds its text and link).
+  const adminSources = new Set(adminMedia.map((slide) => slide.src));
+  const folderAds = ADVERTISING_IMAGES.filter((src) => !adminSources.has(src)).map((src, i) => ({
+    kind: 'image', key: src, src, fit: true, sponsored: true, alt: `${c.adAlt} ${i + 1}`,
+  }));
+  const ads = [...adminMedia.map((slide) => (ADVERTISING_IMAGES.includes(slide.src) ? { ...slide, fit: true } : slide)), ...folderAds];
+  const mediaSlides = ads.length ? ads : defaultMedia;
+  // Ad banners are wide (about 1600×850): on phones the slider takes their shape instead of a tall box.
+  const adsOnly = mediaSlides.every((slide) => slide.fit);
   const activeMedia = mediaSlides[media.index];
   const videoActive = activeMedia?.kind === 'video';
 
@@ -291,9 +303,11 @@ export default function HomeShowcase({ lang, events = [] }) {
                   const active = media.index === index;
                   return (
                     <CarouselItem key={slide.key} aria-roledescription="slide" aria-label={`${index + 1} ${c.of} ${mediaSlides.length}`} aria-hidden={!active} className="pl-0 md:h-full">
-                      <div className="relative aspect-[4/5] w-full overflow-hidden min-[480px]:aspect-[4/3] sm:aspect-video md:aspect-auto md:h-full md:min-h-[24rem] lg:min-h-[28rem] xl:min-h-[30rem]">
+                      <div className={`relative w-full overflow-hidden ${adsOnly ? 'aspect-[32/17]' : 'aspect-[4/5] min-[480px]:aspect-[4/3] sm:aspect-video'} md:aspect-auto md:h-full md:min-h-[24rem] lg:min-h-[28rem] xl:min-h-[30rem]`}>
                         {slide.kind === 'image' && (
-                          slide.contain
+                          slide.fit
+                            ? <img src={slide.src} alt={slide.title || slide.alt || ''} loading={index === 0 ? 'eager' : 'lazy'} decoding="async" className="absolute inset-0 h-full w-full object-contain" />
+                            : slide.contain
                             ? <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_30%_20%,rgb(196_154_67/0.28),transparent_55%)] p-10 pb-32 sm:pb-28"><img src={slide.src} alt="" loading="lazy" decoding="async" className="max-h-full max-w-[60%] object-contain drop-shadow-2xl sm:max-w-[40%]" /></div>
                             : <img src={slide.src} alt={slide.title} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
                         )}
@@ -310,6 +324,10 @@ export default function HomeShowcase({ lang, events = [] }) {
                             <div className="absolute inset-0 shell-grid opacity-[0.06]" />
                           </div>
                         )}
+                        {/* A plain folder ad shows the image alone, with only the Ad label. */}
+                        {!slide.title && !slide.body && !slide.to ? (
+                          slide.sponsored && <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4"><AdBadge lang={lang} /></div>
+                        ) : (
                         <div className={`absolute inset-x-0 bottom-0 p-5 sm:p-8 ${slide.kind === 'text' ? 'top-0 flex flex-col justify-center' : `bg-gradient-to-t from-black/85 via-black/45 to-transparent pt-16${slide.youtube && active ? ' pointer-events-none [&_a]:pointer-events-auto' : ''}`}`}>
                           {(slide.eyebrow || slide.sponsored) && <p className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-gold">{slide.sponsored && <AdBadge lang={lang} />}{slide.eyebrow}</p>}
                           <h3 className={`mt-2 max-w-2xl font-display font-semibold leading-tight text-cream ${slide.kind === 'text' ? 'text-2xl sm:text-4xl' : 'text-xl sm:text-3xl'}`}>{slide.title}</h3>
@@ -320,6 +338,7 @@ export default function HomeShowcase({ lang, events = [] }) {
                             </SlideLink>
                           )}
                         </div>
+                        )}
                       </div>
                     </CarouselItem>
                   );

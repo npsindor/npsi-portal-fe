@@ -11,7 +11,7 @@
           }
         },
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -32,9 +32,9 @@
             "bearer": []
           }
         ],
-        "summary": "Members of the caller's registered family, with Sagun eligibility computed from the family record",
+        "summary": "Members of the caller's registered family, with Shagun eligibility computed from the family record",
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -66,7 +66,7 @@
         ],
         "summary": "Eligibility check and form pre-fill for one member of the caller's family",
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -85,7 +85,7 @@
           }
         ],
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -104,7 +104,7 @@
           }
         ],
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       },
       "post": {
@@ -131,7 +131,7 @@
           }
         ],
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -159,7 +159,7 @@
           }
         ],
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       },
       "patch": {
@@ -195,7 +195,7 @@
           }
         ],
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       },
       "delete": {
@@ -221,7 +221,7 @@
           }
         ],
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -249,7 +249,7 @@
           }
         ],
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -277,7 +277,7 @@
           }
         ],
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -315,7 +315,7 @@
           }
         ],
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -333,9 +333,9 @@
             "bearer": []
           }
         ],
-        "summary": "Sagun dashboard counts (applications exclude drafts)",
+        "summary": "Shagun dashboard counts (applications exclude drafts)",
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -449,9 +449,9 @@
             "bearer": []
           }
         ],
-        "summary": "Search and filter Sagun applications",
+        "summary": "Search and filter Shagun applications",
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -493,7 +493,7 @@
         ],
         "summary": "Correct application details (logged with remarks); identity, consents and files are protected",
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -522,7 +522,7 @@
         ],
         "summary": "Status and correction history of one application",
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -540,9 +540,9 @@
             "bearer": []
           }
         ],
-        "summary": "Sagun registration settings",
+        "summary": "Shagun registration settings",
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       },
       "put": {
@@ -571,9 +571,9 @@
             "bearer": []
           }
         ],
-        "summary": "Update Sagun registration settings (minimum ages cannot go below 18 / 21)",
+        "summary": "Update Shagun registration settings (minimum ages cannot go below 18 / 21)",
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -592,7 +592,7 @@
           }
         ],
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -621,7 +621,7 @@
           }
         ],
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -659,7 +659,7 @@
           }
         ],
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -697,7 +697,7 @@
           }
         ],
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -733,7 +733,7 @@
           }
         ],
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -761,7 +761,7 @@
           }
         ],
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       },
       "delete": {
@@ -787,7 +787,7 @@
           }
         ],
         "tags": [
-          "Sagun"
+          "Shagun"
         ]
       }
     },
@@ -1905,7 +1905,7 @@
             }
           }
         },
-        "summary": "Counts of active families and members",
+        "summary": "Homepage counts: approved families, members, students and Shagun Bandhan profiles",
         "tags": [
           "public lookups"
         ]
@@ -1993,6 +1993,16 @@
           },
           "400": {
             "description": "Malformed, wrong or expired code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Wrong login portal for this account, or account/membership inactive",
             "content": {
               "application/json": {
                 "schema": {
@@ -2233,6 +2243,7 @@
     },
     "/api/v1/auth/sessions": {
       "post": {
+        "description": "`portal` FAMILY (default) or STUDENT must match the account's own registration; the server decides the account type from its records.",
         "operationId": "AuthController_login",
         "parameters": [],
         "requestBody": {
@@ -2267,7 +2278,7 @@
             }
           },
           "403": {
-            "description": "Account not verified yet",
+            "description": "Account not verified yet, wrong login portal for this account, or account/membership inactive",
             "content": {
               "application/json": {
                 "schema": {
@@ -2548,7 +2559,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PublicUserVo"
+                  "$ref": "#/components/schemas/MeVo"
                 }
               }
             }
@@ -2572,7 +2583,7 @@
             "bearer": []
           }
         ],
-        "summary": "The logged-in user",
+        "summary": "The logged-in user, with the portal their account belongs to (from its registration records)",
         "tags": [
           "auth"
         ]
@@ -2647,6 +2658,34 @@
       }
     },
     "/api/v1/auth/sessions/current": {
+      "get": {
+        "operationId": "AuthController_currentSession",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentSessionVo"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (auth and OTP routes)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The current session: the logged-in user, or null (200 either way, so the website can check without an error)",
+        "tags": [
+          "auth"
+        ]
+      },
       "delete": {
         "operationId": "AuthController_logout",
         "parameters": [],
@@ -3806,6 +3845,356 @@
         ]
       }
     },
+    "/api/v1/students": {
+      "get": {
+        "description": "Admin only.",
+        "operationId": "StudentsController_list",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 500,
+              "default": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Rows to skip, for paging",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "-createdAt",
+              "type": "string",
+              "enum": [
+                "id",
+                "-id",
+                "studentId",
+                "-studentId",
+                "studentName",
+                "-studentName",
+                "status",
+                "-status",
+                "mobile",
+                "-mobile",
+                "email",
+                "-email",
+                "dob",
+                "-dob",
+                "gender",
+                "-gender",
+                "course",
+                "-course",
+                "institution",
+                "-institution",
+                "academicYear",
+                "-academicYear",
+                "guardianName",
+                "-guardianName",
+                "guardianMobile",
+                "-guardianMobile",
+                "address",
+                "-address",
+                "city",
+                "-city",
+                "district",
+                "-district",
+                "state",
+                "-state",
+                "pincode",
+                "-pincode",
+                "photoUrl",
+                "-photoUrl",
+                "registrationDate",
+                "-registrationDate",
+                "applicationId",
+                "-applicationId",
+                "linkedFamilyId",
+                "-linkedFamilyId",
+                "linkedMembershipId",
+                "-linkedMembershipId",
+                "createdAt",
+                "-createdAt",
+                "updatedAt",
+                "-updatedAt",
+                "fatherName",
+                "-fatherName"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StudentVo"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid order, limit or filter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List students",
+        "tags": [
+          "students"
+        ]
+      },
+      "post": {
+        "description": "Admin only.",
+        "operationId": "StudentsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStudentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentVo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a student",
+        "tags": [
+          "students"
+        ]
+      }
+    },
+    "/api/v1/students/{id}": {
+      "patch": {
+        "description": "Admin only.",
+        "operationId": "StudentsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Record id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStudentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentVo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Record not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a student",
+        "tags": [
+          "students"
+        ]
+      },
+      "delete": {
+        "description": "Admin only.",
+        "operationId": "StudentsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Record id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted (also when the id did not exist)"
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a student",
+        "tags": [
+          "students"
+        ]
+      }
+    },
     "/api/v1/transactions": {
       "get": {
         "description": "Admin only.",
@@ -4568,356 +4957,6 @@
         ]
       }
     },
-    "/api/v1/students": {
-      "get": {
-        "description": "Admin only.",
-        "operationId": "StudentsController_list",
-        "parameters": [
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "maximum": 500,
-              "default": 100,
-              "type": "number"
-            }
-          },
-          {
-            "name": "offset",
-            "required": false,
-            "in": "query",
-            "description": "Rows to skip, for paging",
-            "schema": {
-              "minimum": 0,
-              "default": 0,
-              "type": "number"
-            }
-          },
-          {
-            "name": "order",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "-createdAt",
-              "type": "string",
-              "enum": [
-                "id",
-                "-id",
-                "studentId",
-                "-studentId",
-                "studentName",
-                "-studentName",
-                "status",
-                "-status",
-                "mobile",
-                "-mobile",
-                "email",
-                "-email",
-                "dob",
-                "-dob",
-                "gender",
-                "-gender",
-                "course",
-                "-course",
-                "institution",
-                "-institution",
-                "academicYear",
-                "-academicYear",
-                "guardianName",
-                "-guardianName",
-                "guardianMobile",
-                "-guardianMobile",
-                "address",
-                "-address",
-                "city",
-                "-city",
-                "district",
-                "-district",
-                "state",
-                "-state",
-                "pincode",
-                "-pincode",
-                "photoUrl",
-                "-photoUrl",
-                "registrationDate",
-                "-registrationDate",
-                "applicationId",
-                "-applicationId",
-                "linkedFamilyId",
-                "-linkedFamilyId",
-                "linkedMembershipId",
-                "-linkedMembershipId",
-                "createdAt",
-                "-createdAt",
-                "updatedAt",
-                "-updatedAt",
-                "fatherName",
-                "-fatherName"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/StudentVo"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid order, limit or filter",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorVo"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorVo"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorVo"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List students",
-        "tags": [
-          "students"
-        ]
-      },
-      "post": {
-        "description": "Admin only.",
-        "operationId": "StudentsController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateStudentDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StudentVo"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorVo"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorVo"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorVo"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create a student",
-        "tags": [
-          "students"
-        ]
-      }
-    },
-    "/api/v1/students/{id}": {
-      "patch": {
-        "description": "Admin only.",
-        "operationId": "StudentsController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Record id",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateStudentDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StudentVo"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorVo"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorVo"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorVo"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Record not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorVo"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Update a student",
-        "tags": [
-          "students"
-        ]
-      },
-      "delete": {
-        "description": "Admin only.",
-        "operationId": "StudentsController_remove",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Record id",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Deleted (also when the id did not exist)"
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorVo"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorVo"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Delete a student",
-        "tags": [
-          "students"
-        ]
-      }
-    },
     "/api/v1/address-options": {
       "get": {
         "operationId": "AddressOptionsController_list",
@@ -4931,7 +4970,9 @@
               "enum": [
                 "AREA",
                 "PINCODE",
-                "VILLAGE"
+                "VILLAGE",
+                "RENTAL_AREA",
+                "PROPERTY_TYPE"
               ]
             }
           },
@@ -5061,7 +5102,9 @@
               "enum": [
                 "AREA",
                 "PINCODE",
-                "VILLAGE"
+                "VILLAGE",
+                "RENTAL_AREA",
+                "PROPERTY_TYPE"
               ]
             }
           },
@@ -6027,7 +6070,7 @@
         },
         "summary": "Verified public health resources and consented approved MR contacts only",
         "tags": [
-          "Sehat Saathi"
+          "Health Support"
         ]
       }
     },
@@ -6046,7 +6089,7 @@
           }
         ],
         "tags": [
-          "Sehat Saathi"
+          "Health Support"
         ]
       }
     },
@@ -6075,7 +6118,7 @@
           }
         ],
         "tags": [
-          "Sehat Saathi"
+          "Health Support"
         ]
       }
     },
@@ -6104,7 +6147,7 @@
           }
         ],
         "tags": [
-          "Sehat Saathi"
+          "Health Support"
         ]
       }
     },
@@ -6132,7 +6175,7 @@
           }
         ],
         "tags": [
-          "Sehat Saathi"
+          "Health Support"
         ]
       }
     },
@@ -6170,7 +6213,7 @@
           }
         ],
         "tags": [
-          "Sehat Saathi"
+          "Health Support"
         ]
       }
     },
@@ -6199,7 +6242,7 @@
           }
         ],
         "tags": [
-          "Sehat Saathi"
+          "Health Support"
         ]
       }
     },
@@ -6218,7 +6261,7 @@
           }
         ],
         "tags": [
-          "Sehat Saathi"
+          "Health Support"
         ]
       }
     },
@@ -6256,7 +6299,7 @@
           }
         ],
         "tags": [
-          "Sehat Saathi"
+          "Health Support"
         ]
       }
     },
@@ -6285,7 +6328,7 @@
           }
         ],
         "tags": [
-          "Sehat Saathi"
+          "Health Support"
         ]
       }
     },
@@ -6323,7 +6366,7 @@
           }
         ],
         "tags": [
-          "Sehat Saathi"
+          "Health Support"
         ]
       }
     },
@@ -6361,7 +6404,7 @@
           }
         ],
         "tags": [
-          "Sehat Saathi"
+          "Health Support"
         ]
       }
     },
@@ -6399,7 +6442,7 @@
           }
         ],
         "tags": [
-          "Sehat Saathi"
+          "Health Support"
         ]
       }
     },
@@ -6427,7 +6470,7 @@
           }
         ],
         "tags": [
-          "Sehat Saathi"
+          "Health Support"
         ]
       }
     },
@@ -6463,7 +6506,7 @@
           }
         ],
         "tags": [
-          "Sehat Saathi"
+          "Health Support"
         ]
       }
     },
@@ -6478,7 +6521,7 @@
         },
         "summary": "Available notification channels; no personal data",
         "tags": [
-          "Safar Saathi"
+          "Transportation"
         ]
       }
     },
@@ -6498,7 +6541,7 @@
         ],
         "summary": "Own travel requests, matches and private notifications",
         "tags": [
-          "Safar Saathi"
+          "Transportation"
         ]
       }
     },
@@ -6528,7 +6571,7 @@
         ],
         "summary": "Create a member travel request or willing-to-help travel plan and find matches",
         "tags": [
-          "Safar Saathi"
+          "Transportation"
         ]
       }
     },
@@ -6557,7 +6600,7 @@
         ],
         "summary": "Cancel only your own entry and its active matches",
         "tags": [
-          "Safar Saathi"
+          "Transportation"
         ]
       }
     },
@@ -6596,7 +6639,1593 @@
         ],
         "summary": "Accept, decline or complete your own match; contacts require mutual acceptance",
         "tags": [
-          "Safar Saathi"
+          "Transportation"
+        ]
+      }
+    },
+    "/api/v1/safar-saathi/admin/entries": {
+      "get": {
+        "operationId": "SafarController_adminEntries",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "COMPLETED",
+                "CANCELLED",
+                "CLOSED",
+                "ARCHIVED"
+              ]
+            }
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "REQUEST",
+                "OFFER"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin: all transportation requests and offers, filtered by status/kind/search",
+        "tags": [
+          "Transportation"
+        ]
+      }
+    },
+    "/api/v1/safar-saathi/admin/entries/{id}": {
+      "patch": {
+        "operationId": "SafarController_adminUpdate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SafarAdminUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin: set a request's status with remarks (the member is notified)",
+        "tags": [
+          "Transportation"
+        ]
+      }
+    },
+    "/api/v1/room-hunting/options": {
+      "get": {
+        "operationId": "RoomHuntingController_options",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Property types and areas for the pickers (built-in plus admin-managed)",
+        "tags": [
+          "Room Hunting"
+        ]
+      }
+    },
+    "/api/v1/room-hunting/listings": {
+      "get": {
+        "operationId": "RoomHuntingController_listings",
+        "parameters": [
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "area",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maxRent",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Public: approved, unexpired rental listings; contacts only as each owner chose",
+        "tags": [
+          "Room Hunting"
+        ]
+      },
+      "post": {
+        "operationId": "RoomHuntingController_createListing",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "403": {
+            "description": "ROOM_MEMBERSHIP_REQUIRED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ROOM_DUPLICATE_LISTING",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a rental listing (approved family members and registered students); it is reviewed before it is public",
+        "tags": [
+          "Room Hunting"
+        ]
+      }
+    },
+    "/api/v1/room-hunting/requirements": {
+      "get": {
+        "operationId": "RoomHuntingController_requirements",
+        "parameters": [
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "area",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maxRent",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Public: approved, unexpired room requirements; names shortened, contacts only with consent",
+        "tags": [
+          "Room Hunting"
+        ]
+      },
+      "post": {
+        "operationId": "RoomHuntingController_createRequirement",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequirementDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "An open requirement for the same mobile, type and area exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Post a room requirement (anyone; anonymous ones need reCAPTCHA and admin approval) and get matching listings",
+        "tags": [
+          "Room Hunting"
+        ]
+      }
+    },
+    "/api/v1/room-hunting/requirements/{id}/closure": {
+      "patch": {
+        "operationId": "RoomHuntingController_close",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Close your own requirement",
+        "tags": [
+          "Room Hunting"
+        ]
+      }
+    },
+    "/api/v1/room-hunting/me": {
+      "get": {
+        "operationId": "RoomHuntingController_mine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Own listings (with matches and enquiries), own requirements (with matching listings) and sent enquiries",
+        "tags": [
+          "Room Hunting"
+        ]
+      }
+    },
+    "/api/v1/room-hunting/listings/{id}": {
+      "put": {
+        "operationId": "RoomHuntingController_updateListing",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit your own listing (it is reviewed again)",
+        "tags": [
+          "Room Hunting"
+        ]
+      },
+      "delete": {
+        "operationId": "RoomHuntingController_removeListing",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ ok: true }"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete (archive) your own listing",
+        "tags": [
+          "Room Hunting"
+        ]
+      }
+    },
+    "/api/v1/room-hunting/listings/{id}/status": {
+      "patch": {
+        "operationId": "RoomHuntingController_listingStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListingStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "409": {
+            "description": "ROOM_STATE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark your listing rented / inactive, or re-list it",
+        "tags": [
+          "Room Hunting"
+        ]
+      }
+    },
+    "/api/v1/room-hunting/listings/{id}/enquiries": {
+      "post": {
+        "operationId": "RoomHuntingController_enquire",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnquiryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "409": {
+            "description": "ROOM_ENQUIRY_EXISTS",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send an enquiry to a listing's owner (shares your name and registered mobile with them)",
+        "tags": [
+          "Room Hunting"
+        ]
+      }
+    },
+    "/api/v1/room-hunting/admin/stats": {
+      "get": {
+        "operationId": "RoomHuntingController_stats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin: counts by status",
+        "tags": [
+          "Room Hunting"
+        ]
+      }
+    },
+    "/api/v1/room-hunting/admin/listings": {
+      "get": {
+        "operationId": "RoomHuntingController_adminListings",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin: all listings with full contact details",
+        "tags": [
+          "Room Hunting"
+        ]
+      }
+    },
+    "/api/v1/room-hunting/admin/requirements": {
+      "get": {
+        "operationId": "RoomHuntingController_adminRequirements",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin: all requirements with full contact details",
+        "tags": [
+          "Room Hunting"
+        ]
+      }
+    },
+    "/api/v1/room-hunting/admin/matches": {
+      "get": {
+        "operationId": "RoomHuntingController_adminMatches",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin: matching history",
+        "tags": [
+          "Room Hunting"
+        ]
+      }
+    },
+    "/api/v1/room-hunting/admin/audit-logs": {
+      "get": {
+        "operationId": "RoomHuntingController_audit",
+        "parameters": [
+          {
+            "name": "entityId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin: audit log (optionally for one listing/requirement)",
+        "tags": [
+          "Room Hunting"
+        ]
+      }
+    },
+    "/api/v1/room-hunting/admin/listings/{id}/review": {
+      "patch": {
+        "operationId": "RoomHuntingController_reviewListing",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin: approve, reject (remarks required), deactivate, expire, archive or restore a listing",
+        "tags": [
+          "Room Hunting"
+        ]
+      }
+    },
+    "/api/v1/room-hunting/admin/requirements/{id}/review": {
+      "patch": {
+        "operationId": "RoomHuntingController_reviewRequirement",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin: approve, reject (remarks required), close, expire, archive or restore a requirement",
+        "tags": [
+          "Room Hunting"
+        ]
+      }
+    },
+    "/api/v1/sagun-cards/stats": {
+      "get": {
+        "operationId": "SagunCardsController_stats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Counts by category, state, booklet selection and booklets generated"
+          },
+          "403": {
+            "description": "Admin access required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Counts for the Shagun Digital Cards overview (admin)",
+        "tags": [
+          "Shagun Digital Cards"
+        ]
+      }
+    },
+    "/api/v1/sagun-cards": {
+      "get": {
+        "operationId": "SagunCardsController_list",
+        "parameters": [
+          {
+            "name": "state",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "APPROVED",
+                "REJECTED",
+                "INACTIVE"
+              ]
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "GROOM",
+                "BRIDE"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Name or Shagun profile ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "place",
+            "required": false,
+            "in": "query",
+            "description": "Village / city contains",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "selected",
+            "required": false,
+            "in": "query",
+            "description": "Only cards selected for the booklet",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "eligible",
+            "required": false,
+            "in": "query",
+            "description": "Only cards that may go into a booklet",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "date"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cards"
+          },
+          "403": {
+            "description": "Admin access required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Digital cards of submitted Shagun profiles, with the details printed on each card (admin)",
+        "tags": [
+          "Shagun Digital Cards"
+        ]
+      }
+    },
+    "/api/v1/sagun-cards/selection": {
+      "patch": {
+        "operationId": "SagunCardsController_select",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SagunCardSelectionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated"
+          },
+          "404": {
+            "description": "Unknown profile"
+          },
+          "409": {
+            "description": "A card may not be printed (not approved, private, consent missing or no photo)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Select or deselect cards for the printed booklet (admin)",
+        "tags": [
+          "Shagun Digital Cards"
+        ]
+      }
+    },
+    "/api/v1/sagun-cards/verifications/{token}": {
+      "get": {
+        "operationId": "SagunCardsController_verify",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Card status; name and category only while the profile is active"
+          },
+          "404": {
+            "description": "Unknown card"
+          }
+        },
+        "summary": "Public QR check: is this printed card genuine and active?",
+        "tags": [
+          "Shagun Digital Cards"
+        ]
+      }
+    },
+    "/api/v1/sagun-cards/{profileId}/pdf": {
+      "get": {
+        "operationId": "SagunCardsController_cardPdf",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PDF"
+          },
+          "404": {
+            "description": "Unknown profile"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One digital card as a PDF (preview / print, admin)",
+        "tags": [
+          "Shagun Digital Cards"
+        ]
+      }
+    },
+    "/api/v1/sagun-booklets": {
+      "get": {
+        "operationId": "SagunBookletsController_history",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Booklets, newest first"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Print history: generated booklets (admin)",
+        "tags": [
+          "Shagun Digital Cards"
+        ]
+      },
+      "post": {
+        "operationId": "SagunBookletsController_generate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SagunBookletDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Print history entry"
+          },
+          "409": {
+            "description": "A selected card may not be printed"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Generate the A4 booklet PDF, store it and record it in the print history (admin)",
+        "tags": [
+          "Shagun Digital Cards"
+        ]
+      }
+    },
+    "/api/v1/sagun-booklets/plans": {
+      "post": {
+        "operationId": "SagunBookletsController_plan",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SagunBookletDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "{ totalProfiles, totalPages }"
+          },
+          "409": {
+            "description": "A selected card may not be printed"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Profiles and page count a booklet would have (admin)",
+        "tags": [
+          "Shagun Digital Cards"
+        ]
+      }
+    },
+    "/api/v1/sagun-booklets/previews": {
+      "post": {
+        "operationId": "SagunBookletsController_preview",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SagunBookletDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "PDF"
+          },
+          "409": {
+            "description": "A selected card may not be printed"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Booklet PDF preview, not saved and not added to the print history (admin)",
+        "tags": [
+          "Shagun Digital Cards"
+        ]
+      }
+    },
+    "/api/v1/sagun-booklets/{id}/pdf": {
+      "get": {
+        "operationId": "SagunBookletsController_pdf",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PDF"
+          },
+          "404": {
+            "description": "Unknown booklet or file missing"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Download a generated booklet (admin)",
+        "tags": [
+          "Shagun Digital Cards"
+        ]
+      }
+    },
+    "/api/v1/event-member-sections": {
+      "get": {
+        "operationId": "EventMemberSectionsController_open",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Section keys, labels and public headings"
+          }
+        },
+        "summary": "Teams open for applications (the Become a Member dropdown; OTHER is added by the form)",
+        "tags": [
+          "Become an NPSI Event Member"
+        ]
+      },
+      "post": {
+        "operationId": "EventMemberSectionsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventMemberSectionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Label and heading are required, or unknown event"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a team section (e.g. for an OTHER request) — admin only",
+        "tags": [
+          "Become an NPSI Event Member"
+        ]
+      }
+    },
+    "/api/v1/event-member-sections/admin": {
+      "get": {
+        "operationId": "EventMemberSectionsController_adminList",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Sections and counts"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "All sections with their event link and approved / pending counts — admin only",
+        "tags": [
+          "Become an NPSI Event Member"
+        ]
+      }
+    },
+    "/api/v1/event-member-sections/{id}": {
+      "patch": {
+        "operationId": "EventMemberSectionsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventMemberSectionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit a section: labels, heading, event page, open for applications, active — admin only",
+        "tags": [
+          "Become an NPSI Event Member"
+        ]
+      }
+    },
+    "/api/v1/event-members/teams": {
+      "get": {
+        "operationId": "EventMembersPublicController_teams",
+        "parameters": [
+          {
+            "name": "section",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "event",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event (if any) and sections with approved, visible members; mobile/email only with consent"
+          },
+          "404": {
+            "description": "Unknown section or unpublished event"
+          }
+        },
+        "summary": "Public team cards: one section (?section=CORE_TEAM) or every section on an event page (?event=slug)",
+        "tags": [
+          "Become an NPSI Event Member"
+        ]
+      }
+    },
+    "/api/v1/event-member-applications": {
+      "post": {
+        "operationId": "EventMemberApplicationsController_apply",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventMemberApplyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Saved as PENDING"
+          },
+          "400": {
+            "description": "Validation, reCAPTCHA or photo error (EM_* codes)"
+          },
+          "403": {
+            "description": "The chosen record is not one of this account's own people"
+          },
+          "409": {
+            "description": "An open application for this person and team already exists"
+          }
+        },
+        "summary": "Submit a Become a Member request (public with reCAPTCHA; logged in: may use an own family member / student record)",
+        "tags": [
+          "Become an NPSI Event Member"
+        ]
+      },
+      "get": {
+        "operationId": "EventMemberApplicationsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Applications with section"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "All applications — admin only",
+        "tags": [
+          "Become an NPSI Event Member"
+        ]
+      }
+    },
+    "/api/v1/event-member-applications/candidates": {
+      "get": {
+        "operationId": "EventMemberApplicationsController_candidates",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Candidates and own applications"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "This account's own people with their details for autofill, and its applications",
+        "tags": [
+          "Become an NPSI Event Member"
+        ]
+      }
+    },
+    "/api/v1/event-member-applications/{id}/withdrawal": {
+      "post": {
+        "operationId": "EventMemberApplicationsController_withdraw",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Withdrawn"
+          },
+          "404": {
+            "description": "Not among this account's applications"
+          },
+          "409": {
+            "description": "No longer pending"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Withdraw an own pending application (kept in history)",
+        "tags": [
+          "Become an NPSI Event Member"
+        ]
+      }
+    },
+    "/api/v1/event-member-applications/people": {
+      "get": {
+        "operationId": "EventMemberApplicationsController_people",
+        "parameters": [
+          {
+            "name": "q",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching people"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Search existing members and students to apply on their behalf — admin only",
+        "tags": [
+          "Become an NPSI Event Member"
+        ]
+      }
+    },
+    "/api/v1/event-member-applications/{id}/history": {
+      "get": {
+        "operationId": "EventMemberApplicationsController_history",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Log entries, oldest first"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Application history — admin only",
+        "tags": [
+          "Become an NPSI Event Member"
+        ]
+      }
+    },
+    "/api/v1/event-member-applications/{id}/review": {
+      "post": {
+        "operationId": "EventMemberApplicationsController_review",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventMemberReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated application"
+          },
+          "400": {
+            "description": "Reason missing, or OTHER request without a section"
+          },
+          "409": {
+            "description": "The person already has an open application in that section"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Approve (shows the card in its section, syncs the event roster) or reject with a reason — admin only",
+        "tags": [
+          "Become an NPSI Event Member"
+        ]
+      }
+    },
+    "/api/v1/event-member-applications/{id}": {
+      "patch": {
+        "operationId": "EventMemberApplicationsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventMemberUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated application"
+          },
+          "400": {
+            "description": "Tried to publish a mobile/email without the member's consent, or bad photo"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit public details, section, visibility; mobile/email can only be hidden — admin only",
+        "tags": [
+          "Become an NPSI Event Member"
+        ]
+      }
+    },
+    "/api/v1/event-member-applications/{id}/removal": {
+      "post": {
+        "operationId": "EventMemberApplicationsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventMemberRemoveDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Removed"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "End the event membership (the person's account and records stay) — admin only",
+        "tags": [
+          "Become an NPSI Event Member"
+        ]
+      }
+    },
+    "/api/v1/search": {
+      "get": {
+        "operationId": "SearchController_search",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "At least 2 characters",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Portal-wide search: public content for everyone, own family for members, families/members/students for admins",
+        "tags": [
+          "Search"
         ]
       }
     },
@@ -6847,6 +8476,7 @@
     },
     "/api/v1/uploads": {
       "post": {
+        "description": "Without a login the multipart body must also carry `recaptchaToken`. Photo metadata (EXIF) is removed.",
         "operationId": "UploadsController_upload",
         "parameters": [],
         "requestBody": {
@@ -6871,7 +8501,7 @@
             }
           },
           "400": {
-            "description": "No file, not an image, or larger than 5 MB",
+            "description": "No file, not an image, larger than 5 MB, or reCAPTCHA failed (anonymous uploads)",
             "content": {
               "application/json": {
                 "schema": {
@@ -6944,7 +8574,28 @@
                 "titleHi",
                 "-titleHi",
                 "bodyHi",
-                "-bodyHi"
+                "-bodyHi",
+                "category",
+                "-category",
+                "publishAt",
+                "-publishAt"
+              ]
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ORGANIZATION",
+                "COMMUNITY",
+                "SOCIAL",
+                "EDUCATION",
+                "EVENTS",
+                "IMPORTANT",
+                "PUBLIC_NOTICE"
               ]
             }
           }
@@ -8263,6 +9914,37 @@
         ]
       }
     },
+    "/api/v1/event-finance/admin/events/{eventId}/history": {
+      "get": {
+        "operationId": "EventFinanceController_history",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventFinance"
+        ]
+      }
+    },
     "/api/v1/event-finance/admin/events/{eventId}/roster": {
       "get": {
         "operationId": "EventFinanceController_roster",
@@ -8781,6 +10463,47 @@
           }
         ],
         "summary": "Create a feedback",
+        "tags": [
+          "feedback"
+        ]
+      }
+    },
+    "/api/v1/feedback/public": {
+      "post": {
+        "description": "No login; reCAPTCHA and rate limit. Reaches Admin → Feedback.",
+        "operationId": "FeedbackController_createPublic",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublicMessageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "{ reference: 'FB-…' }"
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorVo"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Public Contact Us / Feedback message",
         "tags": [
           "feedback"
         ]
@@ -11895,11 +13618,23 @@
             "type": "number",
             "example": 480,
             "description": "Active family members"
+          },
+          "students": {
+            "type": "number",
+            "example": 75,
+            "description": "Approved (active) students"
+          },
+          "sagunProfiles": {
+            "type": "number",
+            "example": 30,
+            "description": "Approved Shagun Bandhan profiles"
           }
         },
         "required": [
           "families",
-          "members"
+          "members",
+          "students",
+          "sagunProfiles"
         ]
       },
       "RegisterDto": {
@@ -11912,7 +13647,7 @@
           "password": {
             "type": "string",
             "example": "secret1",
-            "minLength": 6
+            "minLength": 8
           },
           "fullName": {
             "type": "string",
@@ -12001,8 +13736,48 @@
           "otpCode": {
             "type": "string",
             "example": "123456"
+          },
+          "portal": {
+            "type": "string",
+            "enum": [
+              "FAMILY",
+              "STUDENT"
+            ],
+            "default": "FAMILY",
+            "description": "Login portal. The server checks it against the account's own registration and refuses the other portal."
           }
         }
+      },
+      "AccountVo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "FAMILY",
+              "STUDENT",
+              "NONE"
+            ],
+            "description": "NONE: no family or student registration yet"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "PENDING",
+              "CORRECTION_REQUIRED",
+              "REJECTED",
+              "SUSPENDED",
+              "INACTIVE",
+              "NONE"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "status"
+        ]
       },
       "SessionVo": {
         "type": "object",
@@ -12010,15 +13785,17 @@
           "user": {
             "$ref": "#/components/schemas/PublicUserVo"
           },
-          "accessToken": {
-            "type": "string",
-            "example": "64 hex characters",
-            "description": "Bearer token, valid for 30 days"
+          "account": {
+            "description": "Password and email-code sign-in: the account's portal and status",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountVo"
+              }
+            ]
           }
         },
         "required": [
-          "user",
-          "accessToken"
+          "user"
         ]
       },
       "MobileOtpDto": {
@@ -12042,7 +13819,7 @@
           },
           "recaptchaToken": {
             "type": "string",
-            "description": "Google reCAPTCHA v3 token (registration)"
+            "description": "Google reCAPTCHA v3 token (registration and password reset)"
           }
         }
       },
@@ -12121,7 +13898,7 @@
           "password": {
             "type": "string",
             "example": "secret1",
-            "minLength": 6
+            "minLength": 8
           },
           "email": {
             "type": "string",
@@ -12139,6 +13916,10 @@
           "email": {
             "type": "string",
             "example": "member@example.com"
+          },
+          "recaptchaToken": {
+            "type": "string",
+            "description": "Google reCAPTCHA v3 token (required when the server has a secret configured)"
           }
         }
       },
@@ -12173,6 +13954,19 @@
           "password": {
             "type": "string",
             "example": "secret1"
+          },
+          "portal": {
+            "type": "string",
+            "enum": [
+              "FAMILY",
+              "STUDENT"
+            ],
+            "default": "FAMILY",
+            "description": "Login portal. The server checks it against the account's own registration and refuses the other portal."
+          },
+          "recaptchaToken": {
+            "type": "string",
+            "description": "Google reCAPTCHA v3 token (required when the server has a secret configured)"
           }
         }
       },
@@ -12195,7 +13989,7 @@
           "newPassword": {
             "type": "string",
             "example": "newSecret1",
-            "minLength": 6
+            "minLength": 8
           }
         }
       },
@@ -12258,9 +14052,77 @@
           "newPassword": {
             "type": "string",
             "example": "newSecret1",
-            "minLength": 6
+            "minLength": 8
           }
         }
+      },
+      "MeVo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "5f0c…"
+          },
+          "email": {
+            "type": "object",
+            "example": "member@example.com",
+            "nullable": true
+          },
+          "fullName": {
+            "type": "string",
+            "example": "Ram Patidar",
+            "nullable": true
+          },
+          "phone": {
+            "type": "object",
+            "example": "9876543210",
+            "nullable": true
+          },
+          "role": {
+            "type": "string",
+            "example": "user",
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "nullable": true
+          },
+          "photoUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Profile photo URL"
+          },
+          "account": {
+            "$ref": "#/components/schemas/AccountVo"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "fullName",
+          "phone",
+          "role",
+          "photoUrl",
+          "account"
+        ]
+      },
+      "CurrentSessionVo": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "nullable": true,
+            "description": "The logged-in user, or null when there is no valid session",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MeVo"
+              }
+            ]
+          }
+        },
+        "required": [
+          "user"
+        ]
       },
       "UpdateMeDto": {
         "type": "object",
@@ -12274,6 +14136,11 @@
             "type": "string",
             "nullable": true,
             "description": "10-digit Indian mobile starting 6-9"
+          },
+          "phoneVerificationToken": {
+            "type": "string",
+            "nullable": true,
+            "description": "Required to change the mobile: token from POST /auth/mobile-otps/verifications (purpose REGISTER) for the new number"
           },
           "photoUrl": {
             "type": "string",
@@ -12444,8 +14311,9 @@
           },
           "dob": {
             "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "format": "date",
+            "nullable": true,
+            "description": "YYYY-MM-DD, before today"
           },
           "mobile": {
             "type": "string",
@@ -12523,8 +14391,9 @@
           },
           "dob": {
             "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "format": "date",
+            "nullable": true,
+            "description": "YYYY-MM-DD, before today"
           },
           "mobile": {
             "type": "string",
@@ -12719,6 +14588,348 @@
             "type": "string",
             "nullable": true,
             "description": "In-app link (admins only)"
+          }
+        }
+      },
+      "StudentVo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "studentId": {
+            "type": "string",
+            "nullable": true
+          },
+          "studentName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "mobile": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "dob": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true
+          },
+          "course": {
+            "type": "string",
+            "nullable": true
+          },
+          "institution": {
+            "type": "string",
+            "nullable": true
+          },
+          "academicYear": {
+            "type": "string",
+            "nullable": true
+          },
+          "guardianName": {
+            "type": "string",
+            "nullable": true
+          },
+          "guardianMobile": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "district": {
+            "type": "string",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
+          },
+          "pincode": {
+            "type": "string",
+            "nullable": true
+          },
+          "photoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "registrationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "applicationId": {
+            "type": "string",
+            "nullable": true
+          },
+          "linkedFamilyId": {
+            "type": "string",
+            "nullable": true
+          },
+          "linkedMembershipId": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fatherName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "studentId",
+          "studentName",
+          "status",
+          "mobile",
+          "email",
+          "dob",
+          "gender",
+          "course",
+          "institution",
+          "academicYear",
+          "guardianName",
+          "guardianMobile",
+          "address",
+          "city",
+          "district",
+          "state",
+          "pincode",
+          "photoUrl",
+          "registrationDate",
+          "applicationId",
+          "linkedFamilyId",
+          "linkedMembershipId",
+          "createdAt",
+          "updatedAt",
+          "fatherName"
+        ]
+      },
+      "CreateStudentDto": {
+        "type": "object",
+        "properties": {
+          "studentName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ACTIVE",
+              "INACTIVE",
+              "TRANSFERRED"
+            ],
+            "nullable": true
+          },
+          "mobile": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "dob": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "description": "YYYY-MM-DD, before today"
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true
+          },
+          "course": {
+            "type": "string",
+            "nullable": true
+          },
+          "institution": {
+            "type": "string",
+            "nullable": true
+          },
+          "academicYear": {
+            "type": "string",
+            "nullable": true
+          },
+          "guardianName": {
+            "type": "string",
+            "nullable": true
+          },
+          "guardianMobile": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "district": {
+            "type": "string",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
+          },
+          "pincode": {
+            "type": "string",
+            "nullable": true
+          },
+          "photoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "registrationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "applicationId": {
+            "type": "string",
+            "nullable": true
+          },
+          "linkedFamilyId": {
+            "type": "string",
+            "nullable": true
+          },
+          "linkedMembershipId": {
+            "type": "string",
+            "nullable": true
+          },
+          "fatherName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "studentName"
+        ]
+      },
+      "UpdateStudentDto": {
+        "type": "object",
+        "properties": {
+          "studentName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ACTIVE",
+              "INACTIVE",
+              "TRANSFERRED"
+            ],
+            "nullable": true
+          },
+          "mobile": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "dob": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "description": "YYYY-MM-DD, before today"
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true
+          },
+          "course": {
+            "type": "string",
+            "nullable": true
+          },
+          "institution": {
+            "type": "string",
+            "nullable": true
+          },
+          "academicYear": {
+            "type": "string",
+            "nullable": true
+          },
+          "guardianName": {
+            "type": "string",
+            "nullable": true
+          },
+          "guardianMobile": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "district": {
+            "type": "string",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
+          },
+          "pincode": {
+            "type": "string",
+            "nullable": true
+          },
+          "photoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "registrationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "applicationId": {
+            "type": "string",
+            "nullable": true
+          },
+          "linkedFamilyId": {
+            "type": "string",
+            "nullable": true
+          },
+          "linkedMembershipId": {
+            "type": "string",
+            "nullable": true
+          },
+          "fatherName": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -13040,8 +15251,9 @@
           },
           "dob": {
             "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "format": "date",
+            "nullable": true,
+            "description": "YYYY-MM-DD, before today"
           },
           "gender": {
             "type": "string",
@@ -13139,143 +15351,6 @@
             "description": "Language of the confirmation notification"
           }
         }
-      },
-      "StudentVo": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "studentId": {
-            "type": "string",
-            "nullable": true
-          },
-          "studentName": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "nullable": true
-          },
-          "mobile": {
-            "type": "string",
-            "nullable": true
-          },
-          "email": {
-            "type": "string",
-            "nullable": true
-          },
-          "dob": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "gender": {
-            "type": "string",
-            "nullable": true
-          },
-          "course": {
-            "type": "string",
-            "nullable": true
-          },
-          "institution": {
-            "type": "string",
-            "nullable": true
-          },
-          "academicYear": {
-            "type": "string",
-            "nullable": true
-          },
-          "guardianName": {
-            "type": "string",
-            "nullable": true
-          },
-          "guardianMobile": {
-            "type": "string",
-            "nullable": true
-          },
-          "address": {
-            "type": "string",
-            "nullable": true
-          },
-          "city": {
-            "type": "string",
-            "nullable": true
-          },
-          "district": {
-            "type": "string",
-            "nullable": true
-          },
-          "state": {
-            "type": "string",
-            "nullable": true
-          },
-          "pincode": {
-            "type": "string",
-            "nullable": true
-          },
-          "photoUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "registrationDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "applicationId": {
-            "type": "string",
-            "nullable": true
-          },
-          "linkedFamilyId": {
-            "type": "string",
-            "nullable": true
-          },
-          "linkedMembershipId": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "fatherName": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "studentId",
-          "studentName",
-          "status",
-          "mobile",
-          "email",
-          "dob",
-          "gender",
-          "course",
-          "institution",
-          "academicYear",
-          "guardianName",
-          "guardianMobile",
-          "address",
-          "city",
-          "district",
-          "state",
-          "pincode",
-          "photoUrl",
-          "registrationDate",
-          "applicationId",
-          "linkedFamilyId",
-          "linkedMembershipId",
-          "createdAt",
-          "updatedAt",
-          "fatherName"
-        ]
       },
       "StudentApplicationReviewVo": {
         "type": "object",
@@ -13328,8 +15403,9 @@
           },
           "dob": {
             "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "format": "date",
+            "nullable": true,
+            "description": "YYYY-MM-DD, before today"
           },
           "gender": {
             "type": "string",
@@ -13428,209 +15504,6 @@
           }
         }
       },
-      "CreateStudentDto": {
-        "type": "object",
-        "properties": {
-          "studentName": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "PENDING",
-              "ACTIVE",
-              "INACTIVE",
-              "TRANSFERRED"
-            ],
-            "nullable": true
-          },
-          "mobile": {
-            "type": "string",
-            "nullable": true
-          },
-          "email": {
-            "type": "string",
-            "nullable": true
-          },
-          "dob": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "gender": {
-            "type": "string",
-            "nullable": true
-          },
-          "course": {
-            "type": "string",
-            "nullable": true
-          },
-          "institution": {
-            "type": "string",
-            "nullable": true
-          },
-          "academicYear": {
-            "type": "string",
-            "nullable": true
-          },
-          "guardianName": {
-            "type": "string",
-            "nullable": true
-          },
-          "guardianMobile": {
-            "type": "string",
-            "nullable": true
-          },
-          "address": {
-            "type": "string",
-            "nullable": true
-          },
-          "city": {
-            "type": "string",
-            "nullable": true
-          },
-          "district": {
-            "type": "string",
-            "nullable": true
-          },
-          "state": {
-            "type": "string",
-            "nullable": true
-          },
-          "pincode": {
-            "type": "string",
-            "nullable": true
-          },
-          "photoUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "registrationDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "applicationId": {
-            "type": "string",
-            "nullable": true
-          },
-          "linkedFamilyId": {
-            "type": "string",
-            "nullable": true
-          },
-          "linkedMembershipId": {
-            "type": "string",
-            "nullable": true
-          },
-          "fatherName": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "studentName"
-        ]
-      },
-      "UpdateStudentDto": {
-        "type": "object",
-        "properties": {
-          "studentName": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "PENDING",
-              "ACTIVE",
-              "INACTIVE",
-              "TRANSFERRED"
-            ],
-            "nullable": true
-          },
-          "mobile": {
-            "type": "string",
-            "nullable": true
-          },
-          "email": {
-            "type": "string",
-            "nullable": true
-          },
-          "dob": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "gender": {
-            "type": "string",
-            "nullable": true
-          },
-          "course": {
-            "type": "string",
-            "nullable": true
-          },
-          "institution": {
-            "type": "string",
-            "nullable": true
-          },
-          "academicYear": {
-            "type": "string",
-            "nullable": true
-          },
-          "guardianName": {
-            "type": "string",
-            "nullable": true
-          },
-          "guardianMobile": {
-            "type": "string",
-            "nullable": true
-          },
-          "address": {
-            "type": "string",
-            "nullable": true
-          },
-          "city": {
-            "type": "string",
-            "nullable": true
-          },
-          "district": {
-            "type": "string",
-            "nullable": true
-          },
-          "state": {
-            "type": "string",
-            "nullable": true
-          },
-          "pincode": {
-            "type": "string",
-            "nullable": true
-          },
-          "photoUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "registrationDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "applicationId": {
-            "type": "string",
-            "nullable": true
-          },
-          "linkedFamilyId": {
-            "type": "string",
-            "nullable": true
-          },
-          "linkedMembershipId": {
-            "type": "string",
-            "nullable": true
-          },
-          "fatherName": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
       "AddressOptionVo": {
         "type": "object",
         "properties": {
@@ -13642,7 +15515,9 @@
             "enum": [
               "AREA",
               "PINCODE",
-              "VILLAGE"
+              "VILLAGE",
+              "RENTAL_AREA",
+              "PROPERTY_TYPE"
             ]
           },
           "city": {
@@ -13680,7 +15555,9 @@
             "enum": [
               "AREA",
               "PINCODE",
-              "VILLAGE"
+              "VILLAGE",
+              "RENTAL_AREA",
+              "PROPERTY_TYPE"
             ]
           },
           "city": {
@@ -15201,6 +17078,484 @@
           "decision"
         ]
       },
+      "SafarAdminUpdateDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "COMPLETED",
+              "CANCELLED",
+              "CLOSED",
+              "ARCHIVED"
+            ]
+          },
+          "remarks": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "RequirementDto": {
+        "type": "object",
+        "properties": {
+          "clientRequestId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "mobile": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "propertyType": {
+            "type": "string"
+          },
+          "tenantType": {
+            "type": "string",
+            "enum": [
+              "FAMILY",
+              "STUDENT",
+              "ANY"
+            ]
+          },
+          "area": {
+            "type": "string"
+          },
+          "minBudget": {
+            "type": "number"
+          },
+          "maxBudget": {
+            "type": "number"
+          },
+          "moveInDate": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "showMobile": {
+            "type": "boolean"
+          },
+          "showEmail": {
+            "type": "boolean"
+          },
+          "consent": {
+            "type": "boolean",
+            "description": "Consent to store the requirement and share it with matching property owners"
+          },
+          "recaptchaToken": {
+            "type": "string",
+            "description": "reCAPTCHA token; required when not logged in"
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "en",
+              "hi"
+            ]
+          }
+        },
+        "required": [
+          "clientRequestId",
+          "name",
+          "mobile",
+          "propertyType",
+          "area",
+          "maxBudget",
+          "showMobile",
+          "showEmail",
+          "consent"
+        ]
+      },
+      "ListingDto": {
+        "type": "object",
+        "properties": {
+          "clientRequestId": {
+            "type": "string",
+            "description": "Idempotency key (UUID) so a double click creates one listing"
+          },
+          "propertyType": {
+            "type": "string",
+            "example": "1 BHK"
+          },
+          "availableFor": {
+            "type": "string",
+            "enum": [
+              "FAMILY",
+              "STUDENT",
+              "ANY"
+            ]
+          },
+          "rentAmount": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "area": {
+            "type": "string",
+            "example": "Vijay Nagar"
+          },
+          "address": {
+            "type": "string"
+          },
+          "showAddress": {
+            "type": "boolean"
+          },
+          "availableFrom": {
+            "type": "string",
+            "example": "2026-12-01"
+          },
+          "description": {
+            "type": "string"
+          },
+          "photoUrl": {
+            "type": "string",
+            "description": "URL returned by POST /uploads"
+          },
+          "contactName": {
+            "type": "string"
+          },
+          "contactMobile": {
+            "type": "string"
+          },
+          "contactEmail": {
+            "type": "string"
+          },
+          "showMobile": {
+            "type": "boolean"
+          },
+          "showEmail": {
+            "type": "boolean"
+          },
+          "ownerConfirmed": {
+            "type": "boolean",
+            "description": "The poster owns the property or has the owner's permission to list it"
+          }
+        },
+        "required": [
+          "clientRequestId",
+          "propertyType",
+          "rentAmount",
+          "area",
+          "contactName",
+          "contactMobile",
+          "showMobile",
+          "showEmail",
+          "ownerConfirmed"
+        ]
+      },
+      "ListingStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "RENTED",
+              "INACTIVE",
+              "ACTIVE"
+            ],
+            "description": "ACTIVE re-lists a rented/inactive listing (it is reviewed again)"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "EnquiryDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "requirementId": {
+            "type": "string",
+            "description": "One of your own requirements this enquiry is about"
+          },
+          "consent": {
+            "type": "boolean",
+            "description": "Consent to share your name and mobile number with the owner"
+          }
+        },
+        "required": [
+          "message",
+          "consent"
+        ]
+      },
+      "SagunCardSelectionDto": {
+        "type": "object",
+        "properties": {
+          "profileIds": {
+            "description": "Shagun profile ids",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "selected": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "profileIds",
+          "selected"
+        ]
+      },
+      "SagunBookletDto": {
+        "type": "object",
+        "properties": {
+          "profileIds": {
+            "description": "Approved, publishable Shagun profile ids",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "layout": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              4
+            ],
+            "description": "Cards per A4 page"
+          },
+          "grouping": {
+            "type": "string",
+            "enum": [
+              "SEPARATE",
+              "TOGETHER"
+            ]
+          },
+          "includeCover": {
+            "type": "boolean"
+          },
+          "includeIndex": {
+            "type": "boolean"
+          },
+          "includeClosing": {
+            "type": "boolean"
+          },
+          "sort": {
+            "type": "string",
+            "enum": [
+              "name",
+              "date"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "example": "शगुन बंधन – वैवाहिक परिचय पुस्तिका"
+          },
+          "edition": {
+            "type": "string",
+            "example": "प्रथम संस्करण"
+          },
+          "contactLine": {
+            "type": "string",
+            "description": "Extra contact line for the closing page (phone, office address)"
+          }
+        },
+        "required": [
+          "profileIds",
+          "layout",
+          "grouping",
+          "includeCover",
+          "includeIndex",
+          "includeClosing"
+        ]
+      },
+      "EventMemberSectionDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Shown in the form dropdown"
+          },
+          "labelHi": {
+            "type": "object"
+          },
+          "heading": {
+            "type": "string",
+            "description": "Heading on the public page, e.g. Holi Milan Team"
+          },
+          "headingHi": {
+            "type": "object"
+          },
+          "eventId": {
+            "type": "object",
+            "description": "Event whose page shows this team (null: own team page)"
+          },
+          "accepting": {
+            "type": "boolean",
+            "description": "Shown in the Become a Member dropdown"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE"
+            ]
+          },
+          "sortOrder": {
+            "type": "number"
+          }
+        }
+      },
+      "EventMemberApplyDto": {
+        "type": "object",
+        "properties": {
+          "sectionKey": {
+            "type": "string",
+            "example": "DEEPOTSAV",
+            "description": "Section key from GET /event-member-sections, or OTHER"
+          },
+          "customEventName": {
+            "type": "string",
+            "description": "Event / team name; required with OTHER"
+          },
+          "personKind": {
+            "type": "string",
+            "enum": [
+              "MEMBER",
+              "STUDENT"
+            ],
+            "description": "Logged-in: which own record applies (GET /event-member-applications/candidates)"
+          },
+          "personId": {
+            "type": "string",
+            "description": "Family member id or student id of that record"
+          },
+          "photoUrl": {
+            "type": "string",
+            "description": "URL returned by POST /uploads, or the record's own photo"
+          },
+          "name": {
+            "type": "string",
+            "example": "Ram Patidar"
+          },
+          "mobile": {
+            "type": "string",
+            "example": "9876543210"
+          },
+          "email": {
+            "type": "string",
+            "example": "ram@example.com"
+          },
+          "village": {
+            "type": "string",
+            "example": "Kasrawad"
+          },
+          "area": {
+            "type": "string",
+            "example": "Vijay Nagar",
+            "description": "Indore area / locality"
+          },
+          "mobilePublic": {
+            "type": "boolean",
+            "description": "Show the mobile number on the public card (default no)"
+          },
+          "emailPublic": {
+            "type": "boolean",
+            "description": "Show the email on the public card (default no)"
+          },
+          "consent": {
+            "type": "boolean",
+            "description": "Agrees that name, photo, village and area are shown on the team page once approved"
+          },
+          "recaptchaToken": {
+            "type": "string",
+            "description": "reCAPTCHA token (required when not logged in)"
+          }
+        },
+        "required": [
+          "sectionKey",
+          "consent"
+        ]
+      },
+      "EventMemberReviewDto": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "REJECTED"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "description": "Required when rejecting"
+          },
+          "sectionKey": {
+            "type": "string",
+            "description": "Section key; required to approve an OTHER request (maps it to a section)"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "EventMemberUpdateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "designation": {
+            "type": "object"
+          },
+          "designationHi": {
+            "type": "object"
+          },
+          "village": {
+            "type": "string"
+          },
+          "area": {
+            "type": "string"
+          },
+          "photoUrl": {
+            "type": "object"
+          },
+          "sectionKey": {
+            "type": "string",
+            "description": "Move to another section (maps an OTHER request)"
+          },
+          "showOnWebsite": {
+            "type": "boolean",
+            "description": "Public card shown or hidden"
+          },
+          "mobilePublic": {
+            "type": "boolean",
+            "description": "Can only be turned off by an admin (consent belongs to the member)"
+          },
+          "emailPublic": {
+            "type": "boolean",
+            "description": "Can only be turned off by an admin"
+          },
+          "sortOrder": {
+            "type": "number"
+          }
+        }
+      },
+      "EventMemberRemoveDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Why the membership ends (kept in the history)"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
       "HealthVo": {
         "type": "object",
         "properties": {
@@ -15346,6 +17701,10 @@
               "hi"
             ],
             "default": "en"
+          },
+          "recaptchaToken": {
+            "type": "string",
+            "description": "reCAPTCHA v3 token (required when reCAPTCHA is configured)"
           }
         },
         "required": [
@@ -15646,6 +18005,10 @@
             "type": "string",
             "format": "binary",
             "description": "JPEG, PNG, WEBP or GIF image, max 5 MB"
+          },
+          "recaptchaToken": {
+            "type": "string",
+            "description": "reCAPTCHA v3 token; required when the caller is not logged in"
           }
         },
         "required": [
@@ -15705,6 +18068,27 @@
           "bodyHi": {
             "type": "string",
             "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "author": {
+            "type": "string",
+            "nullable": true
+          },
+          "publishAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "required": [
@@ -15717,7 +18101,12 @@
           "createdAt",
           "updatedAt",
           "titleHi",
-          "bodyHi"
+          "bodyHi",
+          "category",
+          "imageUrl",
+          "slug",
+          "author",
+          "publishAt"
         ]
       },
       "CreateAnnouncementDto": {
@@ -15749,6 +18138,7 @@
           "status": {
             "type": "string",
             "enum": [
+              "Draft",
               "Active",
               "Archived"
             ],
@@ -15761,6 +18151,30 @@
           "bodyHi": {
             "type": "string",
             "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "ORGANIZATION",
+              "COMMUNITY",
+              "SOCIAL",
+              "EDUCATION",
+              "EVENTS",
+              "IMPORTANT",
+              "PUBLIC_NOTICE"
+            ],
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Featured image: a URL returned by POST /uploads"
+          },
+          "publishAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Scheduled publication; Active items are public only from this time"
           }
         },
         "required": [
@@ -15797,6 +18211,7 @@
           "status": {
             "type": "string",
             "enum": [
+              "Draft",
               "Active",
               "Archived"
             ],
@@ -15809,6 +18224,30 @@
           "bodyHi": {
             "type": "string",
             "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "ORGANIZATION",
+              "COMMUNITY",
+              "SOCIAL",
+              "EDUCATION",
+              "EVENTS",
+              "IMPORTANT",
+              "PUBLIC_NOTICE"
+            ],
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Featured image: a URL returned by POST /uploads"
+          },
+          "publishAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Scheduled publication; Active items are public only from this time"
           }
         }
       },
@@ -16118,6 +18557,9 @@
               "GARBA",
               "CULTURAL"
             ]
+          },
+          "teamJoiningOpen": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -16144,7 +18586,8 @@
           "updatedAt",
           "titleHi",
           "descriptionHi",
-          "category"
+          "category",
+          "teamJoiningOpen"
         ]
       },
       "CreateEventDto": {
@@ -16234,6 +18677,11 @@
           "descriptionHi": {
             "type": "string",
             "nullable": true
+          },
+          "teamJoiningOpen": {
+            "type": "boolean",
+            "nullable": false,
+            "description": "Members and students may ask to join this event's team (shown on /events/:slug)"
           },
           "category": {
             "type": "string",
@@ -16340,6 +18788,11 @@
             "type": "string",
             "nullable": true
           },
+          "teamJoiningOpen": {
+            "type": "boolean",
+            "nullable": false,
+            "description": "Members and students may ask to join this event's team (shown on /events/:slug)"
+          },
           "category": {
             "type": "string",
             "enum": [
@@ -16379,6 +18832,56 @@
       "EventResponsibilityDto": {
         "type": "object",
         "properties": {}
+      },
+      "PublicMessageDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "CONTACT",
+              "FEEDBACK"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "mobile": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "example": "General"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "consent": {
+            "type": "boolean"
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "en",
+              "hi"
+            ]
+          },
+          "recaptchaToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "category",
+          "message",
+          "consent"
+        ]
       },
       "CreateFeedbackDto": {
         "type": "object",

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Search, Users, Eye, X, Plus, Pencil, Trash2, Loader2, KeyRound } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
 import { base44 } from "@/api/base44Client";
+import VillageCombobox from "@/components/VillageCombobox";
 import { useToast } from "@/components/ui/use-toast";
 import { useLang } from "@/lib/i18n";
 import { sanitizeMobile, sanitizePincode } from "@/lib/utils";
@@ -146,7 +147,7 @@ export default function AdminFamilies() {
   const load = async () => {
     setLoading(true);
     try { setFamilies(await base44.entities.Family.listAll()); }
-    catch (e) {} finally { setLoading(false); }
+    catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
@@ -248,7 +249,6 @@ export default function AdminFamilies() {
 
   if (loading) return <div className="flex h-64 items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-gold/30 border-t-maroon" /></div>;
 
-  const locale = lang === "hi" ? "hi-IN" : "en-IN";
 
   return (
     <div className="space-y-6">
@@ -390,8 +390,8 @@ export default function AdminFamilies() {
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblState}</label><input value={editing.state} onChange={(e) => setEditing({ ...editing, state: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblPincode}</label><input value={editing.pincode} onChange={(e) => setEditing({ ...editing, pincode: sanitizePincode(e.target.value) })} inputMode="numeric" maxLength={6} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblGotra}</label><input value={editing.gotra} onChange={(e) => setEditing({ ...editing, gotra: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblNativePlace}</label><input value={editing.nativePlace} onChange={(e) => setEditing({ ...editing, nativePlace: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblVillage}</label><input value={editing.village} onChange={(e) => setEditing({ ...editing, village: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label htmlFor="fam-nativePlace" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblNativePlace}</label><VillageCombobox id="fam-nativePlace" hideLabel label={t.lblNativePlace} value={editing.nativePlace} onChange={(v) => setEditing((cur) => ({ ...cur, nativePlace: v }))} inputClassName="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label htmlFor="fam-village" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblVillage}</label><VillageCombobox id="fam-village" hideLabel label={t.lblVillage} value={editing.village} onChange={(v) => setEditing((cur) => ({ ...cur, village: v }))} inputClassName="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblContact}</label><input value={editing.contactNumber} onChange={(e) => setEditing({ ...editing, contactNumber: sanitizeMobile(e.target.value) })} inputMode="numeric" maxLength={10} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblEmail}</label><input value={editing.email} onChange={(e) => setEditing({ ...editing, email: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
             </div>

@@ -41,7 +41,7 @@ export default function Notifications() {
     try {
       const notifs = await base44.entities.Notification.list("-date", 50);
       setNotifications(notifs);
-    } catch (e) {} finally { setLoading(false); }
+    } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 

@@ -11,7 +11,19 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',
   use: { baseURL: ORIGIN, trace: 'retain-on-failure' },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  // `npm run test:browser` runs Chrome; `npm run test:browser:all` (ALL_BROWSERS=1) also runs Firefox, Safari (WebKit)
+  // and phone-sized Chrome / Safari.
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    ...(process.env.ALL_BROWSERS
+      ? [
+          { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+          { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+          { name: 'mobile-chrome', use: { ...devices['Pixel 7'] } },
+          { name: 'mobile-safari', use: { ...devices['iPhone 13'] } },
+        ]
+      : []),
+  ],
   webServer: {
     // The API base is the app's own origin, so the mocked calls are same-origin.
     command: `vite build && vite preview --host 127.0.0.1 --port ${PORT} --strictPort`,

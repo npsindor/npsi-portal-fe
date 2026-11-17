@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { mockApi, ADMIN, NOT_LOGGED_IN } from './mock-api';
 
+// An event date 30 days ahead, so the event always counts as upcoming whatever day the tests run.
+const UPCOMING = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+
 test('admin creates Deepotsav through API; published event appears on public pages in both languages', async ({ page }) => {
   await mockApi(page, { 'GET /auth/me': ADMIN });
   let events = [];
@@ -21,12 +24,12 @@ test('admin creates Deepotsav through API; published event appears on public pag
   await expect(page.getByLabel('Event Title (English)', { exact: false })).toHaveValue('Sneh Deepotsav 2026');
   await expect(page.getByLabel('Event Title (Hindi)', { exact: false })).toHaveValue('स्नेह दीपोत्सव 2026');
   // Dates/venues below are isolated test fixtures, never production records.
-  await page.locator('#event-date').fill('2026-11-15');
+  await page.locator('#event-date').fill(UPCOMING);
   await page.locator('#event-venue').fill('Test venue only');
   await page.locator('#event-status').selectOption('PUBLISHED');
   await page.getByRole('button', { name: 'Create Event', exact: true }).last().click();
   await expect.poll(() => events.length).toBe(1);
-  expect(createdPayload).toMatchObject({ title: 'Sneh Deepotsav 2026', titleHi: 'स्नेह दीपोत्सव 2026', category: 'CULTURAL', status: 'PUBLISHED', date: '2026-11-15', venue: 'Test venue only' });
+  expect(createdPayload).toMatchObject({ title: 'Sneh Deepotsav 2026', titleHi: 'स्नेह दीपोत्सव 2026', category: 'CULTURAL', status: 'PUBLISHED', date: UPCOMING, venue: 'Test venue only' });
   // Old ?category= links land on the matching section of the single Events page.
   await page.goto('/events?category=cultural');
   const cultural = page.locator('#cultural');
@@ -48,7 +51,7 @@ test('anonymous visitors see camelCase Hindi fields returned by the backend', as
   await page.addInitScript(() => localStorage.setItem('pss_lang', 'hi'));
   await mockApi(page, {
     'GET /auth/me': NOT_LOGGED_IN,
-    'GET /events': [{ id: 'event', title: 'Sneh Deepotsav 2026', titleHi: 'स्नेह दीपोत्सव 2026', description: 'A community celebration.', descriptionHi: 'समाज के साथ दीपोत्सव मनाएँ।', status: 'PUBLISHED', date: '2026-11-15', venue: 'Test venue only' }],
+    'GET /events': [{ id: 'event', title: 'Sneh Deepotsav 2026', titleHi: 'स्नेह दीपोत्सव 2026', description: 'A community celebration.', descriptionHi: 'समाज के साथ दीपोत्सव मनाएँ।', status: 'PUBLISHED', date: UPCOMING, venue: 'Test venue only' }],
   });
   await page.goto('/events');
   await expect(page.getByRole('heading', { name: 'स्नेह दीपोत्सव 2026', exact: true })).toBeVisible();

@@ -7,8 +7,13 @@ import { useLang } from '@/lib/i18n';
 import { blockText } from '@/lib/page-content';
 
 const DELAY = 5000;
-// Shown until admins add photos (Admin → Page Content → Home → Photo Gallery).
-const DEFAULT_PHOTOS = [1, 2, 3, 4, 5, 6, 7].map((n) => ({ id: `garba-${n}`, src: `/gallery/maa-na-garba-${n}.jpg` }));
+// Shown until admins add photos (Admin → Page Content → Home → Photo Gallery): every Maa Na Garba photo in
+// public/gallery (the 7 large ones first, then 1maanagarba.jpg … 58maanagarba.jpg). Add a new file's name here too.
+const GARBA_PHOTO_COUNT = 58;
+const DEFAULT_PHOTOS = [
+  ...[1, 2, 3, 4, 5, 6, 7].map((n) => ({ id: `garba-${n}`, src: `/gallery/maa-na-garba-${n}.jpg` })),
+  ...Array.from({ length: GARBA_PHOTO_COUNT }, (_, i) => ({ id: `maanagarba-${i + 1}`, src: `/gallery/${i + 1}maanagarba.jpg` })),
+];
 const copy = {
   en: { eyebrow: 'Photo Gallery', title: 'Moments from our community', intro: 'Celebrations, programmes and gatherings of the Nimar Patidar Sangathan, Indore.', default: 'Maa Na Garba — Nimar Patidar Sangathan, Indore', label: 'Photo gallery', prev: 'Previous photo', next: 'Next photo', pause: 'Pause slideshow', play: 'Play slideshow', open: 'View full size', of: 'of' },
   hi: { eyebrow: 'फोटो गैलरी', title: 'हमारे समाज के यादगार पल', intro: 'निमाड़ पाटीदार संगठन के उत्सव, कार्यक्रम और सम्मेलन।', default: 'माँ ना गरबा — निमाड़ पाटीदार संगठन, इंदौर', label: 'फोटो गैलरी', prev: 'पिछली फोटो', next: 'अगली फोटो', pause: 'स्लाइडशो रोकें', play: 'स्लाइडशो चलाएँ', open: 'बड़ा करके देखें', of: '/' },

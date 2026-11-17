@@ -11,7 +11,7 @@ const words = {
     title: "Page Content", sub: "Edit the text, images and videos of every public menu page. Anything left empty shows the built-in content.",
     page: "Page", view: "View page", intro: "Section heading & text", introHint: "Overrides the section's built-in heading, text and media.", setIntro: "Customise", editIntro: "Edit", custom: "Customised", builtIn: "Built-in",
     entries: "Entries", addEntry: "Add entry", noEntries: "No entries — the built-in content is shown.", save: "Save", cancel: "Cancel", saved: "Saved.", confirm: "Delete this content?",
-    titleEn: "Title (English)", titleHi: "Title (Hindi)", subtitle: "Small line under the title (English)", subtitleHi: "Small line (Hindi)", subtitleHint: "Designation, company, location, category…",
+    titleEn: "Title (English)", titleHi: "Title (Hindi)", subtitle: "Small line under the title (English)", subtitleHi: "Small line (Hindi)", subtitleHint: "Designation, company, location, category…", tagline: "Banner tagline (English)", taglineHi: "Banner tagline (Hindi)", taglineHint: "The small line shown with the banner heading. Leave empty to keep the default.",
     body: "Text (English)", bodyHi: "Text (Hindi)", media: "Image / video", NONE: "None", IMAGE: "Image", VIDEO: "Video", upload: "Upload image", uploading: "Uploading…", imageUrl: "or paste an image URL", videoUrl: "YouTube link or .mp4 URL",
     link: "Button link", linkHint: "A page on this site (/register) or a full https:// address.", cta: "Button text (English)", ctaHi: "Button text (Hindi)", order: "Order", active: "Active", hidden: "Hidden", show: "Show", hide: "Hide", remove: "Delete",
   },
@@ -19,7 +19,7 @@ const words = {
     title: "पेज सामग्री", sub: "हर सार्वजनिक मेनू पेज का टेक्स्ट, इमेज और वीडियो बदलें। जो खाली छोड़ेंगे वहाँ मूल सामग्री दिखेगी।",
     page: "पेज", view: "पेज देखें", intro: "भाग का शीर्षक और विवरण", introHint: "भाग के मूल शीर्षक, विवरण और मीडिया की जगह दिखेगा।", setIntro: "बदलें", editIntro: "संपादित करें", custom: "बदला गया", builtIn: "मूल",
     entries: "प्रविष्टियाँ", addEntry: "प्रविष्टि जोड़ें", noEntries: "कोई प्रविष्टि नहीं — मूल सामग्री दिख रही है।", save: "सहेजें", cancel: "रद्द करें", saved: "सहेजा गया।", confirm: "यह सामग्री हटाएँ?",
-    titleEn: "शीर्षक (अंग्रेज़ी)", titleHi: "शीर्षक (हिंदी)", subtitle: "शीर्षक के नीचे छोटी पंक्ति (अंग्रेज़ी)", subtitleHi: "छोटी पंक्ति (हिंदी)", subtitleHint: "पद, कंपनी, स्थान, श्रेणी…",
+    titleEn: "शीर्षक (अंग्रेज़ी)", titleHi: "शीर्षक (हिंदी)", subtitle: "शीर्षक के नीचे छोटी पंक्ति (अंग्रेज़ी)", subtitleHi: "छोटी पंक्ति (हिंदी)", subtitleHint: "पद, कंपनी, स्थान, श्रेणी…", tagline: "बैनर टैगलाइन (अंग्रेज़ी)", taglineHi: "बैनर टैगलाइन (हिंदी)", taglineHint: "बैनर शीर्षक के साथ दिखने वाली छोटी पंक्ति। डिफ़ॉल्ट रखने के लिए खाली छोड़ें।",
     body: "विवरण (अंग्रेज़ी)", bodyHi: "विवरण (हिंदी)", media: "इमेज / वीडियो", NONE: "कोई नहीं", IMAGE: "इमेज", VIDEO: "वीडियो", upload: "इमेज अपलोड करें", uploading: "अपलोड हो रहा है…", imageUrl: "या इमेज का URL डालें", videoUrl: "YouTube लिंक या .mp4 URL",
     link: "बटन लिंक", linkHint: "इस साइट का पेज (/register) या पूरा https:// पता।", cta: "बटन टेक्स्ट (अंग्रेज़ी)", ctaHi: "बटन टेक्स्ट (हिंदी)", order: "क्रम", active: "सक्रिय", hidden: "छिपा हुआ", show: "दिखाएँ", hide: "छिपाएँ", remove: "हटाएँ",
   },
@@ -49,7 +49,7 @@ function Thumb({ block }) {
   return block.mediaType === "IMAGE" ? <ImageIcon className="h-6 w-6 text-muted-foreground" /> : <Type className="h-6 w-6 text-muted-foreground" />;
 }
 
-function BlockForm({ value, t, onCancel, onSave, busy, setError, isIntro }) {
+function BlockForm({ value, t, onCancel, onSave, busy, setError, isIntro, isHero = false }) {
   const [form, setForm] = useState(value);
   const [uploading, setUploading] = useState(false);
   const set = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.type === "checkbox" ? event.target.checked : event.target.value }));
@@ -64,8 +64,8 @@ function BlockForm({ value, t, onCancel, onSave, busy, setError, isIntro }) {
       <div className="grid gap-4 md:grid-cols-2">
         <Field label={t.titleEn}><input maxLength={200} className={input} value={form.title || ""} onChange={set("title")} /></Field>
         <Field label={t.titleHi}><input maxLength={200} className={input} value={form.titleHi || ""} onChange={set("titleHi")} /></Field>
-        {!isIntro && <Field label={t.subtitle} hint={t.subtitleHint}><input maxLength={200} className={input} value={form.subtitle || ""} onChange={set("subtitle")} /></Field>}
-        {!isIntro && <Field label={t.subtitleHi}><input maxLength={200} className={input} value={form.subtitleHi || ""} onChange={set("subtitleHi")} /></Field>}
+        {(!isIntro || isHero) && <Field label={isHero ? t.tagline : t.subtitle} hint={isHero ? t.taglineHint : t.subtitleHint}><input maxLength={200} className={input} value={form.subtitle || ""} onChange={set("subtitle")} /></Field>}
+        {(!isIntro || isHero) && <Field label={isHero ? t.taglineHi : t.subtitleHi}><input maxLength={200} className={input} value={form.subtitleHi || ""} onChange={set("subtitleHi")} /></Field>}
         <Field label={t.body}><textarea rows={5} className={`${input} h-auto py-2`} value={form.body || ""} onChange={set("body")} /></Field>
         <Field label={t.bodyHi}><textarea rows={5} className={`${input} h-auto py-2`} value={form.bodyHi || ""} onChange={set("bodyHi")} /></Field>
         <Field label={t.media} wide>
@@ -151,7 +151,7 @@ export default function AdminPageContent() {
       </header>
 
       <div className="grid gap-5 lg:grid-cols-12">
-        <nav aria-label={t.page} className="lg:col-span-3">
+        <nav aria-label={t.page} className="min-w-0 lg:col-span-3">
           <ul className="flex gap-1 overflow-x-auto rounded-xl border bg-card p-1 lg:flex-col lg:overflow-visible">
             {Object.entries(PAGE_CONTENT).map(([key, value]) => {
               const count = rows.filter((row) => row.page === key).length;
@@ -200,7 +200,7 @@ export default function AdminPageContent() {
                       </div>
                     )}
                   </div>
-                  {isEditing(section, "INTRO", intro) && <div className="mt-3"><BlockForm value={toForm(intro)} t={t} isIntro busy={busy} setError={setError} onCancel={() => setEditing(null)} onSave={save} /></div>}
+                  {isEditing(section, "INTRO", intro) && <div className="mt-3"><BlockForm value={toForm(intro)} t={t} isIntro isHero={section === "hero"} busy={busy} setError={setError} onCancel={() => setEditing(null)} onSave={save} /></div>}
                 </div>
 
                 {kind === "items" && (

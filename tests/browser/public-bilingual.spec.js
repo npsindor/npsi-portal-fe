@@ -3,6 +3,9 @@ import { mockApi, NOT_LOGGED_IN } from './mock-api';
 import { publicNavigation } from '../../src/lib/public-navigation.js';
 import { publicHindi } from '../../src/lib/public-copy.js';
 
+// An event date 30 days ahead, so the event always counts as upcoming whatever day the tests run.
+const UPCOMING = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+
 const setup = async (page, lang = 'en') => {
   await page.addInitScript(value => localStorage.setItem('pss_lang', value), lang);
   return mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN });
@@ -14,6 +17,8 @@ const switchLanguage = async (page, toHindi) => {
 
 for (const lang of ['en', 'hi']) {
   test(`${lang}: every public submenu reaches its route and anchor`, async ({ page }) => {
+    // Visits every submenu link in one test: allow more time when the whole suite runs on five browsers at once.
+    test.slow();
     await page.setViewportSize({ width: 1440, height: 1000 });
     await setup(page, lang);
     await page.goto('/');
@@ -23,10 +28,13 @@ for (const lang of ['en', 'hi']) {
       for (const [childIndex, [, to]] of (item.items || [[item.label, item.to]]).entries()) {
         if (item.items) {
           const details = nav.locator('details').nth(publicNavigation.slice(0, index).filter((other) => other.items).length);
+          // The previous navigation closes every dropdown; wait for that before opening this one.
+          await expect(details).not.toHaveAttribute('open');
           await details.locator('summary').click();
+          await expect(details).toHaveAttribute('open', '');
           await details.getByRole('link').nth(childIndex).click();
         } else {
-          await nav.getByRole('link', { name: lang === 'hi' ? ({ Feedback: 'सुझाव', 'Contact Us': 'संपर्क करें', 'Room Hunting': 'आवास साथी', Transportation: 'सफ़र साथी', Medical: 'सेहत साथी', Sagun: 'सगुन' }[item.label] || publicHindi[item.label]) : item.label, exact: true }).click();
+          await nav.getByRole('link', { name: lang === 'hi' ? ({ Feedback: 'सुझाव', 'Contact Us': 'संपर्क करें', 'Room Hunting': 'आवास सहयोग', Transportation: 'यातायात सहयोग', 'Health Support': 'स्वास्थ्य सहयोग', 'Shagun Bandhan': 'शगुन बंधन' }[item.label] || publicHindi[item.label]) : item.label, exact: true }).click();
         }
         await expect(page).toHaveURL(new URL(to, 'http://127.0.0.1:4173').href);
         await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
@@ -56,7 +64,9 @@ for (const lang of ['en', 'hi']) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
 
-  test(`${lang}: Sagun requires membership and does not publish demo profiles`, async ({ page }) => {
+  test(`${lang}: Shagun requires membership and does not publish demo profiles`, async ({ page }) => {
+  // Checks the desktop sidebar / header links (on phones they sit in the menu).
+  await page.setViewportSize({ width: 1280, height: 900 });
     await setup(page, lang);
     await page.goto('/sagun');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
@@ -65,18 +75,27 @@ for (const lang of ['en', 'hi']) {
   });
 
   for (const kind of ['contact', 'feedback']) {
-    test(`${lang}: ${kind} form validates and returns an honest demo reference`, async ({ page }) => {
-      const calls = await setup(page, lang);
+    test(`${lang}: ${kind} form sends a real message to the Sangathan and shows its reference`, async ({ page }) => {
+      await setup(page, lang);
       const hi = lang === 'hi';
+      const sent = [];
+      await page.route('**/api/v1/feedback/public', async (route) => { sent.push(JSON.parse(route.request().postData())); await route.fulfill({ status: 201, json: { reference: 'FB-000042' } }); });
       await page.goto(kind === 'contact' ? '/contact' : '/public-feedback');
-      await page.getByRole('button', { name: hi ? 'डेमो जमा करें' : 'Submit Demo', exact: true }).click();
-      expect(await page.locator(`#${kind}-message`).evaluate(element => element.validity.valueMissing)).toBe(true);
-      await page.locator(`#${kind}-message`).fill(hi ? 'यह एक काल्पनिक सुझाव है।' : 'A fictional example suggestion.');
+      const submit = page.getByRole('button', { name: hi ? 'संदेश भेजें' : 'Send message', exact: true });
+      await submit.click();
+      await expect(page.getByRole('alert')).toBeVisible();
+      await page.locator(`#${kind}-message`).fill(hi ? 'सदस्यता के बारे में जानकारी चाहिए।' : 'Please tell me about membership.');
+      if (kind === 'contact') {
+        await submit.click();
+        await expect(page.getByRole('alert')).toHaveText(hi ? 'उत्तर देने के लिए ईमेल या मोबाइल नंबर दें।' : 'Give an email or mobile number so we can reply.');
+        await page.locator('#contact-mobile').fill('9876543210');
+      }
       await page.getByRole('checkbox').check();
-      await page.getByRole('button', { name: hi ? 'डेमो जमा करें' : 'Submit Demo', exact: true }).click();
-      await expect(page.getByRole('status')).toContainText('DEMO-');
-      await expect(page.getByRole('status')).toContainText(hi ? 'संगठन को कुछ नहीं' : 'Nothing has been sent');
-      expect(calls.filter(call => call.key.startsWith('POST '))).toHaveLength(0);
+      await submit.click();
+      await expect(page.getByRole('status')).toContainText('FB-000042');
+      expect(sent).toHaveLength(1);
+      expect(sent[0]).toMatchObject({ kind: kind === 'contact' ? 'CONTACT' : 'FEEDBACK', consent: true, lang });
+      expect(await page.evaluate(() => Object.keys(sessionStorage).filter((key) => key.startsWith('nps-demo')))).toEqual([]);
     });
   }
 }
@@ -85,15 +104,15 @@ test('mobile language toggle persists and translates existing drafts without los
   await page.setViewportSize({ width: 320, height: 900 });
   await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN });
   await page.goto('/community-services');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Standing together when it matters most');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('One message. The whole samaj stands with you.');
   await switchLanguage(page, true);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('ज़रूरत के समय एक-दूसरे के साथ');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('एक संदेश, और पूरा समाज आपके साथ।');
   for (const name of ['रक्तदान', 'आपातकालीन सहायता', 'समाज कल्याण']) await expect(page.getByRole('heading', { level: 2, name, exact: true })).toBeVisible();
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('lang', 'hi');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('ज़रूरत के समय एक-दूसरे के साथ');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('एक संदेश, और पूरा समाज आपके साथ।');
   await switchLanguage(page, false);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Standing together when it matters most');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('One message. The whole samaj stands with you.');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
@@ -101,7 +120,7 @@ test('live event details and news use authored Hindi content alongside separate 
   await page.addInitScript(() => localStorage.setItem('pss_lang', 'hi'));
   await mockApi(page, {
     'GET /auth/me': NOT_LOGGED_IN,
-    'GET /events': [{ id: 'real-event', status: 'PUBLISHED', title: 'Published Event', title_hi: 'प्रकाशित आयोजन', description: 'Confirmed event details', description_hi: 'पुष्ट आयोजन का पूरा विवरण', venue: 'Confirmed venue', venue_hi: 'पुष्ट स्थान', date: '2026-11-15', fee: 0 }],
+    'GET /events': [{ id: 'real-event', status: 'PUBLISHED', title: 'Published Event', title_hi: 'प्रकाशित आयोजन', description: 'Confirmed event details', description_hi: 'पुष्ट आयोजन का पूरा विवरण', venue: 'Confirmed venue', venue_hi: 'पुष्ट स्थान', date: UPCOMING, fee: 0 }],
     'GET /announcements': [{ id: 'real-news', status: 'Active', type: 'General', title: 'Published Notice', title_hi: 'प्रकाशित सूचना', body: 'Confirmed notice details', body_hi: 'पुष्ट सूचना का पूरा विवरण', date: '2026-10-27' }],
   });
   await page.goto('/events');

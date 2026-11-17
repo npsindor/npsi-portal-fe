@@ -35,7 +35,7 @@ export default function AdminTransferRequests() {
     try {
       const list = await base44.entities.TransferRequest.listAll("-requestedDate");
       setAll(list);
-    } catch (e) {} finally { setLoading(false); }
+    } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 

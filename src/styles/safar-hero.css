@@ -1,0 +1,47 @@
+/* Transportation (यातायात सहयोग) hero: a highway at dusk — deep road-blue to teal sky, a traffic-yellow glow, and an asphalt strip with a moving lane line along the bottom. */
+.safar-hero {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 1.75rem;
+  background:
+    radial-gradient(circle at 86% 14%, rgb(245 200 76 / 30%), transparent 38%),
+    radial-gradient(circle at 8% 100%, rgb(20 184 166 / 25%), transparent 45%),
+    linear-gradient(165deg, #0a2540 0%, #0c3a5e 45%, #0e5a6e 80%, #0f766e 100%);
+}
+/* asphalt strip */
+.safar-hero::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 1.75rem;
+  background: linear-gradient(#2a2f37, #1f232a);
+  box-shadow: 0 -2px 0 rgb(255 255 255 / 18%);
+}
+/* lane line */
+.safar-hero::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(.875rem - 2px);
+  height: 4px;
+  background: repeating-linear-gradient(90deg, #f5c84c 0 30px, transparent 30px 54px);
+  background-size: 54px 4px;
+  animation: safar-lane 1.6s linear infinite;
+}
+@keyframes safar-lane { to { background-position: -54px 0; } }
+@media (prefers-reduced-motion: reduce) { .safar-hero::after { animation: none; } }
+.safar-art { display: block; max-width: 40rem; margin: 0 auto; filter: drop-shadow(0 1rem 1.5rem rgb(0 0 0 / 22%)); }
+.safar-art .safar-road-line { animation: safar-road 1.4s linear infinite; }
+.safar-art .safar-route { animation: safar-road 2.4s linear infinite; }
+.safar-art .safar-car-body { animation: safar-bob .9s ease-in-out infinite alternate; }
+.safar-art .safar-wheel { animation: safar-spin .8s linear infinite; }
+.safar-art .safar-heart { transform-box: fill-box; transform-origin: center; animation: safar-beat 1.8s ease-in-out infinite; }
+@keyframes safar-road { to { stroke-dashoffset: -30; } }
+@keyframes safar-bob { from { transform: translateY(0); } to { transform: translateY(-1.5px); } }
+@keyframes safar-spin { to { transform: rotate(360deg); } }
+@keyframes safar-beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+@media (prefers-reduced-motion: reduce) {
+  .safar-art .safar-road-line, .safar-art .safar-route, .safar-art .safar-car-body, .safar-art .safar-wheel, .safar-art .safar-heart { animation: none; }
+}
+.dark .safar-hero { background: radial-gradient(circle at 86% 14%, rgb(245 200 76 / 18%), transparent 38%), linear-gradient(165deg, #06121f 0%, #0a2238 50%, #0b3b47 100%); }

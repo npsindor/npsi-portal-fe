@@ -136,7 +136,7 @@ export default function AdminSamiti() {
       ]);
       setSamitis(sams);
       setAllMembers(mems);
-    } catch (e) {} finally { setLoading(false); }
+    } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 

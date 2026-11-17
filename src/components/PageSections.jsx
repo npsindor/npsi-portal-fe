@@ -3,19 +3,24 @@ import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { ArrowDown, ChevronRight, Inbox } from 'lucide-react';
 import { BlockLink, BlockMedia } from '@/components/PageContent';
 import { blockText } from '@/lib/page-content';
+import '@/styles/page-heroes.css';
 
 // Shared layout for the single-page menu pages. Every page uses the same 12-column container (max-w-7xl).
 // `block` is the admin's INTRO override (Admin → Page Content): title, text and an image or video.
 
-export function PageHero({ eyebrow, title, intro, icon: Icon, lang, block, overview = true, children }) {
+// `theme` ('career' | 'news' | 'health') gives the page its own colours (styles/page-heroes.css) and `art` its own scene
+// beside the text. `tagline` is the small line above the heading; the admin's "small line" (subtitle) replaces it.
+export function PageHero({ eyebrow, title, intro, icon: Icon, lang, block, overview = true, theme, art, tagline, children }) {
   const heading = blockText(block, 'title', lang) || title;
   const text = blockText(block, 'body', lang) || intro;
+  const small = blockText(block, 'subtitle', lang) || tagline;
   const image = block?.mediaType === 'IMAGE' && block.mediaUrl;
   const video = block?.mediaType === 'VIDEO' && block.mediaUrl;
   return (
-    <section className="relative overflow-hidden hero-band text-cream">
+    <section className={`relative overflow-hidden text-cream ${theme ? `page-hero page-hero-${theme}` : 'hero-band'}`}>
       {image && <img src={block.mediaUrl} alt="" className="absolute inset-0 h-full w-full object-cover opacity-30" aria-hidden="true" />}
-      {image && <div className="absolute inset-0 bg-gradient-to-r from-maroon via-maroon/85 to-maroon/40" aria-hidden="true" />}
+      {image && !theme && <div className="absolute inset-0 bg-gradient-to-r from-maroon via-maroon/85 to-maroon/40" aria-hidden="true" />}
+      {image && theme && <div className="absolute inset-0 bg-black/45" aria-hidden="true" />}
       <div className="absolute inset-0 shell-grid opacity-[0.05]" aria-hidden="true" />
       <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-gold/10 blur-3xl" aria-hidden="true" />
       <div className={`relative mx-auto max-w-7xl px-4 pt-10 sm:px-6 sm:pt-14 ${overview ? 'pb-24 sm:pb-28' : 'pb-12 sm:pb-16'}`}>
@@ -25,16 +30,18 @@ export function PageHero({ eyebrow, title, intro, icon: Icon, lang, block, overv
           <span aria-current="page" className="text-cream/90">{eyebrow}</span>
         </nav>
         <div className="mt-6 grid items-center gap-8 lg:grid-cols-12">
-          <div className={`flex min-w-0 items-start gap-4 ${video ? 'lg:col-span-7' : 'lg:col-span-10'}`}>
+          <div className={`flex min-w-0 items-start gap-4 ${video ? 'lg:col-span-7' : art ? 'lg:col-span-6' : 'lg:col-span-10'}`}>
             {Icon && <span className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-gold/30 bg-gold/10 text-gold sm:flex"><Icon className="h-7 w-7" aria-hidden="true" /></span>}
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">{eyebrow}</p>
+              {small && <p className="mt-2 text-sm text-cream/80">{small}</p>}
               <h1 className="mt-2 max-w-3xl font-display text-3xl font-semibold leading-tight text-cream sm:text-5xl">{heading}</h1>
               {text && <p className="mt-4 max-w-2xl whitespace-pre-line text-base leading-relaxed text-cream/75 sm:text-lg">{text}</p>}
               <BlockLink block={block} lang={lang} className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-full bg-gold px-5 text-sm font-bold text-maroon transition hover:bg-cream" />
             </div>
           </div>
           {video && <div className="lg:col-span-5"><BlockMedia block={block} lang={lang} className="shadow-2xl ring-1 ring-cream/10" /></div>}
+          {!video && art && <div className="min-w-0 lg:col-span-6">{art}</div>}
         </div>
         {children}
       </div>

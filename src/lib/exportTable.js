@@ -14,7 +14,16 @@ const cellText = (value) => {
   return String(value);
 };
 
-const toMatrix = (columns, rows) => rows.map((row) => columns.map((col) => cellText(row[col.key])));
+// Spreadsheet apps run a cell that starts with = + - @ (or a tab/CR before one) as a formula, so a
+// member who types `=HYPERLINK(...)` as their name could plant a live link or formula in an admin's
+// export. Such text is prefixed with ' so it opens as plain text. Plain numbers ("-5", "+91") are kept.
+const NUMBER = /^[-+]?\d+(\.\d+)?$/;
+export const safeCell = (value) => {
+  const text = cellText(value);
+  return /^[=+\-@\t\r]/.test(text) && !NUMBER.test(text) ? `'${text}` : text;
+};
+
+const toMatrix = (columns, rows, cell = cellText) => rows.map((row) => columns.map((col) => cell(row[col.key])));
 
 const downloadBlob = (blob, filename) => {
   const url = URL.createObjectURL(blob);
@@ -29,7 +38,7 @@ const downloadBlob = (blob, filename) => {
 
 export const exportToCSV = (filename, columns, rows) => {
   const escapeCsv = (value) => {
-    const text = cellText(value);
+    const text = safeCell(value);
     return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
   };
   const lines = [
@@ -42,7 +51,7 @@ export const exportToCSV = (filename, columns, rows) => {
 
 export const exportToExcel = async (filename, columns, rows) => {
   const XLSX = await import("xlsx");
-  const data = [columns.map((col) => col.label), ...toMatrix(columns, rows)];
+  const data = [columns.map((col) => col.label), ...toMatrix(columns, rows, safeCell)];
   const sheet = XLSX.utils.aoa_to_sheet(data);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, sheet, "Data");

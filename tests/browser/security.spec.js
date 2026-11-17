@@ -2,10 +2,10 @@ import { expect, test } from '@playwright/test';
 import { MEMBER, mockApi, NOT_LOGGED_IN } from './mock-api.js';
 
 // What a visitor without a login, and a normal member, can reach in the app itself.
-const MEMBER_PAGES = ['/portal', '/portal/family', '/portal/registration', '/portal/events', '/portal/event-kharcha', '/portal/notifications', '/portal/settings', '/portal/feedback'];
-const ADMIN_PAGES = ['/admin', '/admin/families', '/admin/applications', '/admin/students', '/admin/transactions', '/admin/registration-payments', '/admin/contact-info', '/admin/feedback', '/admin/settings'];
+const MEMBER_PAGES = ['/portal', '/portal/family', '/portal/registration', '/portal/events', '/portal/event-kharcha', '/portal/notifications', '/portal/settings', '/portal/feedback', '/portal/room-hunting'];
+const ADMIN_PAGES = ['/admin', '/admin/families', '/admin/applications', '/admin/students', '/admin/transactions', '/admin/registration-payments', '/admin/contact-info', '/admin/feedback', '/admin/settings', '/admin/room-hunting', '/admin/transportation', '/admin/news'];
 // Admin-only API reads; the app must never even ask for them for a member.
-const ADMIN_API = /^GET \/(families|family-members|applications|student-applications|students|transactions|registration-payments|contact-info|feedback|transfer-requests|samiti-members)$/;
+const ADMIN_API = /^GET \/(families|family-members|applications|student-applications|students|transactions|registration-payments|contact-info|feedback|transfer-requests|samiti-members|room-hunting\/admin\/.*|safar-saathi\/admin\/.*)$/;
 
 test('a family card link (/verify/:id) needs a login and never calls the lookup anonymously', async ({ page }) => {
   const calls = await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN });

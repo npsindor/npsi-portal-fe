@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import fs from 'node:fs';
 import { MEMBER, mockApi, NOT_LOGGED_IN } from './mock-api.js';
 
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/l9kAAAAASUVORK5CYII=', 'base64');
@@ -14,7 +15,7 @@ for (const width of [1440, 390]) {
     await expect(page.getByRole('link', { name: 'Member Login', exact: true }).filter({ visible: true })).toBeVisible();
     await expect(student).toHaveCount(1);
     await student.click();
-    await expect(page).toHaveURL(/\/login\?returnTo=%2Fportal%2Fregistration%3Ftype%3Dstudent$/);
+    await expect(page).toHaveURL(/\/login\?portal=student&returnTo=%2Fportal%2Fregistration%3Ftype%3Dstudent$/);
     await expect(page.getByRole('heading', { name: 'Student Login' })).toBeVisible();
     await expect(page.getByText('student registration (₹100 fee)')).toBeVisible();
     // New students create an account with the same OTP flow and come back to the student registration.
@@ -70,12 +71,16 @@ for (const width of [1440, 390]) {
     });
     expect(order).toBeTruthy();
     const slides = gallery.locator('[aria-roledescription="slide"]');
-    await expect(slides).toHaveCount(7);
+    // Every photo in public/gallery is in the slider, each once.
+    const files = fs.readdirSync(new URL('../../public/gallery/', import.meta.url)).filter((name) => /\.jpe?g$/i.test(name));
+    await expect(slides).toHaveCount(files.length);
+    const shown = await slides.locator('img').evaluateAll((imgs) => imgs.map((img) => img.getAttribute('src').replace('/gallery/', '')));
+    expect([...shown].sort()).toEqual([...files].sort());
     // Only the slider: no thumbnail strip under it.
     await expect(gallery.getByRole('button', { name: /Go to photo/ })).toHaveCount(0);
     await gallery.getByRole('button', { name: 'Next photo' }).first().click();
-    await expect(gallery.locator('[aria-label="2 of 7"]').getByRole('button', { name: /View full size/ })).toHaveAttribute('tabindex', '0');
-    await gallery.locator('[aria-label="2 of 7"]').getByRole('button', { name: /View full size/ }).click();
+    await expect(gallery.locator('[aria-label="2 of 65"]').getByRole('button', { name: /View full size/ })).toHaveAttribute('tabindex', '0');
+    await gallery.locator('[aria-label="2 of 65"]').getByRole('button', { name: /View full size/ }).click();
     await expect(page.getByRole('dialog').locator('img')).toHaveAttribute('src', /maa-na-garba-2\.jpg$/);
     await page.keyboard.press('Escape');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

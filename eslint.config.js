@@ -55,6 +55,8 @@ export default [
         { ignore: ["cmdk-input-wrapper", "toast-close"] },
       ],
       "react-hooks/rules-of-hooks": "error",
+      // A name that is never defined crashes the page at render time (e.g. a prop not passed down).
+      "no-undef": "error",
     },
   },
 ];

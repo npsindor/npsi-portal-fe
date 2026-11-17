@@ -39,7 +39,7 @@ export default function AdminEventRegistrations() {
       ]);
       setRegs(list);
       setEvents(evs);
-    } catch (e) {} finally { setLoading(false); }
+    } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 

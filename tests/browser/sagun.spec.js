@@ -2,6 +2,9 @@ import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 import { mockApi, MEMBER, ADMIN, NOT_LOGGED_IN } from './mock-api';
 const schema=JSON.parse(fs.readFileSync(new URL('./sagun-schema.json',import.meta.url),'utf8'));
+// 5 cities + the Sagun village list + the native villages it didn't have yet (Gandhawad, Chandawad, Nayanagar, Saikheda).
+const VILLAGE_CHOICES=68;
+const pickVillage=async(page,name)=>{const input=page.locator('#sagun-nativeVillage');await input.fill(name);await input.press('Escape');};
 const empty=()=>({profiles:[],incoming:[],outgoing:[],notices:[]});
 const FAMILY={family:{familyId:'NPSI-FAM-000001',familyName:'Patidar',village:'Sanawad'},registrationEnabled:true,members:[
  {id:'member-son',membershipId:'NPSI-MEM-000010',name:'Rahul Patidar',relationship:'Son',gender:'MALE',age:25,minimumAge:21,eligible:true,reason:null,application:null},
@@ -9,16 +12,16 @@ const FAMILY={family:{familyId:'NPSI-FAM-000001',familyName:'Patidar',village:'S
 const PREFILL={member:{id:'member-son',membershipId:'NPSI-MEM-000010',familyId:'NPSI-FAM-000001',name:'Rahul Patidar',gender:'MALE',age:25,dob:'2001-01-01',village:'Sanawad'},
  eligibility:{eligible:true,reason:null},existing:null,student:{studentId:'NPSI-STU-000001',course:'B.Tech',institution:'NPSI University',academicYear:'2025-2026'},sourceConflicts:['dob'],lockedKeys:['dob','candidateType'],prefill:{fullName:'Rahul Patidar',candidateType:'GROOM',dob:'2001-01-01',fatherName:'Ramesh Patidar',education:'B.Tech',college:'NPSI University',professionalDetails:'2025-2026',district:'Indore',city:'Indore'}};
 const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/l9kAAAAASUVORK5CYII=','base64');
-test('Sagun navigation opens a two-radio selector and routes directly to the chosen registration category',async({page})=>{
+test('Shagun navigation opens a two-radio selector and routes directly to the chosen registration category',async({page})=>{
  await page.setViewportSize({width:1280,height:844});await page.addInitScript(()=>localStorage.setItem('pss_lang','en'));await mockApi(page,{'GET /auth/me':NOT_LOGGED_IN,'GET /sagun/schema':schema});await page.route('**/api/v1/sagun/profiles',route=>route.fulfill({status:403,json:{error:'SAGUN_MEMBER_REQUIRED'}}));
- await page.goto('/');await page.getByRole('link',{name:'Sagun',exact:true}).first().click();await expect(page).toHaveURL(/\/sagun$/);await page.setViewportSize({width:390,height:844});
+ await page.goto('/');await page.getByRole('link',{name:'Shagun Bandhan',exact:true}).first().click();await expect(page).toHaveURL(/\/sagun$/);await page.setViewportSize({width:390,height:844});
  await expect(page.getByRole('radio')).toHaveCount(2);await expect(page.getByRole('checkbox')).toHaveCount(0);
- await expect(page.getByRole('navigation').locator('details').filter({hasText:'Sagun'})).toHaveCount(0);await page.getByRole('radio',{name:/Bride Registration/}).click();await expect(page).toHaveURL(/\/sagun\?category=bride$/);
- await expect(page.getByRole('radio')).toHaveCount(0);await expect(page.locator('#sagun-fullName')).toBeVisible();await expect(page.getByText('Requirements, privacy and official guidance')).toHaveCount(0);await page.getByRole('button',{name:'Submit for Approval',exact:true}).click();await expect(page.getByText('Family registration on the NPS Indore portal is mandatory to submit a Sagun application. Please register your family first.')).toBeVisible();
+ await expect(page.getByRole('navigation').locator('details').filter({hasText:'Shagun'})).toHaveCount(0);await page.getByRole('radio',{name:/Bride Registration/}).click();await expect(page).toHaveURL(/\/sagun\?category=bride$/);
+ await expect(page.getByRole('radio')).toHaveCount(0);await expect(page.locator('#sagun-fullName')).toBeVisible();await expect(page.getByText('Requirements, privacy and official guidance')).toHaveCount(0);await page.getByRole('button',{name:'Submit for Approval',exact:true}).click();await expect(page.getByText('Shagun Bandhan Registration is available only to registered NPS family members. Please complete your Family Registration first. You will be able to submit the Shagun Bandhan form after becoming an approved family member.')).toBeVisible();
  await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 for(const lang of ['en','hi']){
- test(`${lang}: private draft, photo upload, dynamic Sagun, preview and submit validation`,async({page})=>{
+ test(`${lang}: private draft, photo upload, dynamic Shagun, preview and submit validation`,async({page})=>{
   const hi=lang==='hi';await page.setViewportSize({width:hi?390:320,height:900});await page.addInitScript(value=>localStorage.setItem('pss_lang',value),lang);
   await mockApi(page,{'GET /auth/me':MEMBER,'GET /sagun/schema':schema});const own=empty();let saved;let submissions=0;
   await page.route('**/api/v1/sagun/me',route=>route.fulfill({json:own}));
@@ -31,7 +34,7 @@ for(const lang of ['en','hi']){
   await page.route('**/api/v1/sagun/eligible-members/member-son',route=>route.fulfill({json:PREFILL}));
   await page.goto('/sagun?category=groom');
   await expect(page.locator('#sagun-member-member-minor')).toHaveCount(0);await expect(page.locator('#sagun-member-member-son')).toBeVisible();
-  const apply=page.getByRole('button',{name:hi?'सगुन हेतु आवेदन करें':'Apply for Sagun',exact:true});await expect(apply).toBeDisabled();
+  const apply=page.getByRole('button',{name:hi?'शगुन बंधन हेतु आवेदन करें':'Apply for Shagun Bandhan',exact:true});await expect(apply).toBeDisabled();
   await page.locator('#sagun-member-member-son').check();await apply.click();
   await expect(page.locator('#sagun-fullName')).toHaveValue('Rahul Patidar');await expect(page.locator('#sagun-candidateType')).toBeDisabled();await expect(page.locator('#sagun-candidateType')).toHaveValue('GROOM');
   await page.getByRole('button',{name:/^2\./}).click();await expect(page.locator('#sagun-education')).toHaveValue('B.Tech');await expect(page.getByText('NPSI-STU-000001')).toBeVisible();await expect(page.getByText(hi?'प्रशासक द्वारा सत्यापित किया जाएगा':'An administrator will verify these discrepancies')).toBeVisible();
@@ -39,17 +42,18 @@ for(const lang of ['en','hi']){
   await expect(page.getByText('NPSI-FAM-000001',{exact:true})).toBeVisible();
   await page.locator('#sagun-fullName').fill('TEST CANDIDATE');
   await page.getByRole('button',{name:hi?'ड्राफ़्ट सहेजें':'Save Draft',exact:true}).click();await expect(page.getByRole('status').filter({hasText:hi?'बैकएंड':'backend'})).toContainText(hi?'बैकएंड':'backend');expect(saved.action).toBe('DRAFT');expect(saved.memberId).toBe('member-son');expect(saved.category).toBe('GROOM');expect(saved.data.candidateType).toBe('GROOM');expect(saved.data.visibility).toBe('PRIVATE');
-  await expect(page.locator('#sagun-photoFileId')).toBeDisabled();await page.locator('#sagun-upload-consent').check();await page.locator('#sagun-photoFileId').setInputFiles({name:'test.png',mimeType:'image/png',buffer:png});
+  await expect(page.locator('#sagun-photoFileId')).toBeEnabled();await page.locator('#sagun-photoFileId').setInputFiles({name:'test.png',mimeType:'image/png',buffer:png});await expect(page.getByText(/confirm upload authorization first|अपलोड की अनुमति/).first()).toBeVisible();await page.locator('#sagun-upload-consent').check();await page.locator('#sagun-photoFileId').setInputFiles({name:'test.png',mimeType:'image/png',buffer:png});
   await expect(page.getByRole('button',{name:hi?'निजी रूप से डाउनलोड करें':'Download privately',exact:true})).toBeVisible();
   await expect(page.getByRole('button',{name:/Sagun & Marriage Ceremony Details|सगुन और विवाह समारोह का विवरण/})).toHaveCount(0);
   await page.route('https://api.postalpincode.in/**',route=>route.fulfill({json:[{Status:'Success',PostOffice:[{Name:'Pithampur',Pincode:'454775',District:'Dhar'}]}]}));
   for(const removed of ['candidateMobile','motherMobile','email','city'])await expect(page.locator(`#sagun-${removed}`)).toHaveCount(0);await expect(page.locator('#sagun-district')).toBeVisible();await expect(page.locator('#sagun-nativeVillage')).toBeVisible();
-  expect((await page.locator('#sagun-nativeVillage option').evaluateAll(options=>options.map(option=>option.value))).slice(0,6)).toEqual(['','Indore','Dewas','Pithampur','Ujjain','Khargone']);
-  await expect(page.locator('#sagun-nativeVillage option[value="अघावन (टेमला)"]')).toHaveText(hi?'अघावन (टेमला)':'Aghawan (Temla)');
-  await expect(page.locator('#sagun-nativeVillage')).toHaveAccessibleName(hi?/^गाँव \*$/:/^Village \*$/);await expect(page.locator('#sagun-nativeVillage option')).toHaveCount(65);
+  await expect(page.locator('#sagun-nativeVillage')).toHaveAttribute('role','combobox');await page.locator('#sagun-nativeVillage').click();
+  expect((await page.getByRole('listbox',{name:/Village|गाँव/}).getByRole('option').allTextContents()).slice(0,5)).toEqual(hi?['इंदौर','देवास','पीथमपुर','उज्जैन','खरगोन']:['Indore','Dewas','Pithampur','Ujjain','Khargone']);
+  await expect(page.getByRole('listbox',{name:/Village|गाँव/}).getByRole('option').filter({hasText:hi?'अघावन (टेमला)':'Aghawan (Temla)'}).first()).toBeVisible();
+  await expect(page.locator('#sagun-nativeVillage')).toHaveAccessibleName(hi?/^गाँव \*$/:/^Village \*$/);await expect(page.getByRole('listbox',{name:/Village|गाँव/}).getByRole('option')).toHaveCount(VILLAGE_CHOICES);await page.locator('#sagun-nativeVillage').press('Escape');
   expect(await page.evaluate(()=>document.querySelector('#sagun-nativeVillage').compareDocumentPosition(document.querySelector('#sagun-district'))&Node.DOCUMENT_POSITION_FOLLOWING)).toBeTruthy();
-  await page.locator('#sagun-nativeVillage').selectOption('Pithampur');await expect(page.locator('#sagun-area')).toHaveValue('Pithampur');await expect(page.locator('#sagun-district')).toHaveValue('Dhar');await expect(page.locator('#sagun-pincode')).toHaveValue('454775');
-  await page.locator('#sagun-nativeVillage').selectOption('Indore');await expect(page.locator('#sagun-district')).toHaveValue('Indore');await expect(page.locator('#sagun-area')).toHaveValue('Vijay Nagar');await page.locator('#sagun-area').fill('Scheme 54');await expect(page.locator('#sagun-area')).toHaveValue('Scheme 54');await page.locator('#sagun-nativeVillage').selectOption('अघावन (टेमला)');await expect(page.locator('#sagun-nativeVillage')).toHaveValue('अघावन (टेमला)');await expect(page.locator('#sagun-area')).toHaveCount(0);await expect(page.locator('#sagun-district')).toHaveValue('Khargone');
+  await pickVillage(page,'Pithampur');await expect(page.locator('#sagun-area')).toHaveValue('Pithampur');await expect(page.locator('#sagun-district')).toHaveValue('Dhar');await expect(page.locator('#sagun-pincode')).toHaveValue('454775');
+  await pickVillage(page,'Indore');await expect(page.locator('#sagun-district')).toHaveValue('Indore');await expect(page.locator('#sagun-area')).toHaveValue('Vijay Nagar');await page.locator('#sagun-area').fill('Scheme 54');await expect(page.locator('#sagun-area')).toHaveValue('Scheme 54');await pickVillage(page,'अघावन (टेमला)');await expect(page.locator('#sagun-nativeVillage')).toHaveValue(hi?'अघावन (टेमला)':'Aghawan (Temla)');await expect(page.locator('#sagun-area')).toHaveCount(0);await expect(page.locator('#sagun-district')).toHaveValue('Khargone');
   await page.getByRole('group').getByRole('button',{name:hi?'परिचय का पूर्वावलोकन':'Preview Profile',exact:true}).click();await expect(page.getByText('TEST CANDIDATE',{exact:true})).toBeVisible();
   await page.getByRole('button',{name:hi?'स्वीकृति के लिए जमा करें':'Submit for Approval',exact:true}).click();await expect.poll(()=>submissions).toBe(1);await expect(page.getByRole('alert')).toContainText(hi?'जन्म तिथि':'Date of Birth');await expect(page.locator('#sagun-dob')).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
@@ -82,7 +86,7 @@ test('direct Bride route filters family members, fixes category and pre-fills th
  await mockApi(page,{'GET /auth/me':MEMBER,'GET /sagun/schema':schema,'GET /sagun/me':empty(),'GET /sagun/profiles':{records:[],hasMore:false}});let saved;
  await page.route('**/api/v1/sagun/eligible-members',route=>route.fulfill({json:family}));await page.route('**/api/v1/sagun/eligible-members/member-daughter',route=>route.fulfill({json:prefill}));
  await page.route('**/api/v1/sagun/profiles',async route=>{saved=route.request().postDataJSON();return route.fulfill({json:{id:'bride-draft',reference:'SAGUN-BRIDE',data:saved.data,status:'DRAFT',files:[]}});});
- await page.goto('/sagun?category=bride');await expect(page.getByRole('heading',{name:'Register Matrimonial Profile: Bride',level:1})).toBeVisible();await expect(page.getByText('Requirements, privacy and official guidance')).toHaveCount(0);await expect(page.getByRole('button',{name:'Browse Profiles',exact:true})).toHaveCount(0);await expect(page.locator('#sagun-member-member-daughter')).toBeVisible();await expect(page.locator('#sagun-member-member-son')).toHaveCount(0);await page.locator('#sagun-member-member-daughter').check();await page.getByRole('button',{name:'Apply for Sagun',exact:true}).click();
+ await page.goto('/sagun?category=bride');await expect(page.getByRole('heading',{name:'Register Matrimonial Profile: Bride',level:1})).toBeVisible();await expect(page.getByText('Requirements, privacy and official guidance')).toHaveCount(0);await expect(page.getByRole('button',{name:'Browse Profiles',exact:true})).toHaveCount(0);await expect(page.locator('#sagun-member-member-daughter')).toBeVisible();await expect(page.locator('#sagun-member-member-son')).toHaveCount(0);await page.locator('#sagun-member-member-daughter').check();await page.getByRole('button',{name:'Apply for Shagun Bandhan',exact:true}).click();
  await expect(page.locator('#sagun-candidateType')).toHaveValue('BRIDE');await expect(page.locator('#sagun-candidateType')).toBeDisabled();await expect(page.locator('#sagun-dob')).toBeDisabled();await expect(page.locator('#sagun-fullName')).toHaveAttribute('autocomplete','name');await expect(page.locator('#sagun-dob')).toHaveAttribute('autocomplete','bday');await page.getByRole('button',{name:'Save Draft',exact:true}).click();expect(saved.category).toBe('BRIDE');expect(saved.data.candidateType).toBe('BRIDE');expect(saved.data.dob).toBe('2008-11-10');await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 test('public visitors see only the selector, then the selected form; family rule appears on submit',async({page})=>{
@@ -90,9 +94,9 @@ test('public visitors see only the selector, then the selected form; family rule
  await page.route('**/api/v1/sagun/profiles',route=>route.fulfill({status:403,json:{error:'SAGUN_MEMBER_REQUIRED'}}));
  await page.goto('/sagun');await expect(page.getByRole('radio')).toHaveCount(2);await expect(page.locator('#search-name')).toHaveCount(0);
  await page.goto('/sagun?category=groom');await expect(page.getByRole('heading',{name:'Register Matrimonial Profile: Groom',level:1})).toBeVisible();
- await expect(page.getByText('Requirements, privacy and official guidance')).toHaveCount(0);await expect(page.getByRole('heading',{name:'Sagun Registration',exact:true})).toHaveCount(0);
- await expect(page.locator('#sagun-fullName')).toBeVisible();await expect(page.getByText('Family registration on the NPS Indore portal is mandatory to submit a Sagun application. Please register your family first.')).toHaveCount(0);
- await page.getByRole('button',{name:'Submit for Approval',exact:true}).click();await expect(page.getByText('Family registration on the NPS Indore portal is mandatory to submit a Sagun application. Please register your family first.')).toBeVisible();
+ await expect(page.getByText('Requirements, privacy and official guidance')).toHaveCount(0);await expect(page.getByRole('heading',{name:'Shagun Bandhan Registration',exact:true})).toHaveCount(0);
+ await expect(page.locator('#sagun-fullName')).toBeVisible();await expect(page.getByText('Shagun Bandhan Registration is available only to registered NPS family members. Please complete your Family Registration first. You will be able to submit the Shagun Bandhan form after becoming an approved family member.')).toHaveCount(0);
+ await page.getByRole('button',{name:'Submit for Approval',exact:true}).click();await expect(page.getByText('Shagun Bandhan Registration is available only to registered NPS family members. Please complete your Family Registration first. You will be able to submit the Shagun Bandhan form after becoming an approved family member.')).toBeVisible();
  await expect(page.locator('#search-name')).toHaveCount(0);
 });
 test('category form keeps the website shell and offers village/city choices for every district',async({page})=>{
@@ -100,10 +104,13 @@ test('category form keeps the website shell and offers village/city choices for 
  await page.setViewportSize({width:390,height:844});await page.goto('/sagun?category=bride');
  await expect(page.locator('header')).toBeVisible();await expect(page.locator('footer')).toBeVisible();
  await page.getByRole('button',{name:/^1\./}).click();await expect(page.locator('#sagun-district')).toHaveValue('Khargone');
- await expect(page.locator('#sagun-nativeVillage')).toHaveJSProperty('tagName','SELECT');
- await expect(page.locator('#sagun-nativeVillage')).toHaveAccessibleName(/^Village \*$/);
- await expect(page.locator('#sagun-nativeVillage option')).toHaveCount(65);
- await page.locator('#sagun-nativeVillage').selectOption('अघावन (टेमला)');await expect(page.locator('#sagun-nativeVillage')).toHaveValue('अघावन (टेमला)');
+ const village=page.locator('#sagun-nativeVillage');
+ await expect(village).toHaveJSProperty('tagName','INPUT');await expect(village).toHaveAttribute('role','combobox');
+ await expect(village).toHaveAccessibleName(/^Village \*$/);
+ await village.click();await expect(page.getByRole('listbox',{name:/Village/}).getByRole('option')).toHaveCount(VILLAGE_CHOICES);await village.press('Escape');
+ await pickVillage(page,'अघावन (टेमला)');await expect(village).toHaveValue('Aghawan (Temla)');
+ // A village that isn't listed can be typed and is kept as typed.
+ await pickVillage(page,'Navgaon Test');await expect(village).toHaveValue('Navgaon Test');
 });
 test('admin approval and protected field configuration use real API actions',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('pss_lang','en'));const state={profiles:[{id:'profile-1',reference:'SAGUN-TEST',displayName:'Test Candidate',userId:MEMBER.id,data:{fullName:'Test Candidate'},files:[],status:'SUBMITTED',visibility:'PRIVATE'}],audits:[]};
@@ -115,10 +122,10 @@ test('admin approval and protected field configuration use real API actions',asy
  await page.locator('#config-college-required').check();await page.getByRole('button',{name:'Save Field Configuration',exact:true}).click();await expect.poll(()=>settings?.overrides?.college?.required).toBe(true);
 });
 
-test('admin can switch into administration on the common Sagun page',async({page})=>{
+test('admin can switch into administration on the common Shagun page',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('pss_lang','en'));
  await mockApi(page,{'GET /auth/me':ADMIN,'GET /sagun/schema':schema,'GET /sagun/me':empty(),'GET /sagun/profiles':{records:[],hasMore:false},'GET /sagun/admin':{profiles:[],audits:[]}});
- await page.goto('/sagun/workspace');await page.getByRole('button',{name:'Manage Sagun here',exact:true}).click();await expect(page.getByRole('button',{name:'Configure Fields',exact:true})).toBeVisible();await expect(page).toHaveURL(/\/sagun\/workspace$/);await page.getByRole('button',{name:'Member workspace',exact:true}).click();await expect(page.getByRole('button',{name:'My Profiles',exact:true})).toBeVisible();
+ await page.goto('/sagun/workspace');await page.getByRole('button',{name:'Manage Shagun Bandhan here',exact:true}).click();await expect(page.getByRole('button',{name:'Configure Fields',exact:true})).toBeVisible();await expect(page).toHaveURL(/\/sagun\/workspace$/);await page.getByRole('button',{name:'Member workspace',exact:true}).click();await expect(page.getByRole('button',{name:'My Profiles',exact:true})).toBeVisible();
 });
 for(const lang of ['en','hi'])test(`${lang}: consent withdrawal is confirmed and removed ceremony details stay hidden`,async({page})=>{
  const hi=lang==='hi';await page.addInitScript(value=>localStorage.setItem('pss_lang',value),lang);
@@ -136,9 +143,9 @@ for(const lang of ['en','hi'])test(`${lang}: members without family registration
  await page.route('**/api/v1/sagun/profiles',route=>route.fulfill({status:403,json:{error:'SAGUN_MEMBER_REQUIRED'}}));
  await page.goto('/sagun?category=groom');
  await expect(page.locator('#sagun-fullName')).toBeVisible();
- await expect(page.getByText(hi?'सगुन पंजीकरण हेतु आपका परिवार संगठन के पोर्टल पर पंजीकृत होना अनिवार्य है। कृपया पहले परिवार पंजीकरण करवाएं।':'Family registration on the NPS Indore portal is mandatory to submit a Sagun application. Please register your family first.')).toHaveCount(0);
+ await expect(page.getByText(hi?'शगुन बंधन पंजीकरण केवल निमाड़ पाटीदार संगठन के पंजीकृत परिवार सदस्यों के लिए उपलब्ध है। कृपया पहले परिवार पंजीकरण करवाएं। परिवार सदस्य बनने के बाद ही आप शगुन बंधन फॉर्म जमा कर सकते हैं।':'Shagun Bandhan Registration is available only to registered NPS family members. Please complete your Family Registration first. You will be able to submit the Shagun Bandhan form after becoming an approved family member.')).toHaveCount(0);
  await page.getByRole('button',{name:hi?'स्वीकृति के लिए जमा करें':'Submit for Approval',exact:true}).click();
- await expect(page.getByText(hi?'सगुन पंजीकरण हेतु आपका परिवार संगठन के पोर्टल पर पंजीकृत होना अनिवार्य है। कृपया पहले परिवार पंजीकरण करवाएं।':'Family registration on the NPS Indore portal is mandatory to submit a Sagun application. Please register your family first.')).toBeVisible();
+ await expect(page.getByText(hi?'शगुन बंधन पंजीकरण केवल निमाड़ पाटीदार संगठन के पंजीकृत परिवार सदस्यों के लिए उपलब्ध है। कृपया पहले परिवार पंजीकरण करवाएं। परिवार सदस्य बनने के बाद ही आप शगुन बंधन फॉर्म जमा कर सकते हैं।':'Shagun Bandhan Registration is available only to registered NPS family members. Please complete your Family Registration first. You will be able to submit the Shagun Bandhan form after becoming an approved family member.')).toBeVisible();
 });
 test('member with an existing application sees it instead of a second registration',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('pss_lang','hi'));
@@ -150,7 +157,7 @@ test('submitting shows the confirmation screen',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('pss_lang','en'));
  await mockApi(page,{'GET /auth/me':MEMBER,'GET /sagun/schema':schema,'GET /sagun/me':empty(),'GET /sagun/profiles':{records:[],hasMore:false},'GET /sagun/eligible-members':FAMILY,'GET /sagun/eligible-members/member-son':PREFILL});
  let body;await page.route('**/api/v1/sagun/profiles',route=>{body=route.request().postDataJSON();return route.fulfill({json:{id:'p1',reference:'SAGUN-OK',status:'SUBMITTED',data:body.data,memberId:'member-son',files:[]}});});
- await page.goto('/sagun?category=groom');await page.locator('#sagun-member-member-son').check();await page.getByRole('button',{name:'Apply for Sagun',exact:true}).click();
+ await page.goto('/sagun?category=groom');await page.locator('#sagun-member-member-son').check();await page.getByRole('button',{name:'Apply for Shagun Bandhan',exact:true}).click();
  await page.getByRole('button',{name:'Submit for Approval',exact:true}).click();
  await expect(page.getByRole('heading',{name:/Application submitted/})).toBeVisible();await expect(page.getByText(/SAGUN-OK/)).toBeVisible();expect(body.memberId).toBe('member-son');expect(body.category).toBe('GROOM');expect(body.data.candidateType).toBe('GROOM');expect(body.action).toBe('SUBMIT');
 });
@@ -167,3 +174,51 @@ test('admin dashboard shows statistics, filters by status and exports',async({pa
  await page.locator('#sagun-remarks-p1').fill('Photo unclear');await page.getByRole('button',{name:'Reject',exact:true}).click();await expect.poll(()=>review?.status).toBe('REJECTED');expect(review.notes).toBe('Photo unclear');
  const download=page.waitForEvent('download');await page.getByRole('button',{name:'Export to Excel',exact:true}).click();expect((await download).suggestedFilename()).toMatch(/sagun-applications-.*\.xlsx$/);
 });
+
+test('upload control: wrong type and over 10 MB are refused next to the field; a saved photo and kundli show name, type and size', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 }); await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  await mockApi(page, { 'GET /auth/me': MEMBER, 'GET /sagun/schema': schema }); const own = empty(); const uploads = [];
+  await page.route('**/api/v1/sagun/me', (route) => route.fulfill({ json: own }));
+  await page.route('**/api/v1/sagun/profiles?**', (route) => route.fulfill({ json: { records: [], hasMore: false } }));
+  const save = (route) => { const body = route.request().postDataJSON(); const result = { id: 'profile-1', reference: 'SAGUN-TEST', data: body.data, status: 'DRAFT', visibility: 'PRIVATE', files: [] }; own.profiles = [result]; return route.fulfill({ json: result }); };
+  await page.route('**/api/v1/sagun/profiles', save); await page.route('**/api/v1/sagun/profiles/profile-1', save);
+  await page.route('**/api/v1/sagun/profiles/profile-1/files/*', (route) => { const kind = route.request().url().split('/').pop(); uploads.push(kind); return route.fulfill({ json: kind === 'PHOTO' ? { id: 'photo-1', kind, mime: 'image/png', size: 245760 } : { id: 'kundli-1', kind, mime: 'application/pdf', size: 1258291 } }); });
+  await page.route('**/api/v1/sagun/files/photo-1', (route) => route.fulfill({ contentType: 'image/png', body: png }));
+  await page.route('**/api/v1/sagun/eligible-members', (route) => route.fulfill({ json: FAMILY }));
+  await page.route('**/api/v1/sagun/eligible-members/member-son', (route) => route.fulfill({ json: PREFILL }));
+  await page.goto('/sagun?category=groom'); await page.locator('#sagun-member-member-son').check(); await page.getByRole('button', { name: 'Apply for Shagun Bandhan', exact: true }).click();
+  await page.locator('#sagun-upload-consent').check();
+  const photo = page.locator('#sagun-photoFileId');
+  await photo.setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello') });
+  await expect(page.locator('#sagun-photoFileId-error')).toContainText('JPG, JPEG, PNG or WebP');
+  await photo.setInputFiles({ name: 'huge.jpg', mimeType: 'image/jpeg', buffer: Buffer.alloc(10 * 1024 * 1024 + 1) });
+  await expect(page.locator('#sagun-photoFileId-error')).toContainText('10 MB');
+  expect(uploads).toEqual([]);
+  await photo.setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: png });
+  await expect(page.getByText('Uploaded and saved · me.png · Image · PNG · 240 KB')).toBeVisible();
+  await expect(page.getByText('Replace file').first()).toBeVisible();
+  await expect(page.locator('label[for=sagun-kundliFileId]').first()).toHaveText('Horoscope / Kundli (Optional)');
+  await page.locator('#sagun-kundliFileId').setInputFiles({ name: 'kundli.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 test') });
+  await expect(page.getByText('Uploaded and saved · kundli.pdf · PDF document · 1.2 MB')).toBeVisible();
+  expect(uploads).toEqual(['PHOTO', 'KUNDLI']);
+});
+
+for (const [who, me] of [['visitor', NOT_LOGGED_IN], ['account without an approved family', MEMBER]]) {
+  test(`${who}: choosing a photo or pressing Submit shows the family-member popup (Hindi) and sends nothing`, async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('pss_lang', 'hi'));
+    const calls = await mockApi(page, { 'GET /auth/me': me, 'GET /sagun/schema': schema });
+    await page.route('**/api/v1/sagun/me', (route) => route.fulfill({ status: 403, json: { error: 'SAGUN_MEMBER_REQUIRED' } }));
+    await page.goto('/sagun?category=groom');
+    await page.locator('#sagun-photoFileId').setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: png });
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toContainText('परिवार सदस्य पंजीकरण आवश्यक');
+    await expect(dialog).toContainText('शगुन बंधन पंजीकरण केवल');
+    await expect(dialog.getByRole('link', { name: 'परिवार पंजीकरण' })).toHaveAttribute('href', '/register');
+    await expect(dialog.getByRole('link', { name: 'सदस्य लॉगिन' })).toHaveCount(me === NOT_LOGGED_IN ? 1 : 0);
+    await dialog.getByRole('button', { name: 'बंद करें' }).first().click();
+    await expect(dialog).toHaveCount(0);
+    await page.getByRole('button', { name: 'स्वीकृति के लिए जमा करें', exact: true }).click();
+    await expect(page.getByRole('dialog')).toContainText('परिवार सदस्य पंजीकरण आवश्यक');
+    expect(calls.filter((call) => call.key.startsWith('POST /sagun') || call.key.startsWith('PATCH /sagun'))).toEqual([]);
+  });
+}

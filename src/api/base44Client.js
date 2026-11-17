@@ -1,12 +1,28 @@
 import { API } from './endpoints';
 import { API_BASE_URL } from './apiBaseUrl';
+import { getRecaptchaToken } from '../lib/recaptcha';
 
 const localApiBaseUrl = API_BASE_URL;
 
 // The session is an httpOnly cookie set by the API on login; `credentials: 'include'`
 // sends it. The token is never stored where page scripts could read it.
+// A request that never reached the API (offline, DNS, server down) fails with a different message in every browser
+// ("Failed to fetch" in Chrome, "NetworkError…" in Firefox, "Load failed" in Safari); turn it into one clear message.
+export const NETWORK_ERROR = 'Could not reach the server. Check your internet connection and try again. / सर्वर से संपर्क नहीं हो सका। इंटरनेट कनेक्शन जाँचें और फिर कोशिश करें।';
+export const apiFetch = async (url, options) => {
+  try {
+    return await fetch(url, options);
+  } catch (cause) {
+    if (cause?.name === 'AbortError') throw cause;
+    const error = new Error(NETWORK_ERROR);
+    error.network = true;
+    error.cause = cause;
+    throw error;
+  }
+};
+
 const request = async (path, options = {}) => {
-  const response = await fetch(`${localApiBaseUrl}${path}`, {
+  const response = await apiFetch(`${localApiBaseUrl}${path}`, {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
@@ -40,10 +56,19 @@ const redirectToLogin = (path) => {
 // JSON-encodes the body; a browser-built FormData needs its own
 // automatically-generated multipart Content-Type (with boundary), so this
 // deliberately does not set one.
+// Same limits as the API's POST /uploads (5 MB; JPEG, PNG, WebP, GIF), checked before sending the file so a
+// too-large or wrong file fails at once with a clear message instead of after a long upload.
+export const UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
+const UPLOAD_TYPES = ['image/jpeg', 'image/jpg', 'image/pjpeg', 'image/png', 'image/x-png', 'image/webp', 'image/gif'];
 const uploadPublicFile = async ({ file }) => {
+  if (!file) throw new Error('Choose a photo first. / पहले फोटो चुनें।');
+  if (file.type && !UPLOAD_TYPES.includes(file.type.toLowerCase())) throw new Error('Only JPG, PNG, WebP or GIF images can be uploaded. / केवल JPG, PNG, WebP या GIF फोटो अपलोड करें।');
+  if (file.size > UPLOAD_MAX_BYTES) throw new Error('The photo is larger than 5 MB. Please choose a smaller one. / फोटो 5 MB से बड़ी है, कृपया छोटी फोटो चुनें।');
   const formData = new FormData();
+  // Required by the API for uploads without a login (registration forms); ignored for logged-in members.
+  formData.append('recaptchaToken', await getRecaptchaToken('upload'));
   formData.append('file', file);
-  const response = await fetch(`${localApiBaseUrl}${API.uploads}`, {
+  const response = await apiFetch(`${localApiBaseUrl}${API.uploads}`, {
     method: 'POST',
     credentials: 'include',
     body: formData,
@@ -53,6 +78,22 @@ const uploadPublicFile = async ({ file }) => {
     throw new Error(body.error || `Upload failed: ${response.status}`);
   }
   return response.json();
+};
+
+// The header chip, the page and its widgets all ask for "my family" when a portal page opens.
+// Calls made while one is in flight (or within a second of it) share that one request; anything
+// later fetches fresh, so changes to the family show up as before.
+let myFamilyRequest = null;
+let myFamilyAt = 0;
+const sharedMyFamily = () => {
+  if (myFamilyRequest && Date.now() - myFamilyAt < 1000) return myFamilyRequest;
+  myFamilyAt = Date.now();
+  myFamilyRequest = request(API.me.family).catch((error) => {
+    myFamilyRequest = null;
+    throw error;
+  });
+  myFamilyRequest.then(() => { myFamilyAt = Date.now(); }, () => {});
+  return myFamilyRequest;
 };
 
 const PAGE_SIZE = 500; // the backend's maximum limit
@@ -89,9 +130,12 @@ const createLocalEntities = () => new Proxy({}, {
 });
 
 const createLocalAuth = () => ({
-  loginViaEmailPassword: async (email, password) => {
-    // The API sets the session cookie.
-    return request(API.auth.sessions, { method: 'POST', body: JSON.stringify({ email, password }) });
+  // portal: 'FAMILY' (Family Member Login) or 'STUDENT' (Student Login). The server checks it against the account's
+  // own registration records and refuses the other portal.
+  loginViaEmailPassword: async (email, password, portal = 'FAMILY') => {
+    // The API sets the session cookie. Public auth forms send a reCAPTCHA v3 token (the server verifies it).
+    const recaptchaToken = await getRecaptchaToken('login');
+    return request(API.auth.sessions, { method: 'POST', body: JSON.stringify({ email, password, portal, recaptchaToken }) });
   },
   register: (emailOrData, password) => {
     const data = typeof emailOrData === 'object' ? emailOrData : { email: emailOrData, password };
@@ -101,17 +145,27 @@ const createLocalAuth = () => ({
     // The API sets the session cookie.
     return request(API.auth.otpVerifications, { method: 'POST', body: JSON.stringify(data) });
   },
-  resendOtp: (email) => request(API.auth.otps, { method: 'POST', body: JSON.stringify({ email }) }),
+  resendOtp: async (email) => request(API.auth.otps, { method: 'POST', body: JSON.stringify({ email, recaptchaToken: await getRecaptchaToken('resend_code') }) }),
   // Mobile OTP (WhatsApp → SMS → email fallback): { mobile, purpose: 'REGISTER' | 'RESET', email?, recaptchaToken? }.
   requestMobileOtp: (data) => request(API.auth.mobileOtps, { method: 'POST', body: JSON.stringify(data) }),
   // → { verificationToken } for registerWithMobile / resetPassword({ phone, verificationToken, newPassword }).
   verifyMobileOtp: (data) => request(API.auth.mobileOtpVerifications, { method: 'POST', body: JSON.stringify(data) }),
   // The API sets the session cookie.
   registerWithMobile: (data) => request(API.auth.mobileRegistrations, { method: 'POST', body: JSON.stringify(data) }),
-  resetPasswordRequest: (email) => request(API.auth.passwordResets, { method: 'POST', body: JSON.stringify({ email }) }),
+  resetPasswordRequest: async (email) => request(API.auth.passwordResets, { method: 'POST', body: JSON.stringify({ email, recaptchaToken: await getRecaptchaToken('password_reset') }) }),
   resetPassword: (data) => request(API.auth.passwordResetConfirmations, { method: 'POST', body: JSON.stringify(data) }),
   changePassword: (data) => request(API.auth.password, { method: 'PUT', body: JSON.stringify(data) }),
   me: () => request(API.auth.me),
+  // The logged-in user or null, without a 401 in the browser console for visitors. An API that doesn't have this
+  // route yet (404) falls back to /auth/me, where a 401 means "not logged in".
+  currentSession: async () => {
+    try {
+      return (await request(API.auth.currentSession)).user || null;
+    } catch (error) {
+      if (error.status !== 404 && error.status !== 405) throw error;
+      try { return await request(API.auth.me); } catch (fallback) { if (fallback.status === 401 || fallback.status === 403) return null; throw fallback; }
+    }
+  },
   // Own profile: { fullName, phone, photoUrl } (photoUrl from UploadPublicFile).
   updateMe: (data) => request(API.auth.me, { method: 'PATCH', body: JSON.stringify(data) }),
   logout: async () => {
@@ -174,8 +228,8 @@ export const base44 = {
     configure: overrides => request(`${API.sagun}/admin/schema`, { method: 'PATCH', body: JSON.stringify({ overrides }) }),
     inquire: (id, message, consent) => request(`${API.sagun}/profiles/${encodeURIComponent(id)}/inquiries`, { method: 'POST', body: JSON.stringify({ message, consent }) }),
     inquiryAction: (id, action, shareSagun) => request(`${API.sagun}/inquiries/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ action, shareSagun }) }),
-    upload: async (id, kind, file, consent) => { const body = new FormData(); body.append('file', file); body.append('consent', String(consent)); const response = await fetch(`${localApiBaseUrl}${API.sagun}/profiles/${encodeURIComponent(id)}/files/${encodeURIComponent(kind)}`, { method: 'POST', credentials: 'include', body }); if (!response.ok) throw new Error((await response.json()).error || 'SAGUN_FILE'); return response.json(); },
-    file: async id => { const response = await fetch(`${localApiBaseUrl}${API.sagun}/files/${encodeURIComponent(id)}`, { credentials: 'include' }); if (!response.ok) throw new Error('SAGUN_NOT_FOUND'); return response.blob(); },
+    upload: async (id, kind, file, consent) => { const body = new FormData(); body.append('file', file); body.append('consent', String(consent)); const response = await apiFetch(`${localApiBaseUrl}${API.sagun}/profiles/${encodeURIComponent(id)}/files/${encodeURIComponent(kind)}`, { method: 'POST', credentials: 'include', body }); if (!response.ok) throw new Error((await response.json()).error || 'SAGUN_FILE'); return response.json(); },
+    file: async id => { const response = await apiFetch(`${localApiBaseUrl}${API.sagun}/files/${encodeURIComponent(id)}`, { credentials: 'include' }); if (!response.ok) throw new Error('SAGUN_NOT_FOUND'); return response.blob(); },
     deleteFile: id => request(`${API.sagun}/files/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   },
   eventFinance: {
@@ -195,6 +249,8 @@ export const base44 = {
     saveResponsibility: (eventId, data, id) => request(`${API.eventFinance}/admin/events/${encodeURIComponent(eventId)}/responsibilities${id ? '/' + encodeURIComponent(id) : ''}`, { method: id ? 'PATCH' : 'POST', body: JSON.stringify(data) }),
     members: q => request(`${API.eventFinance}/members?q=${encodeURIComponent(q)}`),
     importRoster: (eventId, data) => request(`${API.eventFinance}/admin/events/${encodeURIComponent(eventId)}/roster/import`, { method: 'POST', body: JSON.stringify(data) }),
+    // Who created / changed which finance record and when (admins); entityId narrows it to one record.
+    history: (eventId, entityId) => request(`${API.eventFinance}/admin/events/${encodeURIComponent(eventId)}/history${entityId ? `?entityId=${encodeURIComponent(entityId)}` : ''}`),
   },
   sehat: {
     public: () => request(`${API.sehat}/public`),
@@ -229,7 +285,7 @@ export const base44 = {
     uploadScreenshot: async (file) => {
       const body = new FormData();
       body.append('file', file);
-      const response = await fetch(`${localApiBaseUrl}${API.me.paymentScreenshots}`, { method: 'POST', credentials: 'include', body });
+      const response = await apiFetch(`${localApiBaseUrl}${API.me.paymentScreenshots}`, { method: 'POST', credentials: 'include', body });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw Object.assign(new Error(result.error || 'Upload failed'), { status: response.status });
       return result;
@@ -237,7 +293,7 @@ export const base44 = {
     payments: (status = '', limit = 200) => request(`${API.registrationPayments}?${new URLSearchParams({ limit: String(limit), ...(status ? { status } : {}) })}`),
     reviewPayment: (id, body) => request(API.registrationPaymentReview(id), { method: 'POST', body: JSON.stringify(body) }),
     screenshot: async (id) => {
-      const response = await fetch(`${localApiBaseUrl}${API.registrationPaymentScreenshot(id)}`, { credentials: 'include' });
+      const response = await apiFetch(`${localApiBaseUrl}${API.registrationPaymentScreenshot(id)}`, { credentials: 'include' });
       if (!response.ok) throw Object.assign(new Error('Record not found'), { status: response.status });
       return response.blob();
     },
@@ -285,7 +341,7 @@ export const base44 = {
   // Narrow, purpose-built endpoints that replace fetching a whole sensitive
   // table client-side just to filter/search it.
   me: {
-    family: () => request(API.me.family),
+    family: () => sharedMyFamily(),
     feedback: () => request(API.me.feedback),
     // The family's event registrations, cancelled ones included.
     eventRegistrations: () => request(API.me.eventRegistrations),

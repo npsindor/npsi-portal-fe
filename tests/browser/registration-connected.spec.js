@@ -1,13 +1,14 @@
 import { expect, test } from '@playwright/test';
 import { MEMBER, mockApi, NOT_LOGGED_IN } from './mock-api.js';
 
+// The app's date rules use India's calendar date (IST), so the expectations do too.
+const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
 const isoYearsAgo = (years, days = 0) => {
-  const date = new Date();
+  const date = new Date(`${today()}T00:00:00Z`);
   date.setUTCFullYear(date.getUTCFullYear() - years);
   date.setUTCDate(date.getUTCDate() + days);
   return date.toISOString().slice(0, 10);
 };
-const today = () => new Date().toISOString().slice(0, 10);
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
@@ -88,7 +89,7 @@ test('an approved student is offered "Become a family member", which opens the â
   await expect(page.locator('#reg-village')).toHaveValue('Temla');
 });
 
-test('my family: an eligible member can be shown in Sagun; the form opens for that member', async ({ page }) => {
+test('my family: an eligible member can be shown in Shagun; the form opens for that member', async ({ page }) => {
   const family = { familyId: 'NPSI-FAM-000001', familyName: 'Patidar', headName: 'Ram Patidar', status: 'ACTIVE' };
   const members = [
     { id: 'm-head', familyId: family.familyId, name: 'Ram Patidar', relationship: 'Head', gender: 'Male', dob: '1975-01-01', status: 'ACTIVE' },
@@ -109,10 +110,10 @@ test('my family: an eligible member can be shown in Sagun; the form opens for th
     },
   });
   await page.goto('/portal/family');
-  await expect(page.getByLabel('Show in Sagun (matrimonial)')).toHaveCount(2);
+  await expect(page.getByLabel('Show in Shagun Bandhan (matrimonial)')).toHaveCount(2);
   const head = page.locator('#sagun-m-head');
   await expect(head).toBeChecked();
-  await expect(page.getByText('Visible in Sagun')).toBeVisible();
+  await expect(page.getByText('Visible in Shagun Bandhan')).toBeVisible();
   await expect(page.locator('#sagun-m-kid')).toHaveCount(0);
   await page.locator('#sagun-m-son').click();
   await expect(page).toHaveURL(/\/sagun\?category=groom&member=m-son$/);

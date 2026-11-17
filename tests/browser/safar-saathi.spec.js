@@ -67,7 +67,7 @@ test('unapproved membership and backend errors are localized, never saved as dem
   await page.addInitScript(() => localStorage.setItem('pss_lang', 'hi'));
   await mockApi(page, { 'GET /auth/me': MEMBER, 'GET /safar-saathi/capabilities': { email: false, sms: false, inApp: true }, 'GET /safar-saathi/me': { status: 403, body: { error: 'SAFAR_MEMBERSHIP_REQUIRED' } } });
   await page.goto('/transportation');
-  await expect(page.getByRole('alert')).toContainText('सक्रिय और स्वीकृत सामुदायिक सदस्यता आवश्यक है');
+  await expect(page.getByRole('alert')).toContainText('परिवहन सुविधा के लिए आवेदन करने हेतु कृपया पहले');
   await expect(page.locator('#safar-phone')).toHaveCount(0);
   expect(await page.evaluate(() => Object.keys(sessionStorage).some(key => key.includes('safar')))).toBe(false);
 });

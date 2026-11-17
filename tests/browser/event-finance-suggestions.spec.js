@@ -2,6 +2,9 @@ import { expect, test } from '@playwright/test';
 import * as XLSX from 'xlsx';
 import { ADMIN, mockApi } from './mock-api.js';
 
+// Event dates relative to today, so upcoming events stay upcoming whatever day the tests run.
+const daysAhead = (days) => new Date(Date.now() + days * 86400000).toISOString().slice(0, 10);
+
 const workbookFile = () => {
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([
@@ -21,10 +24,10 @@ const workbookFile = () => {
 test('finance spreadsheet suggestions stay local and prefill matching villages', async ({ page }) => {
   const calls = await mockApi(page, {
     'GET /auth/me': ADMIN,
-    'GET /event-finance': [{ id: 'event-1', title: 'Garba Night', date: '2026-12-01', status: 'PUBLISHED', venue: 'Hall' }],
+    'GET /event-finance': [{ id: 'event-1', title: 'Garba Night', date: daysAhead(14), status: 'PUBLISHED', venue: 'Hall' }],
     'GET /event-finance/admin/categories': [{ id: 'category-1', name: 'Decoration', active: true, sortOrder: 0 }],
     'GET /event-finance/event-1': {
-      event: { id: 'event-1', title: 'Garba Night', date: '2026-12-01', status: 'PUBLISHED', venue: 'Hall' },
+      event: { id: 'event-1', title: 'Garba Night', date: daysAhead(14), status: 'PUBLISHED', venue: 'Hall' },
       summary: { totalCollection: 0, totalExpenses: 0, remainingBalance: 0, pendingContributions: 0, pendingExpenses: 0 },
       contributions: [],
       expenses: [],
@@ -46,7 +49,7 @@ test('finance spreadsheet suggestions stay local and prefill matching villages',
   await page.getByRole('button', { name: 'Contributions', exact: true }).click();
   await expect(page.locator('#finance-contributor-names option')).toHaveCount(2);
   await page.getByLabel('Member name').fill('Smt. Asha Patidar');
-  await expect(page.getByLabel('Village')).toHaveValue('Indore');
+  await expect(page.getByLabel('Village', { exact: true })).toHaveValue('Indore');
   await page.getByRole('button', { name: 'Expenses', exact: true }).click();
   await expect(page.locator('#finance-expense-title-suggestions option')).toHaveCount(2);
   await page.getByLabel('Expense title').fill('Tent');

@@ -28,9 +28,18 @@ const resource = (entity) => `${API_PREFIX}/${ENTITY_RESOURCES[entity] || encode
 
 export const API = {
   sagun: `${API_PREFIX}/sagun`,
+  sagunCards: `${API_PREFIX}/sagun-cards`,
+  sagunBooklets: `${API_PREFIX}/sagun-booklets`,
+  // Become an NPSI Event Member: team sections, public team cards, applications.
+  eventMemberSections: `${API_PREFIX}/event-member-sections`,
+  eventMembers: `${API_PREFIX}/event-members`,
+  eventMemberApplications: `${API_PREFIX}/event-member-applications`,
+  publicFeedback: `${API_PREFIX}/feedback/public`,
   eventFinance: `${API_PREFIX}/event-finance`,
   sehat: `${API_PREFIX}/sehat-saathi`,
   safar: `${API_PREFIX}/safar-saathi`,
+  roomHunting: `${API_PREFIX}/room-hunting`,
+  search: `${API_PREFIX}/search`,
   contactInfo: `${API_PREFIX}/contact-info`,
   uploads: `${API_PREFIX}/uploads`,
   auth: {

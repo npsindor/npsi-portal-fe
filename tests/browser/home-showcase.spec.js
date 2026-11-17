@@ -1,5 +1,9 @@
 import { expect, test } from '@playwright/test';
+import fs from 'node:fs';
 import { mockApi, NOT_LOGGED_IN } from './mock-api.js';
+
+// Every image in public/advertising runs in the ad slider, in name order.
+const ADS = fs.readdirSync(new URL('../../public/advertising/', import.meta.url)).filter((name) => /\.(jpe?g|png|webp|gif)$/i.test(name)).sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
 
 const EVENTS = [{ id: 'e1', status: 'PUBLISHED', title: 'Annual Sammelan', titleHi: 'वार्षिक सम्मेलन', venue: 'Indore', bannerUrl: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="16" height="9"%3E%3Crect width="16" height="9" fill="%23c49a43"/%3E%3C/svg%3E' }];
 
@@ -11,9 +15,9 @@ for (const width of [320, 390, 768, 1024, 1440]) {
     await page.goto('/');
     const showcase = page.locator('#showcase');
     await showcase.scrollIntoViewIfNeeded();
-    await expect(showcase.getByRole('heading', { name: 'Life in our samaj' })).toBeVisible();
+    await expect(showcase.getByRole('heading', { name: 'Featured on our website' })).toBeVisible();
     const text = showcase.getByRole('region', { name: 'Community highlights' });
-    const media = showcase.getByRole('region', { name: 'Community gallery' });
+    const media = showcase.getByRole('region', { name: 'Advertisements' });
     await expect(text).toBeVisible();
     await expect(media).toBeVisible();
     const [textBox, mediaBox] = [await text.boundingBox(), await media.boundingBox()];
@@ -29,27 +33,43 @@ for (const width of [320, 390, 768, 1024, 1440]) {
   });
 }
 
-test('showcase sliders navigate, pause, and the gallery contains image, video, image and text slides', async ({ page }) => {
+test('showcase: the ad slider shows every image in public/advertising, with the Ad label; the text slider still works', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
   await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN, 'GET /events': EVENTS });
   await page.goto('/');
   const showcase = page.locator('#showcase');
+  await expect(showcase.getByText('Advertisements & sponsors')).toBeVisible();
   await showcase.getByRole('button', { name: 'Pause slides' }).click();
   const text = showcase.getByRole('region', { name: 'Community highlights' });
   await expect(text.getByRole('heading', { name: 'Unity, cooperation, respect and transparency' })).toBeVisible();
   await text.getByRole('button', { name: 'Next slide' }).click();
   await expect(text.getByRole('heading', { name: 'Support for every student' })).toBeVisible();
-  const media = showcase.getByRole('region', { name: 'Community gallery' });
-  await expect(media.getByRole('heading', { name: 'Nimar Patidar Sangathan, Indore' })).toBeVisible();
+  const media = showcase.getByRole('region', { name: 'Advertisements' });
+  const slides = media.locator('[aria-roledescription="slide"]');
+  await expect(slides).toHaveCount(ADS.length);
+  expect(await slides.locator('img').evaluateAll((imgs) => imgs.map((img) => img.getAttribute('src')))).toEqual(ADS.map((name) => `/advertising/${name}`));
+  await expect(media.getByRole('img', { name: 'Advertisement 1' })).toBeVisible();
+  await expect(media.getByText('Ad', { exact: true }).first()).toBeVisible();
+  // The old built-in slides (logo, Garba video, latest event, join) are gone.
+  await expect(media.locator('video')).toHaveCount(0);
+  await expect(media.getByRole('heading')).toHaveCount(0);
   await media.getByRole('button', { name: 'Go to slide 2' }).click();
-  await expect(media.locator('video')).toBeVisible();
-  await expect(media.getByRole('button', { name: 'Unmute video' })).toBeVisible();
-  await media.getByRole('button', { name: 'Next slide' }).click();
-  await expect(media.getByRole('img', { name: 'Annual Sammelan' })).toBeVisible();
-  await expect(media.getByRole('button', { name: 'Unmute video' })).toHaveCount(0);
-  await media.getByRole('button', { name: 'Next slide' }).click();
-  await expect(media.getByRole('link', { name: 'Join the Sangathan' })).toBeVisible();
+  await expect(media.getByRole('img', { name: 'Advertisement 2' })).toBeVisible();
+  expect(await media.getByRole('img', { name: 'Advertisement 2' }).evaluate((img) => img.complete && img.naturalWidth > 0)).toBe(true);
+});
+
+test('an admin slide that uses a folder ad replaces its plain slide and adds the text and link', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  const linked = slide({ slider: 'MEDIA', mediaType: 'IMAGE', title: 'Patidar Jewellers', mediaUrl: `/advertising/${ADS[0]}`, sponsored: true, linkUrl: '/events', ctaLabel: 'Visit' });
+  await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN, 'GET /home-highlights': [linked] });
+  await page.goto('/');
+  const media = page.locator('#showcase').getByRole('region', { name: 'Advertisements' });
+  await page.locator('#showcase').getByRole('button', { name: 'Pause slides' }).click();
+  await expect(media.locator('[aria-roledescription="slide"]')).toHaveCount(ADS.length);
+  await expect(media.getByRole('img', { name: 'Patidar Jewellers' })).toHaveAttribute('src', `/advertising/${ADS[0]}`);
+  await expect(media.getByRole('link', { name: 'Visit' })).toHaveAttribute('href', '/events');
 });
 
 const slide = (overrides) => ({ id: overrides.title, slider: 'TEXT', mediaType: 'TEXT', sponsored: false, eyebrow: null, eyebrowHi: null, titleHi: null, body: null, bodyHi: null, mediaUrl: null, linkUrl: null, ctaLabel: null, ctaLabelHi: null, startDate: null, endDate: null, sortOrder: 0, active: true, createdAt: '2026-11-01T00:00:00Z', updatedAt: '2026-11-01T00:00:00Z', ...overrides });
@@ -59,7 +79,7 @@ const ADMIN_SLIDES = [
   slide({ slider: 'MEDIA', mediaType: 'VIDEO', title: 'Sammelan highlights', mediaUrl: 'https://youtu.be/dQw4w9WgXcQ' }),
 ];
 
-test('admin-managed slides replace the defaults, in both languages, with ad labels and safe external links', async ({ page }) => {
+test('admin-managed slides come first, before the folder ads, in both languages, with ad labels and safe external links', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.addInitScript(() => { if (!localStorage.getItem('pss_lang')) localStorage.setItem('pss_lang', 'en'); });
   await page.route('https://www.youtube-nocookie.com/**', (route) => route.fulfill({ contentType: 'text/html', body: '<html></html>' }));
@@ -72,9 +92,9 @@ test('admin-managed slides replace the defaults, in both languages, with ad labe
   await expect(text.getByRole('heading', { name: 'Diwali Milan on 20 Nov' })).toBeVisible();
   await expect(text.getByRole('heading', { name: 'Unity, cooperation, respect and transparency' })).toHaveCount(0);
   await expect(text.getByRole('link', { name: 'See details' })).toHaveAttribute('href', '/events');
-  const media = showcase.getByRole('region', { name: 'Community gallery' });
+  const media = showcase.getByRole('region', { name: 'Advertisements' });
   await expect(media.getByRole('img', { name: 'Patidar Jewellers' })).toBeVisible();
-  await expect(media.getByText('Ad', { exact: true })).toBeVisible();
+  await expect(media.getByText('Ad', { exact: true }).first()).toBeVisible();
   const shop = media.getByRole('link', { name: 'Visit shop' });
   await expect(shop).toHaveAttribute('target', '_blank');
   await expect(shop).toHaveAttribute('rel', /sponsored/);

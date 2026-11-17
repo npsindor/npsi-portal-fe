@@ -30,7 +30,7 @@ export const regCopy = {
     fullName: 'Full name',
     createPassword: 'Create password',
     confirmPassword: 'Confirm password',
-    passwordRule: 'At least 6 characters.',
+    passwordRule: 'At least 8 characters.',
     passwordsDiffer: 'The passwords do not match.',
     createAccount: 'Create account',
     creating: 'Creating…',
@@ -209,7 +209,7 @@ export const regCopy = {
     fullName: 'पूरा नाम',
     createPassword: 'पासवर्ड बनाएं',
     confirmPassword: 'पासवर्ड की पुष्टि करें',
-    passwordRule: 'कम से कम 6 अक्षर।',
+    passwordRule: 'कम से कम 8 अक्षर।',
     passwordsDiffer: 'दोनों पासवर्ड एक जैसे नहीं हैं।',
     createAccount: 'खाता बनाएं',
     creating: 'बनाया जा रहा है…',
@@ -358,6 +358,15 @@ export const regCopy = {
 
 // Server errors are English; Hindi users see these translations (unknown messages are shown as they are).
 const serverErrorsHi = {
+  'Your account is registered as an NPS Family Member. Please use Family Member Login to access your account.': 'आपका खाता एनपीएस परिवार सदस्य के रूप में पंजीकृत है। अपने खाते में जाने के लिए परिवार सदस्य लॉगिन का उपयोग करें।',
+  'Your account is registered as an NPS Student. Please use Student Login to access your account.': 'आपका खाता एनपीएस विद्यार्थी के रूप में पंजीकृत है। अपने खाते में जाने के लिए विद्यार्थी लॉगिन का उपयोग करें।',
+  'Administrator accounts sign in through Family Member Login.': 'प्रशासक खाते परिवार सदस्य लॉगिन से ही लॉगिन करते हैं।',
+  'This account is not active. Please contact the NPS Indore office.': 'यह खाता सक्रिय नहीं है। कृपया एनपीएस इंदौर कार्यालय से संपर्क करें।',
+  'Your NPS family membership is suspended. Please contact the NPS Indore office.': 'आपकी एनपीएस परिवार सदस्यता निलंबित है। कृपया एनपीएस इंदौर कार्यालय से संपर्क करें।',
+  'Your NPS family membership is inactive. Please contact the NPS Indore office.': 'आपकी एनपीएस परिवार सदस्यता निष्क्रिय है। कृपया एनपीएस इंदौर कार्यालय से संपर्क करें।',
+  'Your NPS student registration is inactive. Please contact the NPS Indore office.': 'आपका एनपीएस विद्यार्थी पंजीकरण निष्क्रिय है। कृपया एनपीएस इंदौर कार्यालय से संपर्क करें।',
+  "Your account is registered as an NPS Family Member. A student needs their own account: use Student Login with the student's own email or mobile.": 'आपका खाता एनपीएस परिवार सदस्य के रूप में पंजीकृत है। विद्यार्थी का अपना अलग खाता होना चाहिए: विद्यार्थी के अपने ईमेल या मोबाइल से विद्यार्थी लॉगिन करें।',
+  "This email is already the login of an NPS Family Member account. Enter the student's own email so they get a separate Student Login.": 'यह ईमेल पहले से एक एनपीएस परिवार सदस्य खाते का लॉगिन है। विद्यार्थी का अपना ईमेल दें, ताकि उसे अलग विद्यार्थी लॉगिन मिले।',
   'Invalid email/phone or password.': 'ईमेल/मोबाइल या पासवर्ड गलत है।',
   'Please verify your account before logging in.': 'लॉगिन से पहले अपना खाता सत्यापित करें।',
   'Too many requests, please try again later.': 'बहुत अधिक प्रयास हुए। कृपया थोड़ी देर बाद कोशिश करें।',
@@ -372,11 +381,11 @@ const serverErrorsHi = {
   'Too many codes requested for this mobile number. Please try again in an hour.': 'इस मोबाइल पर बहुत अधिक कोड मंगाए गए। एक घंटे बाद कोशिश करें।',
   'The verification code could not be sent. Please try again later.': 'कोड नहीं भेजा जा सका। कृपया बाद में कोशिश करें।',
   'Your mobile verification has expired. Please verify your mobile number again.': 'मोबाइल सत्यापन की अवधि समाप्त हो गई। कृपया दोबारा सत्यापित करें।',
-  'Password must be at least 6 characters.': 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए।',
-  'New password must be at least 6 characters.': 'नया पासवर्ड कम से कम 6 अक्षरों का होना चाहिए।',
+  'Password must be at least 8 characters.': 'पासवर्ड कम से कम 8 अक्षरों का होना चाहिए।',
+  'New password must be at least 8 characters.': 'नया पासवर्ड कम से कम 8 अक्षरों का होना चाहिए।',
   'Current password is incorrect.': 'वर्तमान पासवर्ड गलत है।',
   'This reset link is invalid or expired.': 'यह रीसेट लिंक अमान्य है या उसकी अवधि समाप्त हो गई है।',
-  'A valid reset token and password of at least 6 characters are required.': 'मान्य रीसेट लिंक और कम से कम 6 अक्षरों का पासवर्ड आवश्यक है।',
+  'A valid reset token and password of at least 8 characters are required.': 'मान्य रीसेट लिंक और कम से कम 8 अक्षरों का पासवर्ड आवश्यक है।',
   'reCAPTCHA verification failed. Please try again.': 'सुरक्षा जाँच विफल रही। कृपया दोबारा कोशिश करें।',
   'You already have a family registration application.': 'आपका परिवार पंजीकरण आवेदन पहले से है।',
   'You already have a student registration application.': 'आपका स्टूडेंट पंजीकरण आवेदन पहले से है।',
@@ -398,7 +407,7 @@ export const translateError = (message, lang) => {
   const text = String(message || '');
   if (/429|Too many requests|Too many codes requested|Too many verification attempts/i.test(text))
     return lang === 'hi' ? 'बहुत अधिक प्रयास हुए हैं। सुरक्षा सीमा के कारण थोड़ी प्रतीक्षा करें और फिर कोशिश करें।' : 'Too many attempts were made. Please wait before trying again.';
-  if (/Failed to fetch|NetworkError|ECONNREFUSED|Local API request failed/i.test(text))
+  if (/Failed to fetch|NetworkError|Load failed|Could not reach the server|ECONNREFUSED|Local API request failed/i.test(text))
     return lang === 'hi' ? 'लॉगिन सेवा से संपर्क नहीं हो सका। इंटरनेट कनेक्शन जाँचें और थोड़ी देर बाद फिर कोशिश करें।' : 'The login service could not be reached. Check your connection and try again shortly.';
   return lang === 'hi' ? serverErrorsHi[text] || text : text;
 };

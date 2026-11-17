@@ -6,25 +6,29 @@ const norm = (text) => String(text || "").toLowerCase().replace(/\s+/g, " ").tri
 
 // A text field with a searchable list (WAI-ARIA combobox): pick a listed option or keep typing a value that
 // isn't listed. `options` are { value, en, hi }; the saved value is `value`, the label follows the language.
-export default function CreatableCombobox({ id, label, value, onChange, options, lang, t, required = true, maxLength = 150, autoComplete = "off" }) {
+// `hideLabel` is for forms that render their own <label htmlFor={id}>; `inputClassName` restyles the field to match them.
+export default function CreatableCombobox({ id, label, value, onChange, options, lang, t, required = true, maxLength = 150, autoComplete = "off", hideLabel = false, inputClassName }) {
   const listId = useId();
   const inputRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
+  // The list filters only while the user types; opening it on a saved value (listed or not) shows every option.
+  const [typing, setTyping] = useState(false);
   const labelOf = (option) => (lang === "hi" ? option.hi : option.en) || option.value;
   const selected = options.find((option) => option.value === value);
   const text = selected ? labelOf(selected) : value;
 
   const matches = useMemo(() => {
     const query = norm(text);
-    if (!query || selected) return options;
+    if (!query || selected || !typing) return options;
     return options.filter((option) => [option.value, option.en, option.hi].some((name) => norm(name).includes(query)));
-  }, [options, text, selected]);
+  }, [options, text, selected, typing]);
 
   // Typing the exact name of an option (in either language) selects it; anything else is kept as typed.
   const type = (typed) => {
     const exact = options.find((option) => [option.value, option.en, option.hi].some((name) => norm(name) === norm(typed)));
     onChange(exact ? exact.value : typed);
+    setTyping(true);
     setOpen(true);
     setActive(-1);
   };
@@ -39,9 +43,12 @@ export default function CreatableCombobox({ id, label, value, onChange, options,
       setOpen(true);
       const step = event.key === "ArrowDown" ? 1 : -1;
       setActive((current) => (matches.length ? (current + step + matches.length) % matches.length : -1));
-    } else if (event.key === "Enter" && open && active >= 0 && matches[active]) {
+    } else if (event.key === "Enter" && open) {
+      // Enter takes the highlighted option, or keeps what was typed; either way the list closes (and the form is not
+      // submitted while the list is open).
       event.preventDefault();
-      pick(matches[active]);
+      if (active >= 0 && matches[active]) pick(matches[active]);
+      else setOpen(false);
     } else if (event.key === "Escape") {
       setOpen(false);
     }
@@ -49,10 +56,12 @@ export default function CreatableCombobox({ id, label, value, onChange, options,
 
   return (
     <div className="relative space-y-2">
-      <Label htmlFor={id}>
-        {label}
-        {required ? " *" : ""}
-      </Label>
+      {!hideLabel && (
+        <Label htmlFor={id}>
+          {label}
+          {required ? " *" : ""}
+        </Label>
+      )}
       <div className="relative">
         <input
           ref={inputRef}
@@ -62,14 +71,14 @@ export default function CreatableCombobox({ id, label, value, onChange, options,
           aria-controls={listId}
           aria-autocomplete="list"
           aria-activedescendant={open && active >= 0 ? `${listId}-${active}` : undefined}
-          className="h-11 w-full rounded-xl border border-border bg-background px-3 pr-10 text-sm outline-none focus:border-primary"
+          className={inputClassName ? `${inputClassName} pr-10` : "h-11 w-full rounded-xl border border-border bg-background px-3 pr-10 text-sm outline-none focus:border-primary"}
           placeholder={t.searchOrType}
           autoComplete={autoComplete}
           maxLength={maxLength}
           value={text}
           required={required}
           onChange={(event) => type(event.target.value)}
-          onFocus={() => setOpen(true)}
+          onFocus={() => { setTyping(false); setOpen(true); }}
           onClick={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 120)}
           onKeyDown={onKeyDown}

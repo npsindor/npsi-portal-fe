@@ -8,11 +8,14 @@
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
     "lint": "eslint .",
-    "test": "node --test --test-reporter=spec src/api/endpoints.test.js src/api/openapi.test.js",
+    "test": "node --test --test-reporter=spec src/api/endpoints.test.js src/api/openapi.test.js src/routes.test.js",
     "test:browser": "playwright test",
-    "test:security": "playwright test --config playwright.security.config.js"
+    "test:security": "playwright test --config playwright.security.config.js",
+    "test:browser:all": "ALL_BROWSERS=1 playwright test"
   },
   "dependencies": {
+    "@fontsource/inter": "5.3.0",
+    "@fontsource/poppins": "5.3.0",
     "@hello-pangea/dnd": "^17.0.0",
     "@hookform/resolvers": "^4.1.2",
     "@radix-ui/react-accordion": "^1.2.3",
@@ -61,6 +64,7 @@
     "lucide-react": "^0.475.0",
     "moment": "^2.30.1",
     "next-themes": "^0.4.4",
+    "pdfjs-dist": "^4.10.38",
     "qrcode.react": "^4.2.0",
     "react": "^18.2.0",
     "react-day-picker": "^8.10.1",

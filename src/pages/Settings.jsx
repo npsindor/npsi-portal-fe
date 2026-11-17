@@ -34,7 +34,7 @@ export default function Settings() {
       try {
         const { family: mine } = await base44.me.family();
         setFamily(mine);
-      } catch (e) {
+      } catch {
       } finally {
         setLoadingFam(false);
       }
@@ -68,7 +68,7 @@ export default function Settings() {
     const currentPassword = String(formValues.get("currentPassword") || pwdForm.currentPassword || "");
     const newPassword = String(formValues.get("newPassword") || pwdForm.newPassword || "");
     const confirmPassword = String(formValues.get("confirmPassword") || pwdForm.confirmPassword || "");
-    if (newPassword.length < 6) {
+    if (newPassword.length < 8) {
       setPwdError(t("auth.pwdMinLength"));
       return;
     }

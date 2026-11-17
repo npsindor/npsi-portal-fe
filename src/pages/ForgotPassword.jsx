@@ -39,7 +39,7 @@ export default function ForgotPassword() {
 
   const saveMobilePassword = (e) => {
     e.preventDefault();
-    if (password.length < 6) return setError(translateError("Password must be at least 6 characters.", lang));
+    if (password.length < 8) return setError(translateError("Password must be at least 8 characters.", lang));
     if (password !== confirm) return setError(t.passwordsDiffer);
     return run(async () => {
       await base44.auth.resetPassword({ phone: verified.mobile, verificationToken: verified.verificationToken, newPassword: password });
@@ -120,7 +120,7 @@ export default function ForgotPassword() {
                   <Label htmlFor={id}>{label}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-                    <PasswordInput id={id} autoComplete="new-password" value={value} onChange={(e) => set(e.target.value)} className="pl-10 h-12" required minLength={6} />
+                    <PasswordInput id={id} autoComplete="new-password" value={value} onChange={(e) => set(e.target.value)} className="pl-10 h-12" required minLength={8} />
                   </div>
                 </div>
               ))}

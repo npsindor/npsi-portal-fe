@@ -9,14 +9,16 @@ import { Label } from "@/components/ui/label";
 import { useLang } from "@/lib/i18n";
 import { FEES, fill, regCopy, translateError, UPI } from "@/lib/registration-copy";
 import CreatableCombobox from "@/components/CreatableCombobox";
-import { INDORE_AREAS, mergeOptions, NATIVE_VILLAGES } from "@/lib/native-places";
+import { INDORE_AREAS, mergeOptions } from "@/lib/native-places";
+import VillageCombobox from "@/components/VillageCombobox";
+import { indiaToday } from "@/lib/dates";
 
 const CITIES = ["Indore", "Ujjain", "Dewas", "Other"];
 const GENDERS = ["Male", "Female", "Other"];
 const OTHER = "__other__";
 const EMPTY = { firstName: "", lastName: "", gender: "", dob: "", city: "Indore", area: "", address: "", pincode: "", nativeVillage: "" };
 const STEP_KEYS = ["stepDetails", "stepAddress", "stepPayment", "stepReview"];
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => indiaToday();
 // Same rules as the server: before today, at most 120 years ago, at least 18 (member) / 3 (student) years old.
 const MIN_AGE = { FAMILY: 18, STUDENT: 3 };
 const yearsAgo = (years, from = today()) => `${String(Number(from.slice(0, 4)) - years).padStart(4, "0")}${from.slice(4)}`;
@@ -83,7 +85,6 @@ function Wizard({ initial, onDone, t, lang, regType = "FAMILY" }) {
   const [step, setStep] = useState(0);
   const [areas, setAreas] = useState([]);
   const [pincodes, setPincodes] = useState([]);
-  const [villages, setVillages] = useState([]);
   const [screenshot, setScreenshot] = useState(null); // { fileId, preview }
   const [utr, setUtr] = useState(initial?.payment?.utr || "");
   const [agree, setAgree] = useState(false);
@@ -93,9 +94,6 @@ function Wizard({ initial, onDone, t, lang, regType = "FAMILY" }) {
   const needsNewScreenshot = !editing || initial?.payment?.status === "REJECTED" || !initial?.payment;
   const set = (key) => (value) => setForm((current) => ({ ...current, [key]: value }));
 
-  useEffect(() => {
-    base44.addressOptions.list("VILLAGE").then(setVillages).catch(() => setVillages([]));
-  }, []);
   useEffect(() => {
     if (form.city === "Other") {
       setAreas([]);
@@ -276,16 +274,7 @@ function Wizard({ initial, onDone, t, lang, regType = "FAMILY" }) {
               />
             </div>
             <h3 className="pt-2 font-semibold">{t.nativeAddress}</h3>
-            <CreatableCombobox
-              id="reg-village"
-              label={t.nativeVillage}
-              value={form.nativeVillage}
-              onChange={set("nativeVillage")}
-              options={mergeOptions(villages, NATIVE_VILLAGES)}
-              lang={lang}
-              t={t}
-              autoComplete="off"
-            />
+            <VillageCombobox id="reg-village" label={t.nativeVillage} value={form.nativeVillage} onChange={set("nativeVillage")} lang={lang} required />
           </>
         )}
 

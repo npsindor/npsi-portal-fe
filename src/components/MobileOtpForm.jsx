@@ -46,7 +46,7 @@ export default function MobileOtpForm({ purpose = "REGISTER", askEmail = false, 
     if (!/^[6-9]\d{9}$/.test(digits)) return setError(translateError("A valid 10-digit mobile number is required.", lang));
     setBusy(true);
     try {
-      const recaptchaToken = purpose === "REGISTER" ? await getRecaptchaToken("mobile_otp") : undefined;
+      const recaptchaToken = await getRecaptchaToken(purpose === "REGISTER" ? "mobile_otp" : "mobile_reset");
       const result = await base44.auth.requestMobileOtp({ mobile: digits, purpose, email: email.trim() || undefined, recaptchaToken });
       setSent({ channel: result.channel });
       setCode("");

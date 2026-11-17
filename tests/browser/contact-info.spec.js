@@ -10,7 +10,7 @@ for (const { path, lang, viewport } of [
     const calls = await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN });
     await page.addInitScript(language => localStorage.setItem('pss_lang', language), lang);
     await page.goto(path);
-    await expect(page.getByRole('heading', { name: 'Page Not Found', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: lang === 'hi' ? 'पेज नहीं मिला' : 'Page not found', exact: true })).toBeVisible();
     await expect(page.locator('form')).toHaveCount(0);
     await expect(page.getByRole('dialog')).toHaveCount(0);
     expect(calls.some(call => call.key.endsWith(' /contact-info'))).toBe(false);

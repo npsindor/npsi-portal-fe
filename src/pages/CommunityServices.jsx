@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Ambulance, ArrowRight, CalendarDays, Droplet, Flame, HandHeart, HeartHandshake, LifeBuoy, MapPin, Phone, ShieldAlert, Siren, User } from "lucide-react";
+import { Ambulance, ArrowRight, CalendarDays, Droplet, Flame, HandHeart, LifeBuoy, MapPin, Phone, ShieldAlert, Siren, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import PublicFooter from "@/components/PublicFooter";
 import PublicNav from "@/components/PublicNav";
 import { usePageContent } from "@/components/PageContent";
-import { CardSkeleton, EmptyState, PageHero, SectionBlock, SectionOverview, formatDate, useSectionLanding } from "@/components/PageSections";
+import CommunityHero from "@/components/community/CommunityHero";
+import { CardSkeleton, EmptyState, SectionBlock, SectionOverview, formatDate, useSectionLanding } from "@/components/PageSections";
 import { base44 } from "@/api/base44Client";
 import { useLang } from "@/lib/i18n";
 
 const copy = {
   en: {
-    eyebrow: "Community Services", title: "Standing together when it matters most", intro: "Blood donation drives, emergency help and social welfare initiatives — organised by our samaj, for our samaj.",
+    eyebrow: "Community Services", title: "One message. The whole samaj stands with you.", intro: "If any NPSI member needs blood or urgent help, one message on the website or in the Sangathan’s WhatsApp group reaches donors and volunteers across the samaj. Blood donation, emergency help and social welfare — by our samaj, for our samaj.",
     blood: "Blood Donation", bloodSummary: "Donation camps, donor drives and urgent requirements.", bloodIntro: "One donation can save up to three lives. Join our camps and donor network.",
     emergency: "Emergency Help", emergencySummary: "Helplines and community contacts for urgent support.", emergencyIntro: "Save these numbers. In a life-threatening emergency, call 112 first.",
     welfare: "Social Welfare", welfareSummary: "Education, health and support initiatives of the samaj.", welfareIntro: "Initiatives that support students, elders and families in need.",
@@ -21,7 +22,7 @@ const copy = {
     ctaTitle: "Want to volunteer or need support?", ctaBody: "Reach out to the Sangathan — our volunteers will connect you with the right people.", ctaButton: "Contact us",
   },
   hi: {
-    eyebrow: "सामुदायिक सेवाएँ", title: "ज़रूरत के समय एक-दूसरे के साथ", intro: "रक्तदान शिविर, आपातकालीन सहायता और समाज कल्याण की पहलें — समाज द्वारा, समाज के लिए।",
+    eyebrow: "सामुदायिक सेवाएँ", title: "एक संदेश, और पूरा समाज आपके साथ।", intro: "किसी भी NPSI सदस्य को रक्त या तत्काल सहायता चाहिए तो वेबसाइट या संगठन के WhatsApp समूह पर एक संदेश भेजें — समाज के रक्तदाता और स्वयंसेवक मदद के लिए आगे आते हैं। रक्तदान, आपातकालीन सहायता और समाज कल्याण — समाज द्वारा, समाज के लिए।",
     blood: "रक्तदान", bloodSummary: "रक्तदान शिविर, दाता अभियान और तत्काल आवश्यकताएँ।", bloodIntro: "एक रक्तदान तीन जीवन तक बचा सकता है। हमारे शिविरों और दाता नेटवर्क से जुड़ें।",
     emergency: "आपातकालीन सहायता", emergencySummary: "तत्काल सहायता के लिए हेल्पलाइन और सामुदायिक संपर्क।", emergencyIntro: "ये नंबर सहेज कर रखें। जानलेवा आपात स्थिति में पहले 112 पर कॉल करें।",
     welfare: "समाज कल्याण", welfareSummary: "समाज की शिक्षा, स्वास्थ्य और सहायता पहलें।", welfareIntro: "विद्यार्थियों, बुज़ुर्गों और ज़रूरतमंद परिवारों की सहायता करने वाली पहलें।",
@@ -109,7 +110,7 @@ export default function CommunityServices() {
     <div className="min-h-screen bg-background">
       <PublicNav />
       <main id="main-content">
-        <PageHero block={content.intro("hero")} eyebrow={t.eyebrow} title={t.title} intro={t.intro} icon={HeartHandshake} lang={lang} />
+        <CommunityHero block={content.intro("hero")} eyebrow={t.eyebrow} title={t.title} intro={t.intro} lang={lang} />
         <SectionOverview
           lang={lang}
           sections={[
@@ -119,7 +120,7 @@ export default function CommunityServices() {
           ]}
         />
 
-        <SectionBlock id="blood-donation" block={content.intro("blood-donation")} lang={lang} eyebrow="01" title={t.blood} intro={t.bloodIntro} {...SECTIONS["blood-donation"]}>
+        <SectionBlock id="blood-donation" block={content.intro("blood-donation")} lang={lang} eyebrow="01" title={t.blood} intro={t.bloodIntro} icon={SECTIONS["blood-donation"].icon} colors={SECTIONS["blood-donation"].colors}>
           <div className="grid gap-6 lg:grid-cols-[18rem_1fr]">
             <aside className="h-fit rounded-2xl border border-rose-200 bg-rose-50 p-5 dark:border-rose-900/50 dark:bg-rose-950/30">
               <h3 className="flex items-center gap-2 font-semibold text-rose-800 dark:text-rose-200"><Droplet className="h-5 w-5" aria-hidden="true" />{t.eligibility}</h3>
@@ -131,7 +132,7 @@ export default function CommunityServices() {
           </div>
         </SectionBlock>
 
-        <SectionBlock id="emergency-help" block={content.intro("emergency-help")} lang={lang} eyebrow="02" title={t.emergency} intro={t.emergencyIntro} tone="muted" {...SECTIONS["emergency-help"]}>
+        <SectionBlock id="emergency-help" block={content.intro("emergency-help")} lang={lang} eyebrow="02" title={t.emergency} intro={t.emergencyIntro} tone="muted" icon={SECTIONS["emergency-help"].icon} colors={SECTIONS["emergency-help"].colors}>
           <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.14em] text-gold-dark">{t.national}</h3>
           <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {t.helplines.map(([number, label, Icon]) => (
@@ -166,7 +167,7 @@ export default function CommunityServices() {
           )}
         </SectionBlock>
 
-        <SectionBlock id="social-welfare" block={content.intro("social-welfare")} lang={lang} eyebrow="03" title={t.welfare} intro={t.welfareIntro} {...SECTIONS["social-welfare"]}>
+        <SectionBlock id="social-welfare" block={content.intro("social-welfare")} lang={lang} eyebrow="03" title={t.welfare} intro={t.welfareIntro} icon={SECTIONS["social-welfare"].icon} colors={SECTIONS["social-welfare"].colors}>
           {posts === null ? <CardSkeleton /> : welfare.length === 0 ? <EmptyState>{t.noWelfare}</EmptyState> : grid(welfare, "social-welfare")}
         </SectionBlock>
 

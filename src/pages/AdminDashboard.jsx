@@ -1,8 +1,10 @@
+import { statusLabel } from "@/components/StatusBadge";
 import React, { useEffect, useState } from "react";
 import { Users, FileCheck, CalendarDays, IndianRupee, TrendingUp, AlertCircle, Clock, GraduationCap, Contact } from "lucide-react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useLang } from "@/lib/i18n";
+import ServicesOverview from "@/components/admin/ServicesOverview";
 
 const L = {
   en: {
@@ -84,7 +86,7 @@ export default function AdminDashboard() {
           contacts: contacts.total,
         });
         setRecentApps(apps);
-      } catch (e) {}
+      } catch {}
     })();
   }, []);
 
@@ -124,6 +126,8 @@ export default function AdminDashboard() {
         ))}
       </div>
 
+      <ServicesOverview lang={lang} />
+
       <div className="rounded-2xl border border-gold/30 bg-card p-5">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-lg font-semibold text-maroon">{t.recentApps}</h2>
@@ -141,7 +145,7 @@ export default function AdminDashboard() {
                 a.status === "REJECTED" ? "bg-red-100 text-red-800" :
                 a.status === "CORRECTION_REQUIRED" ? "bg-orange-100 text-orange-800" :
                 "bg-amber-100 text-amber-800"
-              }`}>{a.status.replace(/_/g, " ")}</span>
+              }`}>{statusLabel(a.status, lang)}</span>
             </Link>
           ))}
           {recentApps.length === 0 && <p className="text-sm text-muted-foreground">{t.noApps}</p>}

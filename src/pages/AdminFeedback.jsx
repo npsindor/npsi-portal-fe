@@ -40,7 +40,7 @@ export default function AdminFeedback() {
     try {
       const list = await base44.entities.Feedback.listAll("-submittedDate");
       setAll(list);
-    } catch (e) {} finally { setLoading(false); }
+    } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 

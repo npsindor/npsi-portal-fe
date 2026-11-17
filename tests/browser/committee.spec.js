@@ -16,9 +16,9 @@ for (const [width, columns] of [[390, 1], [768, 2], [1440, 3]]) {
     await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN, 'GET /senior-discipline-committee': profiles });
     await page.goto('/about');
     const section = page.locator('section[aria-labelledby="senior-discipline-title"]');
-    await expect(page.getByRole('heading', { name: 'वरिष्ठजन एवं अनुशासन समिति' })).toBeVisible();
+    // The heading follows the chosen language (English by default).
+    await expect(page.getByRole('heading', { name: 'Senior Members & Discipline Committee' })).toBeVisible();
     await expect(section.locator('article')).toHaveCount(6);
-    await expect(section.getByText('Senior Members & Discipline Committee')).toBeVisible();
     expect(await section.locator('div.grid').evaluate((node) => getComputedStyle(node).gridTemplateColumns.split(' ').length)).toBe(columns);
     for (const { nameEn } of profiles) await expect(section.getByRole('heading', { name: nameEn })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

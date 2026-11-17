@@ -1,43 +1,41 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
-import { usePageContent } from '@/components/PageContent';
-import { usePublicCopy } from '@/lib/public-copy';
 import { useLang } from '@/lib/i18n';
-import { blockText } from '@/lib/page-content';
-import logoVideo from '@/images/logo.mp4';
 
 const DELAY = 5000;
-// Same photos as the Photo Gallery: the admin's (Admin → Page Content → Home → Photo Gallery), else the Garba set.
-const DEFAULT_PHOTOS = [1, 2, 3, 4, 5, 6, 7].map((n) => ({ id: `garba-${n}`, src: `/gallery/maa-na-garba-${n}.jpg` }));
+// The home hero shows only these three logo videos, from public/slider. Each plays to its end, then the next one starts.
+const SLIDES = [
+  { id: 'npsi', video: '/slider/npsi-logo.mp4', en: 'Nimar Patidar Sangathan, Indore', hi: 'निमाड़ पाटीदार संगठन, इंदौर' },
+  { id: 'garba', video: '/slider/maa-na-garba-logo.mp4', en: 'Maa Na Garba', hi: 'माँ ना गरबा' },
+  { id: 'deepotsav', video: '/slider/deepoutsav-logo.mp4', en: 'Sneh Deepotsav', hi: 'स्नेह दीपोत्सव' },
+];
 const copy = {
-  en: { label: 'Sangathan highlights', prev: 'Previous slide', next: 'Next slide', pause: 'Pause slides', play: 'Resume slides', go: (n) => `Go to slide ${n}`, photo: 'Maa Na Garba' },
-  hi: { label: 'संगठन की झलक', prev: 'पिछली स्लाइड', next: 'अगली स्लाइड', pause: 'स्लाइड रोकें', play: 'स्लाइड चलाएँ', go: (n) => `स्लाइड ${n} पर जाएँ`, photo: 'माँ ना गरबा' },
+  en: { label: 'Sangathan highlights', prev: 'Previous slide', next: 'Next slide', pause: 'Pause slides', play: 'Resume slides', go: (n) => `Go to slide ${n}` },
+  hi: { label: 'संगठन की झलक', prev: 'पिछली स्लाइड', next: 'अगली स्लाइड', pause: 'स्लाइड रोकें', play: 'स्लाइड चलाएँ', go: (n) => `स्लाइड ${n} पर जाएँ` },
 };
 
-// Keeps the logo video silent whatever the browser or an extension does.
+// Keeps the logo videos silent whatever the browser or an extension does.
 const keepMuted = (event) => {
   const video = event.currentTarget;
   if (!video.muted) video.muted = true;
   if (video.volume !== 0) video.volume = 0;
 };
 
-// Home page, left of the services grid: the Sangathan logo video, then community photos.
+// Home page, left of the services grid. A video slide plays once to the end and then moves on; the image slide
+// stays for DELAY. Only the visible video plays.
 export default function HomeLogoCarousel() {
   const { lang } = useLang();
-  const c = usePublicCopy();
   const t = copy[lang] || copy.en;
-  const content = usePageContent('home');
-  const managed = content.items('gallery').filter((block) => block.mediaType === 'IMAGE' && block.mediaUrl);
-  const photos = managed.length
-    ? managed.map((block) => ({ id: block.id, src: block.mediaUrl, caption: blockText(block, 'title', lang) }))
-    : DEFAULT_PHOTOS.map((photo) => ({ ...photo, caption: t.photo }));
-  const slides = [{ id: 'logo', video: true, caption: c('Nimar Patidar Sangathan, Indore') }, ...photos];
+  const slides = SLIDES.map((slide) => ({ ...slide, caption: slide[lang] || slide.en }));
+  const videos = useRef({});
 
   const [api, setApi] = useState(null);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [hover, setHover] = useState(false);
+  const held = paused || hover;
+  const reduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   useEffect(() => {
     if (!api) return;
@@ -51,13 +49,30 @@ export default function HomeLogoCarousel() {
     };
   }, [api]);
 
+  // Play the visible video from the start; stop the others.
   useEffect(() => {
-    if (!api || paused || hover || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const timer = window.setInterval(() => {
+    Object.entries(videos.current).forEach(([id, video]) => {
+      if (!video) return;
+      if (id === slides[index]?.id) {
+        video.currentTime = 0;
+        video.play().catch(() => {});
+      } else video.pause();
+    });
+  }, [index]);
+
+  // The image slide moves on after DELAY; video slides move on when they end (onEnded below).
+  useEffect(() => {
+    if (!api || held || reduced || slides[index]?.video) return;
+    const timer = window.setTimeout(() => {
       if (document.visibilityState === 'visible') api.scrollNext();
     }, DELAY);
-    return () => window.clearInterval(timer);
-  }, [api, paused, hover]);
+    return () => window.clearTimeout(timer);
+  }, [api, held, reduced, index]);
+
+  const ended = (event) => {
+    if (api && !held && !reduced && document.visibilityState === 'visible') api.scrollNext();
+    else event.currentTarget.play().catch(() => {}); // held: keep the logo moving in place
+  };
 
   return (
     <Carousel
@@ -76,25 +91,27 @@ export default function HomeLogoCarousel() {
         {slides.map((slide, i) => (
           <CarouselItem key={slide.id} aria-label={`${i + 1} / ${slides.length}`} aria-hidden={index !== i} className="h-full pl-0">
             <figure className="relative aspect-square h-full w-full overflow-hidden sm:aspect-[4/3] lg:aspect-auto lg:min-h-[24rem]">
+              {/* Portrait logos: shown whole (contain) on the maroon background, never cropped; the name is in the logo itself. */}
               {slide.video ? (
                 <video
-                  className="absolute inset-0 h-full w-full object-cover"
-                  src={logoVideo}
-                  autoPlay
-                  loop
+                  ref={(node) => { videos.current[slide.id] = node; }}
+                  className="absolute inset-0 h-full w-full object-contain"
+                  src={slide.video}
+                  autoPlay={i === 0}
                   muted
                   playsInline
-                  preload="metadata"
+                  preload={i === 0 ? 'auto' : 'metadata'}
                   onLoadedMetadata={keepMuted}
                   onPlay={keepMuted}
                   onVolumeChange={keepMuted}
+                  onEnded={ended}
                   aria-label={slide.caption}
                 />
               ) : (
-                <img src={slide.src} alt={slide.caption || ''} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                <img src={slide.image} alt={slide.caption} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-contain" />
               )}
               {slide.caption && (
-                <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-maroon-dark/95 via-maroon-dark/50 to-transparent px-5 pb-14 pt-12 font-display text-base font-semibold text-cream sm:text-lg">
+                <figcaption className="sr-only">
                   {slide.caption}
                 </figcaption>
               )}

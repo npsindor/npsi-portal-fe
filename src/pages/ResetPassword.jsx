@@ -29,7 +29,7 @@ export default function ResetPassword() {
     const formValues = new FormData(e.currentTarget);
     const effectiveNewPassword = String(formValues.get("password") || newPassword || "");
     const effectiveConfirmPassword = String(formValues.get("confirm") || confirmPassword || "");
-    if (effectiveNewPassword.length < 6) {
+    if (effectiveNewPassword.length < 8) {
       setError(t("auth.pwdMinLength"));
       return;
     }

@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useHeroText } from '@/components/PageContent';
+import { BlockLink, HeroBackdrop, useHeroText } from '@/components/PageContent';
+import { HealthHeroArt } from '@/components/hero/HeroArt';
+import { HeartPulse, Phone, Stethoscope } from 'lucide-react';
+import '@/styles/page-heroes.css';
 import { Link } from 'react-router-dom';
 import PublicNav from '@/components/PublicNav';
 import PublicFooter from '@/components/PublicFooter';
@@ -68,7 +71,20 @@ export default function SehatSaathi({ admin = false }) {
   };
   const RootTag = admin ? "div" : "main";
   const content = <div className="sehat-module"><RootTag>
-    {!admin && <section className="sehat-hero py-5"><div className="container"><p className="mb-2 fw-semibold">{t.title} · {t.subtitle}</p><h1 className="display-5 fw-bold">{hero.title || t.hero}</h1><p className="lead mt-3 mb-4" style={{ maxWidth: '55rem', whiteSpace: 'pre-line' }}>{hero.intro || t.intro}</p><a className="btn btn-light" href="#sehat-workspace">{t.requestForm}</a></div></section>}
+    {!admin && <section className="page-hero page-hero-health relative isolate text-white"><HeroBackdrop block={hero.block} className="opacity-20" /><div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-2 lg:py-16">
+      <div className="min-w-0">
+        <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-sm font-semibold text-emerald-100"><Stethoscope className="h-4 w-4" aria-hidden="true" />{t.title}</span>
+        <p className="!mb-0 mt-3 text-sm text-emerald-50/85">{hero.subtitle || t.subtitle}</p>
+        <h1 className="!mb-0 mt-4 max-w-3xl font-display text-3xl !font-semibold !leading-tight !text-white sm:text-5xl">{hero.title || t.hero}</h1>
+        <p className="!mb-0 mt-5 max-w-2xl whitespace-pre-line text-base leading-relaxed text-emerald-50/90">{hero.intro || t.intro}</p>
+        <div className="mt-7 flex flex-wrap gap-3">
+          <a href="#sehat-workspace" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-bold !text-emerald-900 !no-underline transition hover:bg-emerald-50"><HeartPulse className="h-4 w-4" aria-hidden="true" />{t.requestForm}</a>
+          <a href="tel:112" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/40 px-5 text-sm font-semibold !text-white !no-underline transition hover:bg-white/10"><Phone className="h-4 w-4" aria-hidden="true" />112</a>
+          <BlockLink block={hero.block} lang={lang} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/40 px-5 text-sm font-semibold !text-white !no-underline transition hover:bg-white/10" />
+        </div>
+      </div>
+      <HealthHeroArt lang={lang} />
+    </div></section>}
     <div className="container py-4 py-md-5">
       <div className="alert alert-warning" role="note">{t.emergency} <a href="tel:112" className="alert-link">112</a> · <a href="https://112.gov.in/" target="_blank" rel="noopener noreferrer">ERSS</a></div>
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">{admin ? <h1 className="h3 mb-0">{t.title}</h1> : <h2 className="h3 mb-0">{t.resources}</h2>}<button type="button" className="btn btn-outline-primary" disabled={busy || loading} onClick={() => { setError(''); load(); }}>{t.refresh}</button></div>

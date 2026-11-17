@@ -17,7 +17,7 @@ const copy = {
     cultural: "Cultural Programs", culturalSummary: "Music, traditions and family programmes through the year.", culturalIntro: "Programmes that keep our Nimar traditions, music and values alive for every generation.",
     calendar: "Event Calendar", calendarSummary: "Every upcoming programme, month by month.", calendarIntro: "All upcoming programmes of the Sangathan, month by month.",
     noGarba: "Maa Na Garba details will be announced soon.", noCultural: "No cultural programmes are published right now.", noUpcoming: "No upcoming events are scheduled yet.",
-    past: "Past events", details: "View details", register: "Register in member portal", free: "Free", fee: "Fee", time: "Time", venue: "Venue", organizer: "Organizer", featured: "Featured",
+    past: "Past events", details: "View details", teamPage: "Event page & team", register: "Register in member portal", free: "Free", fee: "Fee", time: "Time", venue: "Venue", organizer: "Organizer", featured: "Featured",
     GARBA: "Maa Na Garba", CULTURAL: "Cultural", GENERAL: "Community", upcoming: "upcoming",
   },
   hi: {
@@ -26,7 +26,7 @@ const copy = {
     cultural: "सांस्कृतिक कार्यक्रम", culturalSummary: "पूरे वर्ष संगीत, परंपरा और पारिवारिक कार्यक्रम।", culturalIntro: "ऐसे कार्यक्रम जो हर पीढ़ी के लिए हमारी निमाड़ी परंपराओं, संगीत और मूल्यों को जीवित रखते हैं।",
     calendar: "कार्यक्रम कैलेंडर", calendarSummary: "सभी आगामी कार्यक्रम, महीनेवार।", calendarIntro: "संगठन के सभी आगामी कार्यक्रम, महीनेवार।",
     noGarba: "माँ ना गरबा की जानकारी जल्द घोषित की जाएगी।", noCultural: "अभी कोई सांस्कृतिक कार्यक्रम प्रकाशित नहीं है।", noUpcoming: "अभी कोई आगामी कार्यक्रम निर्धारित नहीं है।",
-    past: "पिछले कार्यक्रम", details: "विवरण देखें", register: "सदस्य पोर्टल में पंजीकरण करें", free: "निःशुल्क", fee: "शुल्क", time: "समय", venue: "स्थान", organizer: "आयोजक", featured: "मुख्य",
+    past: "पिछले कार्यक्रम", details: "विवरण देखें", teamPage: "कार्यक्रम पेज व टीम", register: "सदस्य पोर्टल में पंजीकरण करें", free: "निःशुल्क", fee: "शुल्क", time: "समय", venue: "स्थान", organizer: "आयोजक", featured: "मुख्य",
     GARBA: "माँ ना गरबा", CULTURAL: "सांस्कृतिक", GENERAL: "सामाजिक", upcoming: "आगामी",
   },
 };
@@ -94,11 +94,12 @@ export default function Events() {
         <button type="button" onClick={() => setSelected(event)} className="mt-4 inline-flex min-h-10 items-center gap-1.5 self-start text-sm font-semibold text-maroon transition hover:text-gold-dark">
           {t.details}<span className="sr-only">: {title(event)}</span> <ArrowRight className="h-4 w-4" aria-hidden="true" />
         </button>
+        {event.slug && <Link to={`/events/${event.slug}`} className="mt-2 inline-flex min-h-10 items-center gap-1.5 self-start text-sm font-semibold text-gold-dark hover:text-maroon">{t.teamPage}<span className="sr-only">: {title(event)}</span> <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>}
       </div>
     </article>
   );
   const CalendarRow = ({ event }) => (
-    <li className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:p-5">
+    <li id={`event-${event.id}`} className="flex scroll-mt-28 flex-col gap-4 p-4 sm:flex-row sm:items-center sm:p-5">
       <DateTile value={event.date} lang={lang} />
       <div className="min-w-0 flex-1">
         <span className="rounded-full bg-muted px-2 py-0.5 text-[0.7rem] font-semibold uppercase tracking-wide text-muted-foreground">{t[event.category] || t.GENERAL}</span>

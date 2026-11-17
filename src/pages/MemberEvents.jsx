@@ -6,6 +6,7 @@ import { useLang } from "@/lib/i18n";
 import { localizedText } from "@/lib/utils";
 import { useAuth } from "@/lib/AuthContext";
 import { resolveMyFamily } from "@/lib/resolveMyFamily";
+import { calendarDate } from "@/lib/dates";
 
 const L = {
   en: {
@@ -70,7 +71,7 @@ export default function MemberEvents() {
         setMembers(mems);
         const registrations = await base44.me.eventRegistrations();
         setRegisteredIds(new Set(registrations.filter((r) => r.status !== "CANCELLED").map((r) => r.eventId)));
-      } catch (e) {} finally { setLoading(false); }
+      } catch {} finally { setLoading(false); }
     })();
   }, [user]);
 
@@ -123,7 +124,7 @@ export default function MemberEvents() {
             <div className="p-4">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <CalendarDays className="h-3.5 w-3.5" />
-                {ev.date ? new Date(ev.date).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                {ev.date ? calendarDate(ev.date).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" }) : "—"}
                 <Clock className="ml-1 h-3.5 w-3.5" /> {ev.startTime || ""}
               </div>
               <h3 className="mt-2 font-display text-lg font-semibold text-maroon">{localizedText(ev, "title", lang)}</h3>
