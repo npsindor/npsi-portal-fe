@@ -1,3 +1,4 @@
+import { suggestValues } from "@/lib/search-suggestions";
 import { useMemo, useState } from "react";
 import { inDateRange } from "./dateRangeFilter";
 
@@ -32,5 +33,8 @@ export function useTableControls(items, { searchFields = [], pageSize = 10, date
   const setDateFrom = (value) => { setDateFromRaw(value); setRawPage(1); };
   const setDateTo = (value) => { setDateToRaw(value); setRawPage(1); };
 
-  return { search, setSearch, page, setPage, totalPages, totalItems, startIndex, pageSize, pageItems, filtered, dateFrom, setDateFrom, dateTo, setDateTo };
+  // Auto-suggest for the search box: values of the searched fields in the loaded rows that contain the typed text.
+  const suggestions = useMemo(() => suggestValues(items, searchFields, search), [items, search, searchFields.join("|")]);
+
+  return { search, setSearch, page, setPage, totalPages, totalItems, startIndex, pageSize, pageItems, filtered, dateFrom, setDateFrom, dateTo, setDateTo, suggestions };
 }

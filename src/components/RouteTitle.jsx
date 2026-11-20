@@ -65,6 +65,8 @@ const TITLES = [
   ['/admin/room-hunting', 'Admin · Room Hunting', 'एडमिन · रूम हंटिंग'],
   ['/admin/core-team', 'Admin · Core Team', 'एडमिन · कोर टीम'],
   ['/admin/address-options', 'Admin · Address Options', 'एडमिन · पता विकल्प'],
+  ['/admin/site-visibility', 'Admin · Page Visibility', 'एडमिन · पेज दृश्यता'],
+  ['/admin/roles', 'Admin · Assign Roles', 'एडमिन · रोल असाइन करें'],
   ['/admin/home-highlights', 'Admin · Home Highlights', 'एडमिन · होम हाइलाइट्स'],
   ['/admin/community-services', 'Admin · Community Services', 'एडमिन · सामुदायिक सेवाएँ'],
   ['/admin/page-content', 'Admin · Page Content', 'एडमिन · पेज सामग्री'],

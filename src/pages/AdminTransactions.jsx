@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Search, Plus, Pencil, Trash2, X, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Loader2 } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
@@ -8,6 +8,8 @@ import TablePagination from "@/components/admin/TablePagination";
 import ExportMenu from "@/components/ExportMenu";
 import DateRangeFilter from "@/components/admin/DateRangeFilter";
 import { inDateRange } from "@/lib/dateRangeFilter";
+import SuggestSearchInput from "@/components/SuggestSearchInput";
+import { suggestValues } from "@/lib/search-suggestions";
 
 const TYPES = ["Family Registration", "Membership Payment", "Event Registration", "Donation", "Other"];
 // Stored type → Hindi label (the stored English value stays the same).
@@ -250,10 +252,7 @@ export default function AdminTransactions() {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t.searchPh} className="w-full rounded-full border border-gold/40 bg-card py-2.5 pl-10 pr-4 text-sm outline-none focus:border-maroon" />
-        </div>
+        <SuggestSearchInput className="flex-1 min-w-[200px]" value={search} onChange={setSearch} placeholder={t.searchPh} suggestions={suggestValues(txns, ["transactionId", "familyId"], search)} />
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded-full border border-gold/40 bg-card px-4 py-2.5 text-sm outline-none focus:border-maroon">
           <option value="All">{t.allStatus}</option>
           {STATUSES.map((s) => <option key={s}>{s}</option>)}

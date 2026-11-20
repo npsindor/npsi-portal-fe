@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
+import { hasAdminAccess } from '@/lib/admin-access';
 
 const DefaultFallback = () => (
   <div className="fixed inset-0 flex items-center justify-center">
@@ -8,7 +9,8 @@ const DefaultFallback = () => (
   </div>
 );
 
-export default function ProtectedRoute({ fallback = <DefaultFallback />, unauthenticatedElement, requireRole, unauthorizedElement }) {
+// requireAdminAccess: the super admin, or a member the super admin gave admin access to (Admin → Assign roles).
+export default function ProtectedRoute({ fallback = <DefaultFallback />, unauthenticatedElement, requireRole, requireAdminAccess, unauthorizedElement }) {
   const { isAuthenticated, isLoadingAuth, authChecked, checkUserAuth, user } = useAuth();
 
   useEffect(() => {
@@ -26,6 +28,9 @@ export default function ProtectedRoute({ fallback = <DefaultFallback />, unauthe
   }
 
   if (requireRole && user?.role !== requireRole) {
+    return unauthorizedElement || unauthenticatedElement;
+  }
+  if (requireAdminAccess && !hasAdminAccess(user)) {
     return unauthorizedElement || unauthenticatedElement;
   }
 

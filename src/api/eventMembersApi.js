@@ -32,9 +32,13 @@ export const eventMembersApi = {
     review: (applicationId, body) => call(`${A()}/${id(applicationId)}/review`, json('POST', body)),
     update: (applicationId, body) => call(`${A()}/${id(applicationId)}`, json('PATCH', body)),
     remove: (applicationId, reason) => call(`${A()}/${id(applicationId)}/removal`, json('POST', { reason })),
+    // Permanent: the entry and its history are gone (the person's family / student record stays).
+    delete: (applicationId) => call(`${A()}/${id(applicationId)}`, { method: 'DELETE' }),
     people: (q) => call(`${A()}/people?${new URLSearchParams({ q })}`),
     sections: () => call(`${API.eventMemberSections}/admin`),
     createSection: (body) => call(API.eventMemberSections, json('POST', body)),
     updateSection: (sectionId, body) => call(`${API.eventMemberSections}/${id(sectionId)}`, json('PATCH', body)),
+    // The order the website shows a team's approved members in (first id = 1).
+    reorder: (sectionId, ids) => call(`${API.eventMemberSections}/${id(sectionId)}/member-order`, json('PUT', { ids })),
   },
 };

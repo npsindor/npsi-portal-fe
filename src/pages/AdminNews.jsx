@@ -8,6 +8,7 @@ import SearchBox from "@/components/admin/SearchBox";
 import TablePagination from "@/components/admin/TablePagination";
 import { localizedText } from "@/lib/utils";
 import { categoryLabel, SANDESH_CATEGORIES } from "@/lib/sandesh";
+import { calendarDate } from "@/lib/dates";
 
 const emptyNews = () => ({ title: "", titleHi: "", body: "", bodyHi: "", date: new Date().toISOString(), type: "Notice", status: "Draft", category: "", imageUrl: "", publishAt: "" });
 // Each type places the item in a section of the public Sandesh page.
@@ -45,7 +46,7 @@ export default function AdminNews() {
   const [statusFilter, setStatusFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const visible = useMemo(() => news.filter((item) => (!statusFilter || item.status === statusFilter) && (!categoryFilter || item.category === categoryFilter)), [news, statusFilter, categoryFilter]);
-  const { search, setSearch, page, setPage, totalPages, totalItems, pageSize, pageItems } = useTableControls(visible, { searchFields: ["title", "titleHi", "body"] });
+  const { search, setSearch, suggestions, page, setPage, totalPages, totalItems, pageSize, pageItems } = useTableControls(visible, { searchFields: ["title", "titleHi", "body"] });
   const statusText = (item) => (scheduled(item) ? `${copy.scheduledFor} ${new Date(item.publishAt).toLocaleString(lang === "hi" ? "hi-IN" : "en-IN")}` : item.status === "Active" ? copy.published : item.status === "Draft" ? copy.draft : copy.archived);
   const fail = (error) => toast({ title: copy.failed, description: error.message, variant: "destructive" });
 
@@ -75,11 +76,11 @@ export default function AdminNews() {
       <div className="flex flex-wrap items-center gap-2">
         {[["", copy.all], ["Active", copy.published], ["Draft", copy.draft], ["Archived", copy.archived]].map(([value, text]) => <button key={value || "all"} type="button" aria-pressed={statusFilter === value} onClick={() => setStatusFilter(value)} className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusFilter === value ? "border-maroon bg-maroon text-cream" : "border-border hover:bg-muted"}`}>{text}</button>)}
         <select aria-label={copy.categoryLabel} value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} className="h-8 rounded-full border border-border bg-card px-3 text-xs"><option value="">{copy.categoryLabel}: {copy.all}</option>{Object.keys(SANDESH_CATEGORIES).map((key) => <option key={key} value={key}>{categoryLabel(key, lang)}</option>)}</select>
-        <div className="min-w-[14rem] flex-1"><SearchBox value={search} onChange={setSearch} placeholder={copy.searchPh} /></div>
+        <div className="min-w-[14rem] flex-1"><SearchBox value={search} onChange={setSearch} suggestions={suggestions} placeholder={copy.searchPh} /></div>
       </div>
       {loading ? <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin" /></div> : totalItems === 0 ? <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">{copy.empty}</div> : pageItems.map((item) => <div key={item.id} className="rounded-2xl border border-gold/30 bg-card p-4"><div className="flex items-start gap-3">
         {item.imageUrl && <img src={item.imageUrl} alt="" className="hidden h-16 w-24 shrink-0 rounded-lg object-cover sm:block" />}
-        <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h2 className="font-semibold text-maroon">{localizedText(item, "title", lang)}</h2><span className="gold-badge text-[0.6rem]">{typeLabel(item.type, lang)}</span>{item.category && <span className="rounded-full bg-muted px-2 py-0.5 text-[0.65rem]">{categoryLabel(item.category, lang)}</span>}</div><p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{localizedText(item, "body", lang)}</p><div className="mt-2 text-xs text-muted-foreground"><span className={item.status === "Active" && !scheduled(item) ? "font-semibold text-emerald-700" : ""}>{statusText(item)}</span> · {item.date ? new Date(item.date).toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN") : ""}{item.author ? ` · ${copy.by} ${item.author}` : ""}</div></div>
+        <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h2 className="font-semibold text-maroon">{localizedText(item, "title", lang)}</h2><span className="gold-badge text-[0.6rem]">{typeLabel(item.type, lang)}</span>{item.category && <span className="rounded-full bg-muted px-2 py-0.5 text-[0.65rem]">{categoryLabel(item.category, lang)}</span>}</div><p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{localizedText(item, "body", lang)}</p><div className="mt-2 text-xs text-muted-foreground"><span className={item.status === "Active" && !scheduled(item) ? "font-semibold text-emerald-700" : ""}>{statusText(item)}</span> · {item.date ? calendarDate(item.date).toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN") : ""}{item.author ? ` · ${copy.by} ${item.author}` : ""}</div></div>
         <div className="flex shrink-0 gap-1"><button onClick={() => togglePublish(item)} className="rounded-full p-2 text-maroon hover:bg-maroon/10" aria-label={item.status === "Active" ? copy.unpublish : copy.publish} title={item.status === "Active" ? copy.unpublish : copy.publish}>{item.status === "Active" ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button><button onClick={() => open(item)} className="rounded-full p-2 text-maroon hover:bg-maroon/10" aria-label={copy.edit}><Pencil className="h-4 w-4" /></button><button onClick={() => remove(item)} className="rounded-full p-2 text-destructive hover:bg-destructive/10" aria-label={copy.deleted}><Trash2 className="h-4 w-4" /></button></div>
       </div></div>)}
       {!loading && totalItems > 0 && <div className="rounded-2xl border border-gold/30 bg-card"><TablePagination page={page} totalPages={totalPages} totalItems={totalItems} pageSize={pageSize} onPageChange={setPage} /></div>}

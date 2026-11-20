@@ -13,7 +13,13 @@ export default function ResetPassword() {
   const t = useT();
   const { lang } = useLang();
   const [searchParams] = useSearchParams();
-  const resetToken = searchParams.get("token");
+  // Reset links carry the token after "#" (/reset-password#token=…), which browsers never send to a server, so it
+  // stays out of server and proxy logs. Older links used ?token=; both work. The token is then removed from the
+  // address bar so it doesn't stay in the browser history.
+  const [resetToken] = useState(() => new URLSearchParams(window.location.hash.slice(1)).get("token") || searchParams.get("token"));
+  React.useEffect(() => {
+    if (resetToken && (window.location.hash || searchParams.get("token"))) window.history.replaceState(null, "", window.location.pathname);
+  }, [resetToken, searchParams]);
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");

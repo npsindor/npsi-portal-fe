@@ -13,6 +13,8 @@ import { useLang, useT } from "@/lib/i18n";
 import { regCopy, translateError } from "@/lib/registration-copy";
 
 const NOT_VERIFIED = "Please verify your account before logging in.";
+// Administrators: after the password, a sign-in code is emailed; the same code step finishes the login.
+const ADMIN_CODE_REQUIRED = "Enter the sign-in code sent to your email to finish logging in.";
 const PORTALS = {
   FAMILY: { en: "Family Member Login", hi: "परिवार सदस्य लॉगिन", icon: LogIn },
   STUDENT: { en: "Student Login", hi: "विद्यार्थी लॉगिन", icon: GraduationCap },
@@ -75,6 +77,10 @@ export default function Login() {
     } catch (err) {
       // Only an unverified account gets the emailed-code step; other 403s are portal or status messages.
       if (err.status === 403 && err.message === NOT_VERIFIED && email.includes("@")) setNeedsCode(true);
+      if (err.status === 403 && err.message === ADMIN_CODE_REQUIRED) {
+        setCode("");
+        setNeedsCode(true);
+      }
       showError(err);
     } finally {
       setLoading(false);
@@ -86,7 +92,11 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      goOn(await base44.auth.verifyOtp({ email: email.trim(), otpCode: code, portal }));
+      // An administrator may have logged in with their mobile: the server accepts that in place of the email.
+      const identifier = email.trim();
+      const digits = identifier.replace(/\D/g, "");
+      const loginId = identifier.includes("@") ? identifier : digits.length >= 10 ? digits.slice(-10) : identifier;
+      goOn(await base44.auth.verifyOtp({ email: loginId, otpCode: code, portal }));
     } catch (err) {
       showError(err);
     } finally {

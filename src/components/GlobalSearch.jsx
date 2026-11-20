@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Search, X } from 'lucide-react';
 import { searchPortal, SEARCH_GROUPS, searchPages } from '@/lib/global-search';
+import { useSiteVisibility } from '@/lib/site-visibility';
 import { useLang } from '@/lib/i18n';
 
 // Header search across the portal: matching pages instantly, then results from the API (debounced), grouped by
@@ -14,17 +15,20 @@ export default function GlobalSearch({ className = '', onNavigate, autoFocus = f
   const [query, setQuery] = useState('');
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
+  // The API could not answer (offline, server error): say so instead of a misleading "no results".
+  const [failed, setFailed] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const hi = lang === 'hi';
 
   useEffect(() => {
     const q = query.trim();
-    if (q.length < 2) { setResults(null); setLoading(false); return undefined; }
+    if (q.length < 2) { setResults(null); setLoading(false); setFailed(false); return undefined; }
     setLoading(true);
+    setFailed(false);
     const controller = new AbortController();
     const timer = setTimeout(() => {
-      searchPortal(q, controller.signal).then((data) => { setResults(data); setLoading(false); }).catch((error) => { if (error.name !== 'AbortError') { setResults({ groups: [] }); setLoading(false); } });
+      searchPortal(q, controller.signal).then((data) => { setResults(data); setLoading(false); }).catch((error) => { if (error.name !== 'AbortError') { setResults({ groups: [] }); setFailed(true); setLoading(false); } });
     }, 300);
     return () => { clearTimeout(timer); controller.abort(); };
   }, [query]);
@@ -34,10 +38,12 @@ export default function GlobalSearch({ className = '', onNavigate, autoFocus = f
     return () => document.removeEventListener('mousedown', close);
   }, []);
 
+  const { isPageVisible, hidden } = useSiteVisibility();
   const groups = useMemo(() => {
-    const pages = searchPages(query, lang);
-    return [...(pages.length ? [{ key: 'pages', items: pages }] : []), ...(results?.groups || [])];
-  }, [query, results, lang]);
+    // Results on a page an admin switched off are left out.
+    const groups = [{ key: 'pages', items: searchPages(query, lang) }, ...(results?.groups || [])];
+    return groups.map((group) => ({ ...group, items: group.items.filter((item) => isPageVisible(item.link)) })).filter((group) => group.items.length);
+  }, [query, results, lang, hidden]);
   const flat = groups.flatMap((group) => group.items);
   const go = (link) => { setOpen(false); setQuery(''); setActive(-1); onNavigate?.(); navigate(link); };
   const showAll = () => { const q = query.trim(); if (q.length >= 2) go(`/search?q=${encodeURIComponent(q)}`); };
@@ -85,7 +91,8 @@ export default function GlobalSearch({ className = '', onNavigate, autoFocus = f
         <p className="px-3 pb-1 pt-2 text-[0.7rem] font-semibold uppercase tracking-wide text-muted-foreground">{SEARCH_GROUPS[group.key]?.[hi ? 1 : 0] || group.key}</p>
         {group.items.map((item) => { index += 1; const position = index; return <button key={`${group.key}-${item.id}`} id={`${listId}-${position}`} type="button" role="option" aria-selected={active === position} onMouseEnter={() => setActive(position)} onClick={() => go(item.link)} className={`block w-full rounded-xl px-3 py-2 text-left text-sm ${active === position ? 'bg-muted' : 'hover:bg-muted'}`}><span className="block truncate font-medium">{label(item)}</span>{item.subtitle && <span className="block truncate text-xs text-muted-foreground">{item.subtitle}</span>}</button>; })}
       </div>)}
-      {!loading && results && groups.length === 0 && <p className="px-3 py-4 text-sm text-muted-foreground">{hi ? `"${q}" के लिए कोई परिणाम नहीं मिला। दूसरे शब्द आज़माएँ।` : `No results for "${q}". Try another word, an area or a Family ID.`}</p>}
+      {!loading && failed && <p role="alert" className="px-3 py-3 text-sm text-destructive">{hi ? 'खोज अभी उपलब्ध नहीं है। थोड़ी देर बाद फिर कोशिश करें।' : 'Search is not available right now. Please try again in a moment.'}</p>}
+      {!loading && !failed && results && groups.length === 0 && <p className="px-3 py-4 text-sm text-muted-foreground">{hi ? `"${q}" के लिए कोई परिणाम नहीं मिला। दूसरे शब्द आज़माएँ।` : `No results for "${q}". Try another word, an area or a Family ID.`}</p>}
       {loading && !groups.length && <p className="flex items-center gap-2 px-3 py-4 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />{hi ? 'खोज रहे हैं…' : 'Searching…'}</p>}
       {groups.length > 0 && <button type="button" onClick={showAll} className="mt-1 block w-full rounded-xl px-3 py-2 text-left text-sm font-semibold text-maroon hover:bg-muted">{hi ? 'सभी परिणाम देखें →' : 'See all results →'}</button>}
     </div>}

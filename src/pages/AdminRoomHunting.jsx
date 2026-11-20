@@ -6,6 +6,7 @@ import { useLang } from '@/lib/i18n';
 import { roomCopy, roomError, rupees } from '@/lib/room-copy';
 import { badge } from '@/components/room/room-ui';
 import SearchBox from '@/components/admin/SearchBox';
+import { suggestValues } from "@/lib/search-suggestions";
 import ExportMenu from '@/components/ExportMenu';
 
 const TABS = ['listings', 'requirements', 'matches', 'audit'];
@@ -53,7 +54,8 @@ export default function AdminRoomHunting() {
   };
   const actions = (kind, row) => {
     const list = row.status === 'PENDING' ? ['APPROVE', 'REJECT'] : ['APPROVED', 'AVAILABLE'].includes(row.status) ? ['DEACTIVATE', 'EXPIRE', 'REJECT'] : ['RESTORE'];
-    return <div className="flex flex-wrap gap-1">{[...list, ...(row.status !== 'ARCHIVED' ? ['ARCHIVE'] : [])].map((decision) => <button key={decision} type="button" className={`${button} ${decision === 'APPROVE' ? 'border-emerald-600 text-emerald-700' : decision === 'REJECT' ? 'text-destructive' : ''}`} disabled={busy === row.id} onClick={() => review(kind, row, decision)}>{c[decision.toLowerCase()]}</button>)}</div>;
+  
+  return <div className="flex flex-wrap gap-1">{[...list, ...(row.status !== 'ARCHIVED' ? ['ARCHIVE'] : [])].map((decision) => <button key={decision} type="button" className={`${button} ${decision === 'APPROVE' ? 'border-emerald-600 text-emerald-700' : decision === 'REJECT' ? 'text-destructive' : ''}`} disabled={busy === row.id} onClick={() => review(kind, row, decision)}>{c[decision.toLowerCase()]}</button>)}</div>;
   };
   const filters = tab === 'listings' ? LISTING_FILTERS : REQUIREMENT_FILTERS;
   const pending = (key) => stats?.[key]?.PENDING || 0;
@@ -67,7 +69,7 @@ export default function AdminRoomHunting() {
     <div role="tablist" className="flex flex-wrap gap-2 border-b border-border">{TABS.map((key) => <button key={key} type="button" role="tab" aria-selected={tab === key} onClick={() => { setTab(key); setStatus(key === 'listings' || key === 'requirements' ? 'PENDING' : ''); }} className={`-mb-px border-b-2 px-3 py-2 text-sm font-semibold ${tab === key ? 'border-maroon text-maroon' : 'border-transparent text-muted-foreground'}`}>{c.tabs[key]}{key === 'listings' && pending('listings') ? ` (${pending('listings')})` : key === 'requirements' && pending('requirements') ? ` (${pending('requirements')})` : ''}</button>)}</div>
     {(tab === 'listings' || tab === 'requirements') && <div className="flex flex-wrap items-center gap-2">
       {filters.map((value) => <button key={value || 'all'} type="button" aria-pressed={status === value} onClick={() => setStatus(value)} className={`rounded-full border px-3 py-1 text-xs font-semibold ${status === value ? 'border-maroon bg-maroon text-cream' : 'border-border hover:bg-muted'}`}>{value ? t.status[value] || value : c.all}{value && stats?.[tab]?.[value] ? ` · ${stats[tab][value]}` : ''}</button>)}
-      <div className="ml-auto flex min-w-[16rem] flex-1 gap-2 sm:flex-none"><SearchBox value={q} onChange={setQ} placeholder={c.search} /><ExportMenu rows={exportRows} filename={`room-hunting-${tab}`} title={c.tabs[tab]} columns={Object.keys(exportRows[0] || {}).map((key) => ({ key, label: key }))} /></div>
+      <div className="ml-auto flex min-w-[16rem] flex-1 gap-2 sm:flex-none"><SearchBox value={q} onChange={setQ} suggestions={suggestValues(Array.isArray(rows) ? rows : rows?.items || [], ["reference", "area", "contactName", "name", "propertyType"], q)} placeholder={c.search} /><ExportMenu rows={exportRows} filename={`room-hunting-${tab}`} title={c.tabs[tab]} columns={Object.keys(exportRows[0] || {}).map((key) => ({ key, label: key }))} /></div>
     </div>}
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     {!rows ? <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div> : rows.length === 0 ? <p className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">{c.empty}</p> : <div className="overflow-x-auto rounded-2xl border border-border bg-card">

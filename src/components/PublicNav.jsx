@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/AuthContext';
 import ThemeToggle from '@/components/ThemeToggle';
 import LanguageToggle from '@/components/LanguageToggle';
 import { publicNavigation } from '@/lib/public-navigation';
+import { useSiteVisibility } from '@/lib/site-visibility';
 import logoImage from '@/images/logo.png';
 import UserMenu from '@/components/UserMenu';
 import GlobalSearch from '@/components/GlobalSearch';
@@ -30,6 +31,11 @@ export default function PublicNav() {
   const searchingRef = useRef(false);
   searchingRef.current = searching;
   const location = useLocation();
+  // Pages an admin switched off leave the menu; a dropdown with nothing left disappears too.
+  const { isPageVisible } = useSiteVisibility();
+  const navigation = publicNavigation
+    .map((item) => (item.items ? { ...item, items: item.items.filter(([, to]) => isPageVisible(to)) } : item))
+    .filter((item) => (item.items ? item.items.length > 0 : isPageVisible(item.to)));
   const header = useRef(null);
   const menuButton = useRef(null);
   const { isAuthenticated } = useAuth();
@@ -88,7 +94,7 @@ export default function PublicNav() {
     <nav id="public-navigation" aria-label={c("Main navigation")} className={`${open ? 'block' : 'hidden'} max-h-[70dvh] overflow-y-auto border-t border-border bg-background xl:block xl:max-h-none xl:overflow-visible xl:border-t-0 xl:bg-maroon`}>
       <div className="relative mx-auto flex max-w-7xl flex-col divide-y divide-border/60 px-4 py-2 sm:px-6 xl:flex-row xl:flex-nowrap xl:items-stretch xl:justify-between xl:divide-y-0 xl:py-0">
         <div className="py-3 xl:hidden"><GlobalSearch onNavigate={() => setOpen(false)} /></div>
-        {publicNavigation.map(item => item.items ? <details key={item.label} className="group relative" onToggle={event => { if (event.currentTarget.open) closeDropdowns(event.currentTarget); }}>
+        {navigation.map(item => item.items ? <details key={item.label} className="group relative" onToggle={event => { if (event.currentTarget.open) closeDropdowns(event.currentTarget); }}>
           <summary aria-current={item.items.some(([, to]) => isCurrent(location.pathname, to)) ? 'page' : undefined} className={`${linkClass} cursor-pointer list-none [&::-webkit-details-marker]:hidden`}>
             {c(item.label)}<ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 opacity-70 transition-transform group-open:rotate-180" />
           </summary>

@@ -21,7 +21,8 @@ export default function ProfileCompletionCard({ completion: given = null, compac
     let alive = true;
     base44.registrations
       .completion()
-      .then((data) => alive && setCompletion(data))
+      // Only a real completion answer is shown; anything else (an older API) leaves the card out instead of breaking the page.
+      .then((data) => alive && typeof data?.percent === "number" && setCompletion(data))
       .catch(() => undefined);
     return () => {
       alive = false;
@@ -39,8 +40,9 @@ export default function ProfileCompletionCard({ completion: given = null, compac
     setShowNudge(true);
   }, [nudge, completion]);
 
-  if (!completion) return null;
-  const { percent, steps, next } = completion;
+  if (!completion || typeof completion.percent !== "number") return null;
+  const { percent, next } = completion;
+  const steps = Array.isArray(completion.steps) ? completion.steps : [];
   const stepLabel = (step) => t[`step_${step.key}`] || step.key;
 
   return (

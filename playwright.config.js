@@ -2,7 +2,8 @@ import { defineConfig, devices } from '@playwright/test';
 
 // Browser tests: the built app, served by `vite preview`, with every API call
 // answered by the test (tests/browser/mock-api.js), so no backend is needed.
-const PORT = 4173;
+// PLAYWRIGHT_PORT picks another port when 4173 is taken on this machine.
+const PORT = Number(process.env.PLAYWRIGHT_PORT) || 4173;
 const ORIGIN = `http://127.0.0.1:${PORT}`;
 
 export default defineConfig({

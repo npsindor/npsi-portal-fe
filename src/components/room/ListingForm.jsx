@@ -7,13 +7,14 @@ import { comboCopy, optionList, roomError } from '@/lib/room-copy';
 import { field, label, primary, secondary } from '@/components/room/room-ui';
 
 const MAX_PHOTO = 5 * 1024 * 1024;
+const MAX_PHOTOS = 6;
 const blank = (user) => ({
-  propertyType: '', availableFor: 'ANY', rentAmount: '', area: '', address: '', showAddress: false, availableFrom: '', description: '', photoUrl: '',
+  propertyType: '', availableFor: 'ANY', rentAmount: '', area: '', address: '', showAddress: false, availableFrom: '', description: '', photoUrls: [],
   contactName: user?.fullName || '', contactMobile: user?.phone || '', contactEmail: user?.email || '', showMobile: true, showEmail: false, ownerConfirmed: false,
 });
 const fromListing = (row) => ({
   propertyType: row.propertyType, availableFor: row.availableFor, rentAmount: String(row.rentAmount), area: row.area, address: row.address || '', showAddress: row.showAddress,
-  availableFrom: row.availableFrom || '', description: row.description || '', photoUrl: row.photoUrl || '', contactName: row.contactName, contactMobile: row.contactMobile,
+  availableFrom: row.availableFrom || '', description: row.description || '', photoUrls: row.photos?.length ? row.photos : row.photoUrl ? [row.photoUrl] : [], contactName: row.contactName, contactMobile: row.contactMobile,
   contactEmail: row.contactEmail || '', showMobile: row.showMobile, showEmail: row.showEmail, ownerConfirmed: true,
 });
 
@@ -26,22 +27,31 @@ export default function ListingForm({ t, lang, user, options, listing, onSaved, 
   const requestId = useRef(crypto.randomUUID());
   const set = (key, value) => { setForm((current) => ({ ...current, [key]: value })); setError(''); };
 
-  const upload = async (file) => {
-    if (!file) return;
-    if (!/^image\/(jpe?g|png|webp)$/i.test(file.type)) return setError(lang === 'hi' ? 'केवल जेपीजी, पीएनजी या वेबपी फोटो।' : 'Only JPG, PNG or WebP photos.');
-    if (file.size > MAX_PHOTO) return setError(lang === 'hi' ? 'फोटो 5 एमबी से बड़ी नहीं होनी चाहिए।' : 'The photo must be 5 MB or smaller.');
+  const upload = async (files) => {
+    const list = [...(files || [])];
+    if (!list.length) return;
+    if (form.photoUrls.length + list.length > MAX_PHOTOS) return setError(t.photoLimit);
+    if (list.some((file) => !/^image\/(jpe?g|png|webp)$/i.test(file.type))) return setError(lang === 'hi' ? 'केवल जेपीजी, पीएनजी या वेबपी फोटो।' : 'Only JPG, PNG or WebP photos.');
+    if (list.some((file) => file.size > MAX_PHOTO)) return setError(lang === 'hi' ? 'हर फोटो 5 एमबी से बड़ी नहीं होनी चाहिए।' : 'Each photo must be 5 MB or smaller.');
     setUploading(true);
-    try { const { fileUrl } = await base44.integrations.Core.UploadPublicFile({ file }); set('photoUrl', fileUrl); }
-    catch (cause) { setError(roomError(t, cause)); }
+    try {
+      for (const file of list) {
+        const { fileUrl } = await base44.integrations.Core.UploadPublicFile({ file });
+        setForm((current) => ({ ...current, photoUrls: [...current.photoUrls, fileUrl].slice(0, MAX_PHOTOS) }));
+      }
+      setError('');
+    } catch (cause) { setError(roomError(t, cause)); }
     finally { setUploading(false); }
   };
+  const removePhoto = (url) => set('photoUrls', form.photoUrls.filter((item) => item !== url));
+  const makeCover = (url) => set('photoUrls', [url, ...form.photoUrls.filter((item) => item !== url)]);
 
   const submit = async (event) => {
     event.preventDefault();
     if (busy) return;
     const rent = Number(form.rentAmount);
     if (!form.propertyType.trim() || !form.area.trim() || form.rentAmount === '' || !Number.isInteger(rent) || rent < 0 || !form.contactName.trim() || !form.contactMobile.trim() || !form.ownerConfirmed) return setError(t.required);
-    const body = { ...form, rentAmount: rent, clientRequestId: requestId.current, showEmail: form.showEmail && Boolean(form.contactEmail.trim()) };
+    const body = { ...form, photoUrl: form.photoUrls[0] || '', rentAmount: rent, clientRequestId: requestId.current, showEmail: form.showEmail && Boolean(form.contactEmail.trim()) };
     setBusy(true);
     try {
       const saved = listing ? await roomApi.updateListing(listing.id, body) : await roomApi.addListing(body);
@@ -68,9 +78,15 @@ export default function ListingForm({ t, lang, user, options, listing, onSaved, 
 
     <div><span className={label}>{t.photo}</span><p className="text-xs text-muted-foreground">{t.photoHint}</p>
       <div className="mt-2 flex flex-wrap items-center gap-3">
-        {form.photoUrl ? <img src={form.photoUrl} alt="" className="h-24 w-32 rounded-xl border border-border object-cover" /> : <div className="flex h-24 w-32 items-center justify-center rounded-xl border border-dashed border-border text-muted-foreground"><ImagePlus className="h-6 w-6" /></div>}
-        <label className={`${secondary} cursor-pointer`}>{uploading ? <><Loader2 className="h-4 w-4 animate-spin" />{t.uploading}</> : form.photoUrl ? t.replacePhoto : t.uploadPhoto}<input type="file" className="sr-only" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ''; upload(file); }} /></label>
-        {form.photoUrl && <button type="button" className={secondary} onClick={() => set('photoUrl', '')}><Trash2 className="h-4 w-4" />{t.removePhoto}</button>}
+        {form.photoUrls.map((url, n) => <figure key={url} className="relative">
+          <img src={url} alt={t.photoOf(n + 1, form.photoUrls.length)} className={`h-24 w-32 rounded-xl border object-cover ${n === 0 ? 'border-maroon ring-2 ring-maroon/30' : 'border-border'}`} />
+          <figcaption className="mt-1 flex justify-between gap-1 text-xs">
+            {n === 0 ? <span className="font-semibold text-maroon">{lang === 'hi' ? 'कवर' : 'Cover'}</span> : <button type="button" className="text-maroon hover:underline" onClick={() => makeCover(url)}>{t.makeCover}</button>}
+            <button type="button" className="text-destructive hover:underline" aria-label={`${t.removePhoto} ${n + 1}`} onClick={() => removePhoto(url)}><Trash2 className="h-3.5 w-3.5" /></button>
+          </figcaption>
+        </figure>)}
+        {form.photoUrls.length === 0 && <div className="flex h-24 w-32 items-center justify-center rounded-xl border border-dashed border-border text-muted-foreground"><ImagePlus className="h-6 w-6" /></div>}
+        {form.photoUrls.length < MAX_PHOTOS && <label className={`${secondary} cursor-pointer`}>{uploading ? <><Loader2 className="h-4 w-4 animate-spin" />{t.uploading}</> : form.photoUrls.length ? t.addPhoto : t.uploadPhoto}<input type="file" multiple className="sr-only" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(e) => { const files = [...(e.target.files || [])]; e.target.value = ''; upload(files); }} /></label>}
       </div>
     </div>
 

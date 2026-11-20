@@ -5,6 +5,7 @@ import PublicNav from '@/components/PublicNav';
 import PublicFooter from '@/components/PublicFooter';
 import GlobalSearch from '@/components/GlobalSearch';
 import { SEARCH_GROUPS, searchPages, searchPortal } from '@/lib/global-search';
+import { useSiteVisibility } from '@/lib/site-visibility';
 import { useLang } from '@/lib/i18n';
 
 // Full results for a header search ("See all results" or Enter), grouped by category.
@@ -19,19 +20,22 @@ export default function SearchResults() {
     if (q.length < 2) { setResults({ groups: [] }); return undefined; }
     const controller = new AbortController();
     setResults(null);
-    searchPortal(q, controller.signal).then(setResults).catch((error) => { if (error.name !== 'AbortError') setResults({ groups: [] }); });
+    searchPortal(q, controller.signal).then(setResults).catch((error) => { if (error.name !== 'AbortError') setResults({ groups: [], failed: true }); });
     return () => controller.abort();
   }, [q]);
+  const { isPageVisible, hidden } = useSiteVisibility();
   const groups = useMemo(() => {
-    const pages = searchPages(q, lang);
-    return [...(pages.length ? [{ key: 'pages', items: pages }] : []), ...(results?.groups || [])];
-  }, [q, results, lang]);
+    // Results on a page an admin switched off are left out.
+    const groups = [{ key: 'pages', items: searchPages(q, lang) }, ...(results?.groups || [])];
+    return groups.map((group) => ({ ...group, items: group.items.filter((item) => isPageVisible(item.link)) })).filter((group) => group.items.length);
+  }, [q, results, lang, hidden]);
   return <div className="min-h-screen bg-background"><PublicNav />
     <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
       <h1 className="flex items-center gap-2 font-display text-3xl font-semibold"><Search className="h-7 w-7 text-maroon" />{hi ? 'खोज परिणाम' : 'Search results'}</h1>
       <GlobalSearch className="mt-5 max-w-xl" />
       {q && <p className="mt-4 text-sm text-muted-foreground">{hi ? `"${q}" के परिणाम` : `Results for "${q}"`}</p>}
       {!results ? <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-maroon" /></div>
+        : results.failed && groups.length === 0 ? <p role="alert" className="mt-8 rounded-2xl border border-destructive/30 p-8 text-center text-sm text-destructive">{hi ? 'खोज अभी उपलब्ध नहीं है। थोड़ी देर बाद फिर कोशिश करें।' : 'Search is not available right now. Please try again in a moment.'}</p>
         : groups.length === 0 ? <p className="mt-8 rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">{q.length < 2 ? (hi ? 'कम से कम 2 अक्षर लिखें।' : 'Type at least 2 characters.') : hi ? 'कोई परिणाम नहीं मिला। दूसरे शब्द, क्षेत्र या फैमिली आईडी आज़माएँ।' : 'No results found. Try another word, an area or a Family ID.'}</p>
         : <div className="mt-6 space-y-6">{groups.map((group) => <section key={group.key} aria-labelledby={`group-${group.key}`}>
           <h2 id={`group-${group.key}`} className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{SEARCH_GROUPS[group.key]?.[hi ? 1 : 0] || group.key}</h2>

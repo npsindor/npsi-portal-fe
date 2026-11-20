@@ -61,6 +61,7 @@ export const API = {
     family: `${API_PREFIX}/me/family`,
     feedback: `${API_PREFIX}/me/feedback`,
     eventRegistrations: `${API_PREFIX}/me/event-registrations`,
+    transferRequests: `${API_PREFIX}/me/transfer-requests`,
     registrations: `${API_PREFIX}/me/registrations`,
     registration: (id) => `${API_PREFIX}/me/registrations/${encodeURIComponent(id)}`,
     paymentScreenshots: `${API_PREFIX}/me/payment-screenshots`,
@@ -69,6 +70,12 @@ export const API = {
   registrationPayments: `${API_PREFIX}/registration-payments`,
   registrationPaymentReview: (id) => `${API_PREFIX}/registration-payments/${encodeURIComponent(id)}/review`,
   registrationPaymentScreenshot: (id) => `${API_PREFIX}/registration-payments/${encodeURIComponent(id)}/screenshot`,
+  // Admin dashboard charts (monthly transactions, users, registrations).
+  adminDashboardCharts: `${API_PREFIX}/admin-dashboard/charts`,
+  // Role-based admin access (Admin → Assign roles): list, candidates, PUT / DELETE /:userId.
+  adminAccess: `${API_PREFIX}/admin-access`,
+  // Pages / homepage sections switched off by an admin (GET: public; PUT: admin).
+  siteVisibility: `${API_PREFIX}/site-visibility`,
   addressOptions: `${API_PREFIX}/address-options`,
   addressOptionsAll: `${API_PREFIX}/address-options/all`,
   addressOption: (id) => `${API_PREFIX}/address-options/${encodeURIComponent(id)}`,

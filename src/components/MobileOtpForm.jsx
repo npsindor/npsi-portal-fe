@@ -110,7 +110,7 @@ export default function MobileOtpForm({ purpose = "REGISTER", askEmail = false, 
                 required
               />
             </div>
-            <p className="text-xs text-muted-foreground">{t.mobileHint}</p>
+            <p className="text-xs text-muted-foreground">{askEmail ? t.mobileHintEmail : t.mobileHint}</p>
           </div>
           {askEmail && (
             <div className="space-y-2">
@@ -132,6 +132,7 @@ export default function MobileOtpForm({ purpose = "REGISTER", askEmail = false, 
           <p role="status" className="text-sm text-muted-foreground">
             {fill(t.codeSentTo, { mobile: `+91 ${digits}`, channel: t[sent.channel] || sent.channel })}
             {purpose === "RESET" && sent.channel !== "EMAIL" && <span className="mt-1 block">{t.resetCodeEmailCopy}</span>}
+            {purpose === "REGISTER" && sent.channel === "EMAIL" && <span className="mt-1 block">{t.emailedMobileUnverified}</span>}
           </p>
           <div className="space-y-2">
             <Label htmlFor="otp-code">{t.enterCode}</Label>

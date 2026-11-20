@@ -4,12 +4,14 @@ import { API } from '@/api/endpoints';
 import { API_BASE_URL } from '@/api/apiBaseUrl';
 import { useLang } from '@/lib/i18n';
 import SearchBox from '@/components/admin/SearchBox';
+import { suggestValues } from "@/lib/search-suggestions";
 import { apiFetch } from '@/api/base44Client';
 
 const STATUSES = ['OPEN', 'COMPLETED', 'CANCELLED', 'CLOSED', 'ARCHIVED'];
 const call = async (path, options = {}) => {
   const response = await apiFetch(`${API_BASE_URL}${API.safar}${path}`, { credentials: 'include', ...options, headers: { 'Content-Type': 'application/json' } });
   if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || `HTTP ${response.status}`);
+
   return response.json();
 };
 const words = {
@@ -46,7 +48,7 @@ export default function AdminTransportation() {
     <div className="flex flex-wrap items-center gap-2">
       {['', ...STATUSES].map((value) => <button key={value || 'all'} type="button" aria-pressed={status === value} onClick={() => setStatus(value)} className={`rounded-full border px-3 py-1 text-xs font-semibold ${status === value ? 'border-maroon bg-maroon text-cream' : 'border-border hover:bg-muted'}`}>{value ? t.status[value] : t.all}</button>)}
       <select aria-label={t.any} value={kind} onChange={(event) => setKind(event.target.value)} className="h-8 rounded-full border border-border bg-card px-3 text-xs"><option value="">{t.any}</option><option value="REQUEST">{t.requests}</option><option value="OFFER">{t.offers}</option></select>
-      <div className="min-w-[14rem] flex-1"><SearchBox value={q} onChange={setQ} placeholder={t.search} /></div>
+      <div className="min-w-[14rem] flex-1"><SearchBox value={q} onChange={setQ} suggestions={suggestValues(rows || [], ["name", "phone", "origin", "destination"], q)} placeholder={t.search} /></div>
     </div>
     {message && <p role="status" className="text-sm text-emerald-700">{message}</p>}
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}

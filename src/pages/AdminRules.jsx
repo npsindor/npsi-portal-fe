@@ -32,7 +32,7 @@ export default function AdminRules() {
   const openNew = () => setEditing({ sectionNumber: rules.length + 1, status: "Active" });
   const openEdit = (r) => setEditing({ ...r });
 
-  const { search, setSearch, page, setPage, totalPages, totalItems, pageSize, pageItems } = useTableControls(rules, {
+  const { search, setSearch, suggestions, page, setPage, totalPages, totalItems, pageSize, pageItems } = useTableControls(rules, {
     searchFields: ["titleEn", "titleHi"],
   });
 
@@ -94,7 +94,7 @@ export default function AdminRules() {
       </div>
 
       <div className="mt-6">
-        {!loading && rules.length > 0 && <SearchBox value={search} onChange={setSearch} placeholder={t("rulesAdmin.searchPh")} className="mb-4" />}
+        {!loading && rules.length > 0 && <SearchBox value={search} onChange={setSearch} suggestions={suggestions} placeholder={t("rulesAdmin.searchPh")} className="mb-4" />}
         {loading ? (
           <div className="flex items-center justify-center py-16 text-muted-foreground">
             <Loader2 className="h-6 w-6 animate-spin mr-2" /> {t("rules.loading")}

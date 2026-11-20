@@ -37,9 +37,11 @@ ErrorDocument 404 /index.html
   # No camera, microphone, location or payment APIs for the page or anything it embeds.
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
   Header always set Cross-Origin-Opener-Policy "same-origin"
-  # Content Security Policy in report-only mode first: check the browser console on the live site for
-  # "[Report Only]" violations, then rename the header to Content-Security-Policy to enforce it.
-  Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' https://www.google.com https://www.gstatic.com https://www.recaptcha.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://*.npsindore.org https://i.ytimg.com https://static.wixstatic.com https://media.base44.com; connect-src 'self' https://*.npsindore.org https://api.postalpincode.in https://www.google.com; frame-src https://www.youtube-nocookie.com https://www.google.com https://www.recaptcha.net; media-src 'self' https://*.npsindore.org; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+  # Content Security Policy, enforced. Scripts only from this site and Google reCAPTCHA; styles and fonts from this
+  # site and Google Fonts (the printable finance reports); images from this site or any HTTPS host (admins link
+  # pictures); API calls only to *.npsindore.org and the pincode lookup. Checked with the built app in Chrome,
+  # Firefox and Safari before switching from report-only (tests/browser/csp.spec.js uses the same policy).
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' https://www.google.com https://www.gstatic.com https://www.recaptcha.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.npsindore.org https://api.postalpincode.in https://www.google.com; frame-src https://www.youtube-nocookie.com https://www.google.com https://www.recaptcha.net; media-src 'self' https://*.npsindore.org; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
 </IfModule>
 
 # Never serve source maps, dotfiles or backups if one ever lands in the web root.

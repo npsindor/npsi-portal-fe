@@ -3,21 +3,23 @@ import PhotoGallery from '@/components/PhotoGallery';
 import { Link } from 'react-router-dom';
 import { ArrowRight, HeartHandshake, BriefcaseBusiness } from 'lucide-react';
 import { services, careers } from '@/lib/community-content';
+import { HomeSection } from '@/lib/site-visibility';
 
 // `afterServices` is rendered right after the "Explore Community Services" block (the homepage puts Community highlights there).
 export default function CommunityHighlights({ afterServices = null }) {
   const c = usePublicCopy();
+  // Each block is a homepage section an admin can switch off (Admin → Page visibility).
   return <>
-    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+    <HomeSection id="community"><section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
       <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{c("Support \u2022 Opportunity \u2022 Togetherness")}</span>
       <h2 className="mt-3 section-title">{c("Explore Community Services")}</h2>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{c("Connecting people with resources, mutual assistance, and opportunities to contribute.")}</p>
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{services.map(([id, title, description]) => <Link key={id} to={id === "rent-property" ? "/room-hunting" : `/community-services#${id}`} className="premium-card group p-6"><HeartHandshake className="h-7 w-7 text-gold" /><h3 className="mt-4 font-semibold">{c(title)}</h3><p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{c(description)}</p><span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold">{c("Learn More")} <ArrowRight className="h-4 w-4" /></span></Link>)}</div>
-    </section>
+    </section></HomeSection>
     {afterServices}
-    <section className="border-y border-border bg-card"><div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16"><h2 className="section-title">{c("Opportunities Grow When We Connect.")}</h2><p className="mt-3 text-sm text-muted-foreground">{c("Career & Business \u2014 encouraging learning, skills, and professional growth.")}</p><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{careers.map(([id, title, description]) => <Link key={id} to={`/career-business#${id}`} className="rounded-xl border border-border p-6 hover:border-gold"><BriefcaseBusiness className="h-6 w-6 text-gold" /><h3 className="mt-4 font-semibold">{c(title)}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c(description)}</p></Link>)}</div></div></section>
-    <PhotoGallery />
-    <section className="border-t border-gold/30 bg-card px-4 py-12 text-center"><h2 className="section-title">{c("Your Suggestions Help Us Improve.")}</h2><p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">{c("Share ideas to strengthen our community initiatives and make our digital services more useful.")}</p><Link to="/public-feedback" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-maroon px-6 py-3 text-sm font-semibold text-cream">{c("Share Feedback")} <ArrowRight className="h-4 w-4" /></Link></section>
+    <HomeSection id="career"><section className="border-y border-border bg-card"><div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16"><h2 className="section-title">{c("Opportunities Grow When We Connect.")}</h2><p className="mt-3 text-sm text-muted-foreground">{c("Career & Business \u2014 encouraging learning, skills, and professional growth.")}</p><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{careers.map(([id, title, description]) => <Link key={id} to={`/career-business#${id}`} className="rounded-xl border border-border p-6 hover:border-gold"><BriefcaseBusiness className="h-6 w-6 text-gold" /><h3 className="mt-4 font-semibold">{c(title)}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c(description)}</p></Link>)}</div></div></section></HomeSection>
+    <HomeSection id="gallery"><PhotoGallery /></HomeSection>
+    <HomeSection id="feedback"><section className="border-t border-gold/30 bg-card px-4 py-12 text-center"><h2 className="section-title">{c("Your Suggestions Help Us Improve.")}</h2><p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">{c("Share ideas to strengthen our community initiatives and make our digital services more useful.")}</p><Link to="/public-feedback" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-maroon px-6 py-3 text-sm font-semibold text-cream">{c("Share Feedback")} <ArrowRight className="h-4 w-4" /></Link></section></HomeSection>
   </>;
 }
 

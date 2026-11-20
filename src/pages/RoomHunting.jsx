@@ -17,6 +17,8 @@ import { roomApi } from '@/api/roomHuntingApi';
 import { useAuth } from '@/lib/AuthContext';
 import { useLang } from '@/lib/i18n';
 import { roomCopy } from '@/lib/room-copy';
+import SuggestSearchInput from '@/components/SuggestSearchInput';
+import { suggestValues } from '@/lib/search-suggestions';
 
 const EMPTY = { type: '', area: '', maxRent: '', q: '' };
 
@@ -99,7 +101,7 @@ export default function RoomHunting() {
         <label className="text-xs font-semibold text-muted-foreground">{t.type}<select aria-label={t.type} className={field} value={draft.type} onChange={(e) => setDraft({ ...draft, type: e.target.value })}><option value="">{t.anyType}</option>{typeOptions.map((option) => <option key={option.value} value={option.value}>{lang === 'hi' ? option.hi : option.value}</option>)}</select></label>
         <label className="text-xs font-semibold text-muted-foreground">{t.area}<select aria-label={t.area} className={field} value={draft.area} onChange={(e) => setDraft({ ...draft, area: e.target.value })}><option value="">{t.anyArea}</option>{areaOptions.map((option) => <option key={option.value} value={option.value}>{lang === 'hi' ? option.hi : option.value}</option>)}</select></label>
         <label className="text-xs font-semibold text-muted-foreground">{t.maxRent}<input aria-label={t.maxRent} className={field} type="number" inputMode="numeric" min="0" value={draft.maxRent} onChange={(e) => setDraft({ ...draft, maxRent: e.target.value })} /></label>
-        <label className="text-xs font-semibold text-muted-foreground">{t.search}<input aria-label={t.search} className={field} type="search" maxLength={100} value={draft.q} onChange={(e) => setDraft({ ...draft, q: e.target.value })} /></label>
+        <div className="text-xs font-semibold text-muted-foreground"><label htmlFor="room-search">{t.search}</label><SuggestSearchInput id="room-search" ariaLabel={t.search} maxLength={100} icon={false} inputClassName={field} value={draft.q} onChange={(v) => setDraft((d) => ({ ...d, q: v }))} suggestions={suggestValues(data.items, ['area', 'propertyType'], draft.q)} /></div>
         <div className="flex items-end gap-2"><button type="submit" className={primary}><Search className="h-4 w-4" />{t.search}</button></div>
       </form>
 

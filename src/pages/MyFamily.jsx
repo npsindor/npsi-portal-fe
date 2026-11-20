@@ -10,6 +10,7 @@ import { useLang } from "@/lib/i18n";
 import { resolveMyFamily } from "@/lib/resolveMyFamily";
 import { sagunApi } from "@/api/sagunApi";
 import { isPastBirthDate, latestBirthDate } from "@/lib/dates";
+import { translateError } from "@/lib/registration-copy";
 
 const relationships = ["Spouse", "Son", "Daughter", "Father", "Mother", "Brother", "Sister", "Other"];
 const genders = ["Male", "Female", "Other"];
@@ -75,7 +76,9 @@ const L = {
     updated: "Member updated",
     updatedDesc: "updated.",
     added: "Member added",
-    addedDesc: "added to your family.",
+    addedDesc: "added. The Sangathan will approve the new member shortly.",
+    pendingNote: "Waiting for admin approval. Until then this member can't be registered for events or Shagun Bandhan.",
+    transferPending: "Transfer request pending",
     failUpdate: "Failed to update member",
     failAdd: "Failed to add member",
     removed: "Member removed",
@@ -133,7 +136,9 @@ const L = {
     updated: "सदस्य अपडेट हुआ",
     updatedDesc: "अपडेट हुआ।",
     added: "सदस्य जोड़ा गया",
-    addedDesc: "आपके परिवार में जोड़ा गया।",
+    addedDesc: "जोड़ा गया। संगठन जल्द ही नए सदस्य को स्वीकृति देगा।",
+    pendingNote: "प्रशासक की स्वीकृति की प्रतीक्षा है। तब तक यह सदस्य कार्यक्रम या शगुन बंधन में पंजीकृत नहीं हो सकता।",
+    transferPending: "ट्रांसफर अनुरोध लंबित है",
     failUpdate: "सदस्य अपडेट करने में विफल",
     failAdd: "सदस्य जोड़ने में विफल",
     removed: "सदस्य हटाया गया",
@@ -170,6 +175,7 @@ function validDob(dob, t) {
 export default function MyFamily() {
   const { user } = useAuth();
   const { lang } = useLang();
+  const [openTransfers, setOpenTransfers] = useState([]);
   const t = L[lang];
   const { toast } = useToast();
   const [family, setFamily] = useState(null);
@@ -200,11 +206,16 @@ export default function MyFamily() {
       const { family: mine, members: mems } = await resolveMyFamily(user);
       setFamily(mine);
       setMembers(mems);
+      // Undecided transfer requests: one member can have only one at a time.
+      setOpenTransfers(await base44.me.transferRequests().catch(() => []));
     } catch {} finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, [user]);
   useEffect(() => { if (family) loadSagun(); }, [family, members, loadSagun]);
+
+  const transferMember = members.find((m) => m.relationship === "Head") || members[0];
+  const transferPending = transferMember ? openTransfers.find((row) => row.sourceMembershipId === transferMember.membershipId) : null;
 
   const toggleSagun = async (member, info, on) => {
     const application = info.application;
@@ -275,7 +286,6 @@ export default function MyFamily() {
         education: form.education,
         occupation: form.occupation,
         address: form.address,
-        status: "ACTIVE",
       };
       if (editing) {
         await base44.entities.FamilyMember.update(editing.id, payload);
@@ -290,7 +300,7 @@ export default function MyFamily() {
       setShowForm(false);
       load();
     } catch (err) {
-      toast({ title: editing ? t.failUpdate : t.failAdd, description: err.message, variant: "destructive" });
+      toast({ title: editing ? t.failUpdate : t.failAdd, description: translateError(err.message, lang), variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -332,9 +342,15 @@ export default function MyFamily() {
           <button onClick={openAdd} className="inline-flex items-center justify-center gap-1.5 rounded-full bg-maroon px-5 py-2.5 text-sm font-semibold text-cream shadow-sm transition hover:bg-maroon-dark">
             <UserPlus className="h-4 w-4" /> {t.addMember}
           </button>
-          <button onClick={() => setShowTransfer(true)} className="inline-flex items-center justify-center gap-1.5 rounded-full border border-gold/50 px-5 py-2.5 text-sm font-semibold text-maroon transition hover:bg-gold/10">
-            <ArrowRightLeft className="h-4 w-4" /> {t.requestTransfer}
-          </button>
+          {transferPending ? (
+            <span role="status" className="inline-flex items-center justify-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-5 py-2.5 text-sm font-semibold text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200">
+              <ArrowRightLeft className="h-4 w-4" /> {t.transferPending} ({transferPending.requestId})
+            </span>
+          ) : (
+            <button onClick={() => setShowTransfer(true)} className="inline-flex items-center justify-center gap-1.5 rounded-full border border-gold/50 px-5 py-2.5 text-sm font-semibold text-maroon transition hover:bg-gold/10">
+              <ArrowRightLeft className="h-4 w-4" /> {t.requestTransfer}
+            </button>
+          )}
         </div>
       </div>
 
@@ -353,6 +369,7 @@ export default function MyFamily() {
               </div>
               <StatusBadge status={m.status} />
             </div>
+            {m.status === "PENDING" && <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">{t.pendingNote}</p>}
             <div className="mt-4 space-y-1.5 text-xs text-muted-foreground">
               {m.dob && <div className="flex items-center gap-1.5"><span className="font-medium text-foreground/70">{t.dob}:</span> {new Date(m.dob).toLocaleDateString(locale)}</div>}
               {m.mobile && <div className="flex items-center gap-1.5"><Phone className="h-3 w-3 text-gold" /> {m.mobile}</div>}
@@ -473,9 +490,9 @@ export default function MyFamily() {
       <RequestTransferModal
         open={showTransfer}
         onClose={() => setShowTransfer(false)}
+        onSubmitted={(created) => setOpenTransfers((rows) => [created, ...rows])}
         family={family}
-        membershipId={members.find((m) => m.relationship === "Head")?.membershipId || members[0]?.membershipId}
-        memberName={members.find((m) => m.relationship === "Head")?.name || members[0]?.name}
+        membershipId={transferMember?.membershipId}
       />
     </div>
   );

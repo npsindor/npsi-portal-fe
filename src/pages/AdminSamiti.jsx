@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Search, Users, X, Plus, Pencil, Trash2, Loader2, Landmark, Phone, Mail } from "lucide-react";
+import { Users, X, Plus, Pencil, Trash2, Loader2, Landmark, Phone, Mail } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
 import { base44 } from "@/api/base44Client";
+import SearchBox from "@/components/admin/SearchBox";
 import { useToast } from "@/components/ui/use-toast";
 import { useLang } from "@/lib/i18n";
 import { sanitizeMobile } from "@/lib/utils";
+import RegisteredPersonInput from "@/components/admin/RegisteredPersonInput";
 import { useTableControls } from "@/lib/useTableControls";
 import TablePagination from "@/components/admin/TablePagination";
 
@@ -235,7 +237,7 @@ export default function AdminSamiti() {
     }
   };
 
-  const { search, setSearch, page, setPage, totalPages, totalItems, pageSize, pageItems: filtered } = useTableControls(samitis, {
+  const { search, setSearch, suggestions, page, setPage, totalPages, totalItems, pageSize, pageItems: filtered } = useTableControls(samitis, {
     searchFields: ["name"],
     pageSize: 9,
   });
@@ -257,15 +259,7 @@ export default function AdminSamiti() {
         </button>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder={t.searchPh}
-          className="w-full rounded-full border border-gold/40 bg-card py-2.5 pl-10 pr-4 text-sm outline-none focus:border-maroon"
-        />
-      </div>
+      <SearchBox value={search} onChange={setSearch} suggestions={suggestions} placeholder={t.searchPh} />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((s) => (
@@ -388,7 +382,7 @@ export default function AdminSamiti() {
               <button onClick={() => setMemEditing(null)} className="rounded-full p-1.5 hover:bg-muted"><X className="h-4 w-4" /></button>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div className="sm:col-span-2"><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.memberName} *</label><input value={memEditing.name} onChange={(e) => setMemEditing({ ...memEditing, name: e.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div className="sm:col-span-2"><label htmlFor="samiti-member-name" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.memberName} *</label><RegisteredPersonInput id="samiti-member-name" value={memEditing.name} onChange={(v) => setMemEditing((m) => ({ ...m, name: v }))} onPick={(person) => setMemEditing((m) => ({ ...m, name: person.name, mobile: person.mobile || m.mobile, email: person.email || m.email }))} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.position}</label><input value={memEditing.position} onChange={(e) => setMemEditing({ ...memEditing, position: e.target.value })} placeholder={t.posPh} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.memberStatus}</label>
                 <select value={memEditing.status} onChange={(e) => setMemEditing({ ...memEditing, status: e.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">

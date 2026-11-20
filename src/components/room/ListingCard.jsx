@@ -1,13 +1,14 @@
 import { CalendarDays, Mail, MapPin, Phone } from 'lucide-react';
 import { badge, secondary } from '@/components/room/room-ui';
 import { rupees } from '@/lib/room-copy';
+import PhotoCarousel from '@/components/room/PhotoCarousel';
 
 const dateText = (value, lang) => (value ? new Date(value).toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
 
 // A public listing: only what the owner chose to show; enquiry button when contacts are hidden.
 export default function ListingCard({ listing, t, lang, onEnquire, actions }) {
   return <article className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card">
-    {listing.photoUrl && <img src={listing.photoUrl} alt="" loading="lazy" className="aspect-[16/9] w-full object-cover" />}
+    <PhotoCarousel photos={listing.photos?.length ? listing.photos : listing.photoUrl ? [listing.photoUrl] : []} t={t} alt={`${listing.propertyType}, ${listing.area}`} />
     <div className="flex flex-1 flex-col gap-2 p-4">
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-semibold text-foreground">{listing.propertyType}</h3>

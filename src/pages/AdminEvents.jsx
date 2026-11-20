@@ -238,7 +238,7 @@ export default function AdminEvents() {
     }
   };
 
-  const { search, setSearch, page, setPage, totalPages, totalItems, pageSize, pageItems } = useTableControls(events, {
+  const { search, setSearch, suggestions, page, setPage, totalPages, totalItems, pageSize, pageItems } = useTableControls(events, {
     searchFields: ["title", "venue"],
     pageSize: 9,
   });
@@ -260,7 +260,7 @@ export default function AdminEvents() {
       </div>
 
       <div className="rounded-2xl border border-gold/30 bg-card p-4"><p className="text-sm leading-relaxed text-muted-foreground">{t.publishHint}</p><button type="button" onClick={openDeepotsav} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full border border-gold/50 px-4 py-2 text-sm font-semibold text-maroon"><Plus className="h-4 w-4" />{t.deepotsav}</button></div>
-      <SearchBox value={search} onChange={setSearch} placeholder={t.searchPh} />
+      <SearchBox value={search} onChange={setSearch} suggestions={suggestions} placeholder={t.searchPh} />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {pageItems.map((ev) => (

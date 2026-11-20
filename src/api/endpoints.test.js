@@ -31,6 +31,7 @@ describe('API endpoints', () => {
       family: '/api/v1/me/family',
       feedback: '/api/v1/me/feedback',
       eventRegistrations: '/api/v1/me/event-registrations',
+      transferRequests: '/api/v1/me/transfer-requests',
       registrations: '/api/v1/me/registrations',
       paymentScreenshots: '/api/v1/me/payment-screenshots',
       profileCompletion: '/api/v1/me/profile-completion',

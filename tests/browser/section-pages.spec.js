@@ -31,15 +31,15 @@ const POSTS = [
 ];
 
 for (const width of [390, 1280]) {
-  test(`${width}px: every header menu item reaches its page; related services are grouped in three small dropdowns`, async ({ page }) => {
+  test(`${width}px: every header menu item reaches its page; related services are grouped in two small dropdowns`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
     await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN });
     await page.goto('/');
     const nav = page.locator('#public-navigation');
     if (width < 1280) await page.getByRole('button', { name: 'Open navigation menu' }).click();
-    await expect(nav.locator('summary')).toHaveCount(3);
-    for (const label of ['Home', 'About Us', 'Events & Programs', 'Community Services', 'Career & Business', 'Sandesh', 'Shagun Bandhan', 'Transportation', 'Health Support', 'Room Hunting', 'Feedback', 'Contact Us']) await expect(await navLink(page, label)).toBeVisible();
+    await expect(nav.locator('summary')).toHaveCount(2);
+    for (const label of ['Home', 'About Us', 'Events & Programs', 'Blood Donor', 'Career & Business', 'Sandesh', 'Shagun Bandhan', 'Transportation', 'Health Support', 'Room Hunting', 'Feedback', 'Contact Us']) await expect(await navLink(page, label)).toBeVisible();
     await expect(nav.getByRole('link', { name: 'Home', exact: true })).toHaveAttribute('aria-current', 'page');
     await shot(page, `header-${width}`);
     await nav.getByRole('link', { name: 'Sandesh', exact: true }).click();

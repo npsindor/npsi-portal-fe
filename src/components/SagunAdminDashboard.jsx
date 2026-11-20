@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { sagunApi } from '@/api/sagunApi';
 import { exportToExcel } from '@/lib/exportTable';
 import { SagunPhoto, downloadSagunFile } from '@/components/SagunWizard';
+import SuggestSearchInput from '@/components/SuggestSearchInput';
+import { suggestValues } from '@/lib/search-suggestions';
 
 const PAGE = 50;
 const STATUSES = ['DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'INACTIVE'];
@@ -192,13 +194,15 @@ export default function SagunAdminDashboard({ t, lang, fields, onError, onEdit }
             <label className="form-label" htmlFor="sagun-admin-search">
               {t.searchLabel}
             </label>
-            <input
+            <SuggestSearchInput
               id="sagun-admin-search"
-              className="form-control"
+              icon={false}
+              inputClassName="form-control"
               maxLength={150}
               placeholder={t.searchPlaceholder}
               value={filters.search}
-              onChange={(event) => setFilters({ ...filters, search: event.target.value })}
+              onChange={(value) => setFilters((current) => ({ ...current, search: value }))}
+              suggestions={suggestValues(page.records, ['displayName', 'reference', 'familyId', 'village'], filters.search)}
             />
           </div>
           <div className="col-6 col-lg-2">

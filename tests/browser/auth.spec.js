@@ -64,6 +64,7 @@ test('password reset shows a rate-limit message when the API returns 429', async
   await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
   await page.route('**/api/v1/auth/mobile-otps', (route) => route.fulfill({ status: 429, json: { error: 'Too many requests, please try again later.' } }));
   await page.goto('/forgot-password');
+  await page.getByRole('tab', { name: 'Using mobile' }).click(); // email is the first tab
   await page.locator('#otp-mobile').fill('9926877375');
   await page.getByRole('button', { name: 'Send code' }).click();
   await expect(page.getByRole('alert')).toContainText('Too many attempts were made');
@@ -75,6 +76,7 @@ test('password reset explains when the login API cannot be reached', async ({ pa
   await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
   await page.route('**/api/v1/auth/mobile-otps', (route) => route.abort('connectionrefused'));
   await page.goto('/forgot-password');
+  await page.getByRole('tab', { name: 'Using mobile' }).click(); // email is the first tab
   await page.locator('#otp-mobile').fill('9926877375');
   await page.getByRole('button', { name: 'Send code' }).click();
   await expect(page.getByRole('alert')).toContainText('The login service could not be reached');
@@ -85,6 +87,7 @@ test('password reset falls back to email when the deployed API lacks mobile OTP 
   await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
   await page.route('**/api/v1/auth/mobile-otps', (route) => route.fulfill({ status: 404, json: { error: 'Cannot POST /api/v1/auth/mobile-otps' } }));
   await page.goto('/forgot-password');
+  await page.getByRole('tab', { name: 'Using mobile' }).click(); // email is the first tab
   await page.locator('#otp-mobile').fill('9926877375');
   await page.getByRole('button', { name: 'Send code' }).click();
   await expect(page.getByRole('tab', { name: 'Using email' })).toHaveAttribute('aria-selected', 'true');
@@ -193,6 +196,7 @@ test('login, password reset by email and by mobile send a reCAPTCHA token', asyn
   await page.locator('form button[type="submit"]').click();
   await expect.poll(() => sent.login?.recaptchaToken).toBe('test-recaptcha-token');
   await page.goto('/forgot-password');
+  await page.getByRole('tab', { name: 'Using mobile' }).click(); // email is the first tab
   await page.locator('#otp-mobile').fill('9926877375');
   await page.getByRole('button', { name: 'Send code' }).click();
   await expect.poll(() => sent.mobile).toMatchObject({ mobile: '9926877375', purpose: 'RESET', recaptchaToken: 'test-recaptcha-token' });
@@ -217,4 +221,13 @@ test('the session check uses GET /auth/sessions/current: a visitor gets no 401 i
   await mockApi(member, { 'GET /auth/sessions/current': { user: MEMBER } });
   await member.goto('/portal');
   await expect(member).toHaveURL(/\/portal$/);
+});
+
+test('forgot password: "Using email" is the first tab and is selected, "Using mobile" comes second', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN });
+  await page.goto('/forgot-password');
+  await expect(page.getByRole('tab')).toHaveText(['Using email', 'Using mobile']);
+  await expect(page.getByRole('tab', { name: 'Using email' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('#fp-email')).toBeVisible();
 });

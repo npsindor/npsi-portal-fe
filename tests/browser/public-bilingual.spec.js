@@ -36,7 +36,7 @@ for (const lang of ['en', 'hi']) {
         } else {
           await nav.getByRole('link', { name: lang === 'hi' ? ({ Feedback: 'सुझाव', 'Contact Us': 'संपर्क करें', 'Room Hunting': 'आवास सहयोग', Transportation: 'यातायात सहयोग', 'Health Support': 'स्वास्थ्य सहयोग', 'Shagun Bandhan': 'शगुन बंधन' }[item.label] || publicHindi[item.label]) : item.label, exact: true }).click();
         }
-        await expect(page).toHaveURL(new URL(to, 'http://127.0.0.1:4173').href);
+        await expect(page).toHaveURL(new URL(to, new URL(page.url()).origin).href);
         await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
         const hash = new URL(to, 'http://local').hash;
         if (hash) await expect(page.locator(hash)).toHaveCount(1);

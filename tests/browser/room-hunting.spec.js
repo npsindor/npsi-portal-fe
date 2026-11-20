@@ -88,3 +88,58 @@ test('a registered member adds a listing; it is sent for approval', async ({ pag
   await expect(page.getByRole('status')).toContainText('It will be public once approved');
   expect(calls.find((call) => call.key === 'POST /room-hunting/listings').body).toMatchObject({ propertyType: '1 BHK', area: 'Vijay Nagar', rentAmount: 9000, contactMobile: '9876500001', showMobile: true, ownerConfirmed: true });
 });
+
+test('a listing with several photos shows a carousel (buttons, dots, arrow keys); one photo is a plain image', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  const photos = ['a', 'b', 'c'].map((name) => `http://localhost:4001/uploads/${name}.jpg`);
+  await page.route('**/uploads/*.jpg', (route) => route.fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="9"/>' }));
+  await mockApi(page, {
+    'GET /auth/me': NOT_LOGGED_IN,
+    'GET /room-hunting/options': OPTIONS,
+    'GET /room-hunting/listings': page1([listing({ photoUrl: photos[0], photos }), listing({ id: 'l2', reference: 'RL-0002', area: 'Rau', photoUrl: photos[1], photos: [photos[1]] })]),
+  });
+  await page.goto('/room-hunting');
+  const carousel = page.getByRole('region', { name: '1 BHK, Vijay Nagar' });
+  await expect(carousel.getByText('Photo 1 of 3', { exact: true })).toBeVisible();
+  await carousel.getByRole('button', { name: 'Next photo' }).click();
+  await expect(carousel.getByText('Photo 2 of 3', { exact: true })).toBeVisible();
+  await carousel.getByRole('button', { name: 'Photo 3 of 3' }).click();
+  await expect(carousel.getByText('Photo 3 of 3', { exact: true })).toBeVisible();
+  await carousel.getByRole('button', { name: 'Next photo' }).click();
+  await expect(carousel.getByText('Photo 1 of 3', { exact: true })).toBeVisible();
+  await carousel.press('ArrowLeft');
+  await expect(carousel.getByText('Photo 3 of 3', { exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: '1 BHK, Rau' })).toHaveCount(0);
+  await expect(page.getByRole('img', { name: '1 BHK, Rau' })).toBeVisible();
+});
+
+test('a member adds several photos to a listing, picks the cover and removes one; all are sent', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  const calls = await mockApi(page, {
+    'GET /auth/me': MEMBER,
+    'GET /room-hunting/options': OPTIONS,
+    'GET /room-hunting/listings': page1([]),
+    'GET /room-hunting/me': { eligible: true, accountKind: 'FAMILY', listings: [], requirements: [], enquiriesSent: [] },
+    'POST /room-hunting/listings': { status: 201, body: listing({ status: 'PENDING' }) },
+  });
+  let uploaded = 0;
+  await page.route('**/api/v1/uploads', (route) => { uploaded += 1; return route.fulfill({ status: 201, json: { fileUrl: `http://localhost:4001/uploads/p${uploaded}.png` } }); });
+  await page.route('**/uploads/p*.png', (route) => route.fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="9"/>' }));
+  await page.goto('/room-hunting');
+  await page.getByRole('button', { name: 'Add Rental Property' }).click();
+  const dialog = page.getByRole('dialog');
+  const png = (name) => ({ name, mimeType: 'image/png', buffer: Buffer.from('89504e470d0a1a0a', 'hex') });
+  await dialog.locator('input[type=file]').setInputFiles([png('a.png'), png('b.png'), png('c.png')]);
+  await expect(dialog.getByRole('img', { name: /^Photo \d of 3$/ })).toHaveCount(3);
+  await dialog.getByRole('button', { name: 'Make cover' }).last().click();
+  await dialog.getByRole('button', { name: 'Remove photo 2' }).click();
+  await dialog.locator('#listing-type').fill('1 BHK');
+  await dialog.locator('#listing-area').fill('Vijay Nagar');
+  await dialog.getByLabel('Monthly rent (₹) *').fill('9000');
+  await dialog.getByLabel(/I own this property/).check();
+  await dialog.getByRole('button', { name: 'Submit listing' }).click();
+  await expect(page.getByRole('status')).toContainText('It will be public once approved');
+  // Upload URLs come back pointing at this site's API address (apiFetch re-hosts localhost upload links).
+  const file = (name) => expect.stringMatching(new RegExp(`/uploads/${name}$`));
+  expect(calls.find((call) => call.key === 'POST /room-hunting/listings').body).toMatchObject({ photoUrl: file('p3.png'), photoUrls: [file('p3.png'), file('p2.png')] });
+});

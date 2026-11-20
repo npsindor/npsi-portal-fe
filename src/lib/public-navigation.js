@@ -1,4 +1,4 @@
-// Header navigation: a few top-level pages and three small dropdowns, so the bar stays uncluttered.
+// Header navigation: top-level pages plus two small dropdowns (Services, Contact), so the bar stays uncluttered.
 // Every entry is a public page; admin-only pages never appear here.
 export const publicNavigation = [
   { label: 'Home', to: '/' },
@@ -6,7 +6,8 @@ export const publicNavigation = [
   { label: 'Events & Programs', to: '/events' },
   { label: 'Sandesh', to: '/news' },
   { label: 'Services', items: [['Shagun Bandhan', '/sagun'], ['Transportation', '/transportation'], ['Room Hunting', '/room-hunting'], ['Health Support', '/medical']] },
-  { label: 'Community', items: [['Community Services', '/community-services'], ['Career & Business', '/career-business']] },
+  { label: 'Blood Donor', to: '/community-services' },
+  { label: 'Career & Business', to: '/career-business' },
   { label: 'Contact', items: [['Contact Us', '/contact'], ['Feedback', '/public-feedback']] },
 ];
 

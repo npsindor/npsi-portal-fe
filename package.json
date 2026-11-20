@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
     "lint": "eslint .",
-    "test": "node --test --test-reporter=spec src/api/endpoints.test.js src/api/openapi.test.js src/routes.test.js",
+    "test": "node --test --test-reporter=spec src/api/endpoints.test.js src/api/openapi.test.js src/api/uploadUrls.test.js src/routes.test.js",
     "test:browser": "playwright test",
     "test:security": "playwright test --config playwright.security.config.js",
     "test:browser:all": "ALL_BROWSERS=1 playwright test"

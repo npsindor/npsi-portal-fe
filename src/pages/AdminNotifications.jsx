@@ -122,7 +122,7 @@ export default function AdminNotifications() {
     }
   };
 
-  const { search, setSearch, page, setPage, totalPages, totalItems, pageSize, pageItems } = useTableControls(notifs, {
+  const { search, setSearch, suggestions, page, setPage, totalPages, totalItems, pageSize, pageItems } = useTableControls(notifs, {
     searchFields: ["title", "message"],
   });
 
@@ -142,7 +142,7 @@ export default function AdminNotifications() {
         </button>
       </div>
 
-      <SearchBox value={search} onChange={setSearch} placeholder={t.searchPh} />
+      <SearchBox value={search} onChange={setSearch} suggestions={suggestions} placeholder={t.searchPh} />
 
       <div className="space-y-3">
         {pageItems.map((n) => (

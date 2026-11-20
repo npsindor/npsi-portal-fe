@@ -25,7 +25,7 @@ const en = {
   reference: 'Reference', matchesFound: 'Matching listings', noMatches: 'No matching listings right now. We will let owners of new matching listings know.',
   // Listing form
   rent: 'Monthly rent (₹)', availableFor: 'Available for', address: 'Full address (optional)', showAddress: 'Show the address publicly', description: 'Short description (optional)',
-  photo: 'Property photograph (optional)', photoHint: 'JPG, PNG or WebP, up to 5 MB.', uploadPhoto: 'Upload photo', replacePhoto: 'Replace photo', removePhoto: 'Remove photo', uploading: 'Uploading…',
+  photo: 'Property photographs (optional, up to 6)', photoHint: 'JPG, PNG or WebP, up to 5 MB each. The first photo is the cover.', addPhoto: 'Add photo', photoLimit: 'At most 6 photographs.', prevPhoto: 'Previous photo', nextPhoto: 'Next photo', photoOf: (n, total) => `Photo ${n} of ${total}`, makeCover: 'Make cover', uploadPhoto: 'Upload photo', replacePhoto: 'Replace photo', removePhoto: 'Remove photo', uploading: 'Uploading…',
   contactName: 'Contact name', contactMobile: 'Contact mobile', contactEmail: 'Contact email (optional)', visibilityHint: 'Choose what the public can see. If both are hidden, people send you an enquiry instead.',
   ownerConfirmed: 'I own this property or have the owner’s permission to list it.', saveListing: 'Submit listing', updateListing: 'Save changes', cancel: 'Cancel',
   listingSubmitted: 'Listing submitted. It will be public once approved.', listingUpdated: 'Listing updated and sent for review.',
@@ -68,7 +68,7 @@ const hi = {
   requirementPublished: 'आपकी आवश्यकता प्रकाशित हो गई है। मेल खाने वाली लिस्टिंग नीचे दी गई हैं।', requirementPending: 'धन्यवाद। संगठन की संक्षिप्त जाँच के बाद आपकी आवश्यकता दिखाई देगी।',
   reference: 'संदर्भ', matchesFound: 'मेल खाने वाली लिस्टिंग', noMatches: 'अभी कोई मेल खाने वाली लिस्टिंग नहीं है। नई मेल खाने वाली लिस्टिंग के मालिकों को सूचित किया जाएगा।',
   rent: 'मासिक किराया (₹)', availableFor: 'किसके लिए उपलब्ध', address: 'पूरा पता (वैकल्पिक)', showAddress: 'पता सार्वजनिक रूप से दिखाएं', description: 'संक्षिप्त विवरण (वैकल्पिक)',
-  photo: 'संपत्ति की फोटो (वैकल्पिक)', photoHint: 'जेपीजी, पीएनजी या वेबपी, अधिकतम 5 एमबी।', uploadPhoto: 'फोटो अपलोड करें', replacePhoto: 'फोटो बदलें', removePhoto: 'फोटो हटाएँ', uploading: 'अपलोड हो रहा है…',
+  photo: 'संपत्ति की फोटो (वैकल्पिक, अधिकतम 6)', photoHint: 'जेपीजी, पीएनजी या वेबपी, हर फोटो अधिकतम 5 एमबी। पहली फोटो कवर होगी।', addPhoto: 'फोटो जोड़ें', photoLimit: 'अधिकतम 6 फोटो।', prevPhoto: 'पिछली फोटो', nextPhoto: 'अगली फोटो', photoOf: (n, total) => `फोटो ${n} / ${total}`, makeCover: 'कवर बनाएँ', uploadPhoto: 'फोटो अपलोड करें', replacePhoto: 'फोटो बदलें', removePhoto: 'फोटो हटाएँ', uploading: 'अपलोड हो रहा है…',
   contactName: 'संपर्क नाम', contactMobile: 'संपर्क मोबाइल', contactEmail: 'संपर्क ईमेल (वैकल्पिक)', visibilityHint: 'चुनें कि जनता क्या देख सकती है। दोनों छिपे हों तो लोग आपको पूछताछ भेजेंगे।',
   ownerConfirmed: 'मैं इस संपत्ति का मालिक हूँ या इसे सूचीबद्ध करने के लिए मालिक की अनुमति मेरे पास है।', saveListing: 'लिस्टिंग जमा करें', updateListing: 'बदलाव सहेजें', cancel: 'रद्द करें',
   listingSubmitted: 'लिस्टिंग जमा हो गई। स्वीकृति के बाद यह सार्वजनिक होगी।', listingUpdated: 'लिस्टिंग अपडेट हुई और जाँच के लिए भेजी गई।',

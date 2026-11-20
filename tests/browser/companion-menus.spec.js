@@ -25,8 +25,8 @@ for (const lang of ['en', 'hi']) {
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       }
       if (width < 1280) await page.getByRole('button', { name: hi ? 'नेविगेशन मेनू खोलें' : 'Open navigation menu', exact: true }).click();
-      // Community Services is one page with its three sections, under the Community menu.
-      await (await navLink(page, 'Community Services', { hi })).click();
+      // Community Services is one page with its three sections, linked from the top-level Blood Donor menu item.
+      await (await navLink(page, 'Blood Donor', { hi })).click();
       await expect(page).toHaveURL(/\/community-services$/);
       for (const id of ['blood-donation', 'emergency-help', 'social-welfare']) await expect(page.locator(`#${id}`)).toHaveCount(1);
       await page.goto('/medical');

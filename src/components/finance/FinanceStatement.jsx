@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
-import { AlertTriangle, Download, FileText, Printer, Search } from 'lucide-react';
+import { AlertTriangle, Download, FileText, Printer } from 'lucide-react';
 import { exportToExcel } from '@/lib/exportTable';
 import { localizedText } from '@/lib/utils';
 import { statusLabel } from '@/components/StatusBadge';
 import { FINANCE_COPY, groupLabel, inr, openFinanceReport } from '@/lib/finance-statement';
+import SuggestSearchInput from '@/components/SuggestSearchInput';
+import { suggestValues } from '@/lib/search-suggestions';
 
 const PAGE_SIZE = 50;
 const field = 'h-10 rounded-lg border border-border bg-background px-3 text-sm';
@@ -130,7 +132,7 @@ function Contributions({ detail, lang, t, admin, action }) {
   return (
     <section aria-label={t.contributionsTab} className="space-y-3">
       <div className="grid gap-2 rounded-xl border border-border bg-card p-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-        <label className="relative sm:col-span-2"><span className="sr-only">{t.search}</span><Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><input type="search" value={q} onChange={reset(setQ)} placeholder={t.searchPlaceholder} className={`${field} w-full pl-9`} /></label>
+        <div className="sm:col-span-2"><SuggestSearchInput value={q} onChange={(v) => { setQ(v); setPage(1); }} placeholder={t.searchPlaceholder} ariaLabel={t.search} suggestions={suggestValues(rows, ['memberName', 'village'], q)} inputClassName={`${field} w-full pl-9`} /></div>
         <select aria-label={t.village} value={village} onChange={reset(setVillage)} className={field}><option value="">{t.allVillages}</option>{villages.map((name) => <option key={name} value={name}>{name}</option>)}</select>
         <select aria-label={t.section} value={group} onChange={reset(setGroup)} className={field}><option value="">{t.allSections}</option>{['GENERAL', 'BHOG_PRASAD'].map((key) => <option key={key} value={key}>{t.groups[key]}</option>)}</select>
         {admin && <select aria-label={t.status} value={status} onChange={reset(setStatus)} className={field}><option value="">{t.allStatuses}</option>{['APPROVED', 'PENDING', 'REJECTED'].map((key) => <option key={key} value={key}>{statusLabel(key, lang)}</option>)}</select>}
@@ -198,7 +200,7 @@ function Expenses({ detail, lang, t, admin, action }) {
   return (
     <section aria-label={t.expensesTab} className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <label className="relative w-full sm:max-w-sm"><span className="sr-only">{t.search}</span><Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><input type="search" value={q} onChange={(event) => setQ(event.target.value)} placeholder={t.searchExpenses} className={`${field} w-full pl-9`} /></label>
+        <div className="w-full sm:max-w-sm"><SuggestSearchInput value={q} onChange={setQ} placeholder={t.searchExpenses} ariaLabel={t.search} suggestions={suggestValues(rows, lang === 'hi' ? ['titleHi', 'title', (row) => row.category?.nameHi] : ['title', (row) => row.category?.name], q)} inputClassName={`${field} w-full pl-9`} /></div>
         <button type="button" onClick={exportRows} className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs"><Download className="h-3.5 w-3.5" aria-hidden="true" />{t.downloadExcel}</button>
       </div>
       <div className="overflow-x-auto rounded-xl border border-border bg-card">

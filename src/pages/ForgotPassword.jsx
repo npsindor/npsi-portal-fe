@@ -16,7 +16,8 @@ export default function ForgotPassword() {
   const tt = useT();
   const { lang } = useLang();
   const t = regCopy[lang];
-  const [mode, setMode] = useState("MOBILE");
+  // Email first: a reset link to the registered email is the most reliable way back in.
+  const [mode, setMode] = useState("EMAIL");
   const [verified, setVerified] = useState(null);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -80,8 +81,8 @@ export default function ForgotPassword() {
         <>
           <div className="mb-6 grid grid-cols-2 gap-2 rounded-xl bg-muted p-1" role="tablist">
             {[
-              ["MOBILE", t.byMobile],
               ["EMAIL", t.byEmail],
+              ["MOBILE", t.byMobile],
             ].map(([key, label]) => (
               <button
                 key={key}
