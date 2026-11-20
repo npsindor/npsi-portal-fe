@@ -89,7 +89,7 @@ export default function PublicNav() {
       <div className="sm:hidden"><LanguageToggle /></div>
       {isAuthenticated && <UserMenu />}
       <button ref={menuButton} type="button" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border bg-card transition-colors hover:bg-muted xl:hidden" aria-label={c(open ? 'Close navigation menu' : 'Open navigation menu')} aria-expanded={open} aria-controls="public-navigation" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button>
-      {!isAuthenticated && <Link to="/register" className="join-cta lg:w-auto"><Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />{c("Join the Sangathan")}</Link>}
+      {!isAuthenticated && <Link to="/join" className="join-cta lg:w-auto"><Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />{c("Join the Sangathan")}</Link>}
     </div>
     <nav id="public-navigation" aria-label={c("Main navigation")} className={`${open ? 'block' : 'hidden'} max-h-[70dvh] overflow-y-auto border-t border-border bg-background xl:block xl:max-h-none xl:overflow-visible xl:border-t-0 xl:bg-maroon`}>
       <div className="relative mx-auto flex max-w-7xl flex-col divide-y divide-border/60 px-4 py-2 sm:px-6 xl:flex-row xl:flex-nowrap xl:items-stretch xl:justify-between xl:divide-y-0 xl:py-0">

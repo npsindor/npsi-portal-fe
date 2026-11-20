@@ -28,6 +28,7 @@ const PAGES = [
   ['/medical', 'Health Support', 'स्वास्थ्य सहयोग', 'medical health hospital doctor sehat saathi health support स्वास्थ्य चिकित्सा सेहत साथी'],
   ['/community-services', 'Community Services', 'सामुदायिक सेवाएँ', 'community services social education सेवा'],
   ['/career-business', 'Career & Business', 'करियर और व्यवसाय', 'career job employment business रोजगार व्यवसाय'],
+  ['/join', 'Join the Sangathan: family or student registration', 'संगठन से जुड़ें: परिवार या विद्यार्थी पंजीकरण', 'join register registration family student member membership जुड़ें पंजीकरण विद्यार्थी परिवार'],
   ['/register', 'Member Registration', 'सदस्य पंजीकरण', 'register registration join family member पंजीकरण'],
   ['/student-register', 'Student Registration', 'विद्यार्थी पंजीकरण', 'student registration विद्यार्थी'],
   ['/public-feedback', 'Feedback', 'सुझाव', 'feedback suggestion सुझाव'],
