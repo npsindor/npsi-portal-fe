@@ -2,6 +2,7 @@ import { API } from './endpoints';
 import { API_BASE_URL } from './apiBaseUrl';
 import { getRecaptchaToken } from '../lib/recaptcha';
 import { rehostUploads } from './uploadUrls';
+import { isLoginOnlyPath, loginPathFor, SESSION_MISSING } from '../lib/login-routes';
 
 const localApiBaseUrl = API_BASE_URL;
 
@@ -13,6 +14,7 @@ export const NETWORK_ERROR = 'Could not reach the server. Check your internet co
 export const apiFetch = async (url, options) => {
   try {
     const response = await fetch(url, options);
+    if (response.status === 401 && String(url).startsWith(localApiBaseUrl)) sessionEnded(String(url).slice(localApiBaseUrl.length), response.clone());
     // Image links in API answers point at this site's API, whatever host they were uploaded through.
     if (String(url).startsWith(localApiBaseUrl) && /json/i.test(response.headers.get('content-type') || '')) {
       const json = response.json.bind(response);
@@ -40,7 +42,6 @@ const request = async (path, options = {}) => {
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    if (response.status === 401) redirectToLogin(path);
     const error = new Error(body.error || `Local API request failed: ${response.status}`);
     error.status = response.status;
     throw error;
@@ -49,14 +50,16 @@ const request = async (path, options = {}) => {
   return response.status === 204 ? null : response.json();
 };
 
-// A session that expired (or belongs to another database) while working in the admin panel or member
-// portal: go to login and come back here afterwards, instead of failing every action with
-// "Authentication required.". The session check and login calls themselves never redirect.
-const redirectToLogin = (path) => {
+// A session that ended (logout elsewhere, idle timeout, another database) while a login-only page is open: go to
+// login and come back here afterwards, instead of failing every action. Every API module goes through apiFetch,
+// so this covers all of them. Only the API's "no session" answer counts: a wrong current password is also a 401
+// and must stay on the form. The session check and the login calls never redirect.
+const sessionEnded = (path, response) => {
   if (typeof window === 'undefined' || path.startsWith(API.auth.me) || path.startsWith(API.auth.sessions)) return;
-  const { pathname, search, hash } = window.location;
-  if (!/^\/(admin|portal)(\/|$)/.test(pathname)) return;
-  window.location.assign(`/login?returnTo=${encodeURIComponent(`${pathname}${search}${hash}`)}`);
+  if (!isLoginOnlyPath(window.location.pathname)) return;
+  response.json().then((body) => {
+    if (body?.error === SESSION_MISSING && isLoginOnlyPath(window.location.pathname)) window.location.assign(loginPathFor(window.location));
+  }, () => {});
 };
 
 // Multipart upload — kept separate from request() above, which always

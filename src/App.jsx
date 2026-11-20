@@ -136,7 +136,10 @@ const AuthenticatedApp = () => {
       <Route path="/career-business" element={<Careers />} />
       <Route path="/sagun" element={<Sagun />} />
       <Route path="/sagun/verify/:token" element={<SagunVerify />} />
-      <Route path="/sagun/workspace" element={<Sagun workspace />} />
+      {/* A member's own Shagun profiles: login only, like the portal. */}
+      <Route element={<ProtectedRoute unauthenticatedElement={<LoginRedirect />} />}>
+        <Route path="/sagun/workspace" element={<Sagun workspace />} />
+      </Route>
       <Route path="/contact" element={<CommunityPage kind="contact" />} />
       <Route path="/public-feedback" element={<CommunityPage kind="feedback" />} />
       {/* Auth routes */}
