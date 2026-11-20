@@ -45,6 +45,7 @@ const VerifyMember = lazy(() => import('@/pages/VerifyMember'));
 const Login = lazy(() => import('@/pages/Login'));
 const PortalRegistration = lazy(() => import('@/pages/PortalRegistration'));
 const StudentRegistration = lazy(() => import('@/pages/StudentRegistration'));
+const JoinSangathan = lazy(() => import('@/pages/JoinSangathan'));
 const AdminRegistrationPayments = lazy(() => import('@/pages/AdminRegistrationPayments'));
 const AdminAddressOptions = lazy(() => import('@/pages/AdminAddressOptions'));
 const AdminSiteVisibility = lazy(() => import('@/pages/AdminSiteVisibility'));
@@ -115,6 +116,8 @@ const AuthenticatedApp = () => {
       {/* Registration is account-first now: sign up with mobile OTP, then register (with payment) in the portal. */}
       <Route path="/register" element={<RegistrationEntry />} />
       <Route path="/student-register" element={<StudentRegistration />} />
+      {/* "Join the Sangathan": choose family or student registration. */}
+      <Route path="/join" element={<JoinSangathan />} />
       <Route path="/application-status" element={<ApplicationStatus />} />
       {/* Family ids are sequential: verifying a card needs a login so nobody can list every family. */}
       <Route element={<ProtectedRoute unauthenticatedElement={<LoginRedirect />} />}>

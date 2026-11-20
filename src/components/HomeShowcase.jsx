@@ -196,7 +196,7 @@ export default function HomeShowcase({ lang, events = [] }) {
     latestEvent
       ? { kind: 'image', key: 'event', src: latestEvent.bannerUrl, eyebrow: c.eventEyebrow, title: localizedText(latestEvent, 'title', lang), body: localizedText(latestEvent, 'venue', lang), to: '/events', cta: c.eventCta }
       : { kind: 'image', key: 'event', src: logoImage, contain: true, eyebrow: c.eventEyebrow, title: c.eventFallbackTitle, body: c.eventFallbackBody, to: '/events', cta: c.eventCta },
-    { kind: 'text', key: 'join', eyebrow: c.textSlideEyebrow, title: c.textSlideTitle, body: c.textSlideBody, to: '/register', cta: c.textSlideCta },
+    { kind: 'text', key: 'join', eyebrow: c.textSlideEyebrow, title: c.textSlideTitle, body: c.textSlideBody, to: '/join', cta: c.textSlideCta },
   ];
   // The ads in public/advertising always run; admin media slides (Admin → Community highlights → Media) join them.
   // An admin slide that uses a folder image replaces that image's plain slide (it adds its text and link).

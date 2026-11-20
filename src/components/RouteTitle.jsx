@@ -14,6 +14,7 @@ const TITLES = [
   ['/events', 'Events', 'कार्यक्रम'],
   ['/core-team', 'Core Team', 'कोर टीम'],
   ['/student-register', 'Student Registration', 'विद्यार्थी पंजीकरण'],
+  ['/join', 'Join the Sangathan', 'संगठन से जुड़ें'],
   ['/application-status', 'Application Status', 'आवेदन की स्थिति'],
   ['/verify', 'Verify Membership', 'सदस्यता सत्यापन'],
   ['/help', 'Help', 'सहायता'],
