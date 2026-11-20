@@ -10,6 +10,8 @@ export const regCopy = {
     stepPassword: 'Password',
     mobile: 'Mobile number',
     mobileHint: 'We will send a 6-digit code on WhatsApp (or SMS).',
+    mobileHintEmail: 'WhatsApp/SMS codes are not available yet, so the 6-digit code will be sent to your email.',
+    emailedMobileUnverified: 'The code went to your email, so your mobile number is saved as unverified: log in with your email until the mobile is verified.',
     mobileTenDigits: 'Enter a 10-digit mobile number starting with 6, 7, 8 or 9.',
     emailOptional: 'Email (optional)',
     emailForOtp: 'Email for OTP fallback',
@@ -17,6 +19,7 @@ export const regCopy = {
     sendCode: 'Send code',
     sending: 'Sending…',
     codeSentTo: 'Code sent to {mobile} by {channel}.',
+    resetCodeEmailCopy: 'If this number is registered, the same code is also emailed to the account’s registered email. Check your inbox and spam folder.',
     WHATSAPP: 'WhatsApp',
     SMS: 'SMS',
     EMAIL: 'email',
@@ -40,7 +43,7 @@ export const regCopy = {
     identifier: 'Mobile number or email',
     notVerified: 'Your account is not verified yet. Enter the code we just sent to your email.',
     forgotTitle: 'Forgot password',
-    forgotSub: 'Reset with your mobile number or your email',
+    forgotSub: 'Reset with your email or your mobile number',
     byMobile: 'Using mobile',
     byEmail: 'Using email',
     newPassword: 'New password',
@@ -189,6 +192,8 @@ export const regCopy = {
     stepPassword: 'पासवर्ड',
     mobile: 'मोबाइल नंबर',
     mobileHint: 'हम WhatsApp (या SMS) पर 6 अंकों का कोड भेजेंगे।',
+    mobileHintEmail: 'WhatsApp/SMS कोड अभी उपलब्ध नहीं है, इसलिए 6 अंकों का कोड आपके ईमेल पर भेजा जाएगा।',
+    emailedMobileUnverified: 'कोड आपके ईमेल पर गया है, इसलिए आपका मोबाइल नंबर असत्यापित के रूप में सहेजा जाएगा: मोबाइल सत्यापित होने तक ईमेल से लॉगिन करें।',
     mobileTenDigits: '6, 7, 8 या 9 से शुरू होने वाला 10 अंकों का मोबाइल नंबर दर्ज करें।',
     emailOptional: 'ईमेल (वैकल्पिक)',
     emailForOtp: 'OTP के वैकल्पिक माध्यम के लिए ईमेल',
@@ -196,6 +201,7 @@ export const regCopy = {
     sendCode: 'कोड भेजें',
     sending: 'भेजा जा रहा है…',
     codeSentTo: '{mobile} पर {channel} द्वारा कोड भेजा गया।',
+    resetCodeEmailCopy: 'यदि यह नंबर पंजीकृत है, तो यही कोड खाते के पंजीकृत ईमेल पर भी भेजा गया है। इनबॉक्स और स्पैम फ़ोल्डर देखें।',
     WHATSAPP: 'WhatsApp',
     SMS: 'SMS',
     EMAIL: 'ईमेल',
@@ -218,7 +224,7 @@ export const regCopy = {
     identifier: 'मोबाइल नंबर या ईमेल',
     notVerified: 'आपका खाता अभी सत्यापित नहीं है। आपके ईमेल पर अभी भेजा गया कोड दर्ज करें।',
     forgotTitle: 'पासवर्ड भूल गए',
-    forgotSub: 'मोबाइल नंबर या ईमेल से पासवर्ड रीसेट करें',
+    forgotSub: 'ईमेल या मोबाइल नंबर से पासवर्ड रीसेट करें',
     byMobile: 'मोबाइल से',
     byEmail: 'ईमेल से',
     newPassword: 'नया पासवर्ड',
@@ -374,6 +380,7 @@ const serverErrorsHi = {
   'This mobile number is already registered.': 'यह मोबाइल नंबर पहले से पंजीकृत है।',
   'An account with this email already exists.': 'इस ईमेल से पहले से खाता बना है।',
   'A valid email address is required.': 'मान्य ईमेल पता दर्ज करें।',
+  'Enter a valid email address.': 'मान्य ईमेल पता दर्ज करें।',
   'Invalid or expired verification code.': 'कोड गलत है या उसकी अवधि समाप्त हो गई है।',
   'A valid 6-digit verification code is required.': '6 अंकों का सही कोड दर्ज करें।',
   'Too many verification attempts. Please request a new code.': 'बहुत अधिक गलत प्रयास। कृपया नया कोड मंगाएँ।',
@@ -401,6 +408,32 @@ const serverErrorsHi = {
   'A valid 6-digit PIN code is required.': 'मान्य 6 अंकों का पिन कोड दर्ज करें।',
   "This application can't be changed now.": 'यह आवेदन अभी बदला नहीं जा सकता।',
   'Add your 10-digit mobile number in your profile before registering.': 'पंजीकरण से पहले अपनी प्रोफ़ाइल में 10 अंकों का मोबाइल नंबर जोड़ें।',
+  // Security rules (open issues list, Nov 2026).
+  'This mobile number or email already belongs to an active member of another family. To move them into your family, send a transfer request instead.':
+    'यह मोबाइल नंबर या ईमेल पहले से किसी दूसरे परिवार के सक्रिय सदस्य का है। उन्हें अपने परिवार में लाने के लिए ट्रांसफर अनुरोध भेजें।',
+  "This email belongs to an administrator account and can't be added as a family member.": 'यह ईमेल प्रशासक खाते का है, इसे परिवार सदस्य के रूप में नहीं जोड़ा जा सकता।',
+  "Your account already belongs to an active family on the portal, so it can't register another family.": 'आपका खाता पहले से पोर्टल पर एक सक्रिय परिवार से जुड़ा है, इसलिए दूसरा परिवार पंजीकृत नहीं कर सकता।',
+  'Choose the family member to transfer.': 'ट्रांसफर करने के लिए परिवार सदस्य चुनें।',
+  'Choose the student record to transfer.': 'ट्रांसफर करने के लिए विद्यार्थी रिकॉर्ड चुनें।',
+  'Choose the family to transfer to.': 'जिस परिवार में ट्रांसफर करना है, उसे चुनें।',
+  'The member is already in this family.': 'यह सदस्य पहले से इसी परिवार में है।',
+  'Target family not found.': 'लक्षित परिवार नहीं मिला।',
+  'Too many transfer requests. Please try again later.': 'बहुत अधिक ट्रांसफर अनुरोध भेजे गए हैं। कृपया बाद में फिर कोशिश करें।',
+  'Registration for this event is closed.': 'इस कार्यक्रम का पंजीकरण बंद हो चुका है।',
+  'Registration for this event has not opened yet.': 'इस कार्यक्रम का पंजीकरण अभी शुरू नहीं हुआ है।',
+  'Choose at least one family member to register.': 'पंजीकरण के लिए कम से कम एक परिवार सदस्य चुनें।',
+  'Your family is already registered for this event.': 'आपका परिवार इस कार्यक्रम के लिए पहले से पंजीकृत है।',
+  'Enter the sign-in code sent to your email to finish logging in.': 'लॉगिन पूरा करने के लिए अपने ईमेल पर भेजा गया कोड दर्ज करें।',
+  'Administrator accounts need an email address for the sign-in code. Ask another administrator to add one.': 'प्रशासक खाते में लॉगिन कोड के लिए ईमेल होना ज़रूरी है। किसी दूसरे प्रशासक से ईमेल जुड़वाएँ।',
+  'The sign-in code could not be sent. Please try again later.': 'लॉगिन कोड नहीं भेजा जा सका। कृपया थोड़ी देर बाद फिर कोशिश करें।',
+  'This password is too common and easy to guess. Choose a different one.': 'यह पासवर्ड बहुत आम है और आसानी से अनुमान लगाया जा सकता है। कोई दूसरा पासवर्ड चुनें।',
+  'Enter the email the verification code was sent to.': 'वह ईमेल दर्ज करें जिस पर सत्यापन कोड भेजा गया था।',
+  'This record already exists.': 'यह रिकॉर्ड पहले से मौजूद है।',
+  'Admin access can only be given to an active, registered family member.': 'एडमिन पहुँच केवल सक्रिय, पंजीकृत परिवार सदस्य को दी जा सकती है।',
+  'This account is already a super admin.': 'यह खाता पहले से सुपर एडमिन है।',
+  'Choose at least one admin access.': 'कम से कम एक एडमिन काम चुनें।',
+  'Choose the villages, or all villages.': 'गाँव चुनें, या सभी गाँव।',
+  'This record belongs to a village outside your admin access.': 'यह रिकॉर्ड आपकी एडमिन पहुँच से बाहर के गाँव का है।',
 };
 
 export const translateError = (message, lang) => {
@@ -409,6 +442,8 @@ export const translateError = (message, lang) => {
     return lang === 'hi' ? 'बहुत अधिक प्रयास हुए हैं। सुरक्षा सीमा के कारण थोड़ी प्रतीक्षा करें और फिर कोशिश करें।' : 'Too many attempts were made. Please wait before trying again.';
   if (/Failed to fetch|NetworkError|Load failed|Could not reach the server|ECONNREFUSED|Local API request failed/i.test(text))
     return lang === 'hi' ? 'लॉगिन सेवा से संपर्क नहीं हो सका। इंटरनेट कनेक्शन जाँचें और थोड़ी देर बाद फिर कोशिश करें।' : 'The login service could not be reached. Check your connection and try again shortly.';
+  const pending = /^A transfer request for this member is already pending \((TRF-\d+)\) and is under admin review\.$/.exec(text);
+  if (pending && lang === 'hi') return `इस सदस्य का ट्रांसफर अनुरोध (${pending[1]}) पहले से लंबित है और प्रशासक की समीक्षा में है।`;
   return lang === 'hi' ? serverErrorsHi[text] || text : text;
 };
 

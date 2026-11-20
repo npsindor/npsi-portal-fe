@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { BookOpenText, Check, Download, Eye, History, IdCard, Loader2, Printer, RefreshCw, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import SearchBox from '@/components/admin/SearchBox';
+import { suggestValues } from "@/lib/search-suggestions";
 import PdfPages from '@/components/sagun-cards/PdfPages';
 import { sagunApi } from '@/api/sagunApi';
 import { printBlob, sagunCardsApi, saveBlob } from '@/api/sagunCardsApi';
@@ -118,6 +119,7 @@ export default function AdminSagunCards() {
   const reject = (card) => { const notes = window.prompt(t.rejectPrompt); if (notes?.trim()) run(`reject-${card.profileId}`, () => sagunApi.sagun.review(card.profileId, 'REJECTED', notes.trim())); };
   const toggle = (ids, selected) => run(`select-${ids.join(',')}`, () => sagunCardsApi.select(ids, selected));
 
+
   const shown = useMemo(() => {
     if (!cards) return [];
     const scope = LIST_TABS[tab] || (tab === 'booklet' ? { eligible: true } : {});
@@ -129,7 +131,7 @@ export default function AdminSagunCards() {
   }, [cards, tab, filters]);
 
   const filterBar = <div className="flex flex-wrap items-end gap-2">
-    <div className="min-w-[14rem] flex-1"><SearchBox value={filters.q} onChange={(q) => setFilters((current) => ({ ...current, q }))} placeholder={t.search} /></div>
+    <div className="min-w-[14rem] flex-1"><SearchBox value={filters.q} onChange={(q) => setFilters((current) => ({ ...current, q }))} suggestions={suggestValues(cards || [], ["name", "profileCode"], filters.q)} placeholder={t.search} /></div>
     <input aria-label={t.place} placeholder={t.place} className="min-h-10 w-40 rounded-lg border border-input bg-background px-3 text-sm" value={filters.place} onChange={(event) => setFilters((current) => ({ ...current, place: event.target.value }))} />
     <select aria-label={t.sortBy} className="min-h-10 rounded-lg border border-input bg-background px-3 text-sm" value={filters.sort} onChange={(event) => setFilters((current) => ({ ...current, sort: event.target.value }))}><option value="date">{t.sortDate}</option><option value="name">{t.sortName}</option></select>
     <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" checked={filters.selectedOnly} onChange={(event) => setFilters((current) => ({ ...current, selectedOnly: event.target.checked }))} />{t.selectedOnly}</label>

@@ -1,17 +1,16 @@
 import React, { useState } from "react";
 import { X, Loader2, ArrowRightLeft, Search } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { useAuth } from "@/lib/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { useLang, useT } from "@/lib/i18n";
+import { translateError } from "@/lib/registration-copy";
 
 // props: open, onClose
 // student: the logged-in user's Student record (for student_to_family)
-// family + membershipId + memberName: for family_to_family
-export default function RequestTransferModal({ open, onClose, student, family, membershipId, memberName }) {
+// family + membershipId: for family_to_family
+export default function RequestTransferModal({ open, onClose, onSubmitted, student, family, membershipId }) {
   const t = useT();
   const { lang } = useLang();
-  const { user } = useAuth();
   const { toast } = useToast();
   const [targetFamilyId, setTargetFamilyId] = useState("");
   const [targetName, setTargetName] = useState("");
@@ -58,29 +57,23 @@ export default function RequestTransferModal({ open, onClose, student, family, m
         return;
       }
 
+      // The server fills in the requester (from the login), the source family, the status and the date, and
+      // notifies the target family.
       const created = await base44.entities.TransferRequest.create({
         requestType: isStudent ? "student_to_family" : "family_to_family",
-        status: "PENDING",
-        requesterName: isStudent ? student.studentName : (memberName || user?.fullName || "Member"),
-        requesterEmail: user?.email || "",
-        requesterMobile: isStudent ? student.mobile : "",
-        sourceStudentId: isStudent ? student.studentId : "",
-        sourceMembershipId: isStudent ? "" : membershipId,
-        sourceFamilyId: isStudent ? "" : family?.familyId,
+        ...(isStudent ? { sourceStudentId: student.studentId } : { sourceMembershipId: membershipId }),
         targetFamilyId: target.familyId,
         targetFamilyName: target.familyName,
         reason: reason.trim(),
-        requesterId: user?.id,
-        requestedDate: new Date().toISOString(),
-        // The server notifies the target family.
         lang,
       });
 
       toast({ title: t("tr.submitted"), description: created.requestId });
+      onSubmitted?.(created);
       onClose();
       setTargetFamilyId(""); setTargetName(""); setReason("");
     } catch (e) {
-      toast({ title: t("tr.submitFailed"), description: e.message, variant: "destructive" });
+      toast({ title: t("tr.submitFailed"), description: translateError(e.message, lang), variant: "destructive" });
     } finally { setSubmitting(false); }
   };
 

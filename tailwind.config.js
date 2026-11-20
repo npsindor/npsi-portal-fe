@@ -62,15 +62,17 @@ module.exports = {
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
   			},
+  			// Brand colours come from CSS variables (src/index.css): the public site uses navy + gold, the admin portal
+  			// swaps them for its own palette (.admin-theme) so the two never look alike.
   			gold: {
-                DEFAULT: '#C49A43',
-  				light: '#E6C86E',
-  				dark: '#B8901F'
+  				DEFAULT: 'rgb(var(--brand-gold) / <alpha-value>)',
+  				light: 'rgb(var(--brand-gold-light) / <alpha-value>)',
+  				dark: 'rgb(var(--brand-gold-dark) / <alpha-value>)'
   			},
   			maroon: {
-  				DEFAULT: '#102A43',
-  				dark: '#0A1F33',
-  				light: '#1E3A5F'
+  				DEFAULT: 'rgb(var(--brand-maroon) / <alpha-value>)',
+  				dark: 'rgb(var(--brand-maroon-dark) / <alpha-value>)',
+  				light: 'rgb(var(--brand-maroon-light) / <alpha-value>)'
   			},
             cream: '#F5F7FA'
   		},

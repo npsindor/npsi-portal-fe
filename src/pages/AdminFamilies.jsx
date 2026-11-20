@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Search, Users, Eye, X, Plus, Pencil, Trash2, Loader2, KeyRound } from "lucide-react";
+import { Users, Eye, X, Plus, Pencil, Trash2, Loader2, KeyRound } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
 import { base44 } from "@/api/base44Client";
+import SearchBox from "@/components/admin/SearchBox";
+import { isSuperAdmin } from "@/lib/admin-access";
+import { useAuth } from "@/lib/AuthContext";
 import VillageCombobox from "@/components/VillageCombobox";
 import { useToast } from "@/components/ui/use-toast";
 import { useLang } from "@/lib/i18n";
@@ -69,6 +72,12 @@ const L = {
     deleted: "Family deleted",
     delFailed: "Delete failed",
     noMembers: "No members.",
+    approveMember: "Approve",
+    deactivateMember: "Mark inactive",
+    memberApproved: "Member approved",
+    memberDeactivated: "Member marked inactive",
+    memberStatusFailed: "Could not change the member's status",
+    pendingMembers: "added by the family head, waiting for approval",
     resendCreds: "Resend Login Credentials",
     resending: "Sending...",
     noEmailOnFile: "This family has no email on file.",
@@ -124,6 +133,12 @@ const L = {
     deleted: "परिवार हटाया गया",
     delFailed: "हटाने में विफल",
     noMembers: "कोई सदस्य नहीं।",
+    approveMember: "स्वीकृत करें",
+    deactivateMember: "निष्क्रिय करें",
+    memberApproved: "सदस्य स्वीकृत हुआ",
+    memberDeactivated: "सदस्य निष्क्रिय किया गया",
+    memberStatusFailed: "सदस्य की स्थिति नहीं बदली जा सकी",
+    pendingMembers: "परिवार प्रमुख ने जोड़े, स्वीकृति की प्रतीक्षा में",
     resendCreds: "लॉगिन जानकारी पुनः भेजें",
     resending: "भेजा जा रहा है...",
     noEmailOnFile: "इस परिवार का कोई ईमेल दर्ज नहीं है।",
@@ -133,6 +148,9 @@ const L = {
 };
 
 export default function AdminFamilies() {
+  // The super admin manages records; a sub-admin (Admin → Assign roles) reviews and approves only.
+  const { user: currentUser } = useAuth();
+  const superAdmin = isSuperAdmin(currentUser);
   const { lang } = useLang();
   const t = L[lang];
   const { toast } = useToast();
@@ -155,6 +173,21 @@ export default function AdminFamilies() {
     setSelected(f);
     const mems = await base44.entities.FamilyMember.filter({ familyId: f.familyId });
     setMembers(mems);
+  };
+
+  // Members a family head adds (or whose mobile / email they change) wait as PENDING until an admin approves them.
+  const [statusBusy, setStatusBusy] = useState(null);
+  const setMemberStatus = async (member, status) => {
+    setStatusBusy(member.id);
+    try {
+      const updated = await base44.entities.FamilyMember.update(member.id, { status });
+      setMembers((rows) => rows.map((row) => (row.id === member.id ? { ...row, ...updated } : row)));
+      toast({ title: status === "ACTIVE" ? t.memberApproved : t.memberDeactivated, description: member.name });
+    } catch (err) {
+      toast({ title: t.memberStatusFailed, description: err.message, variant: "destructive" });
+    } finally {
+      setStatusBusy(null);
+    }
   };
 
   const resendCredentials = async (f) => {
@@ -233,8 +266,8 @@ export default function AdminFamilies() {
     }
   };
 
-  const { search, setSearch, page, setPage, totalPages, totalItems, startIndex, pageSize, pageItems, filtered, dateFrom, setDateFrom, dateTo, setDateTo } = useTableControls(families, {
-    searchFields: ["familyId", "familyName", "headName", "applicationId"],
+  const { search, setSearch, suggestions, page, setPage, totalPages, totalItems, startIndex, pageSize, pageItems, filtered, dateFrom, setDateFrom, dateTo, setDateTo } = useTableControls(families, {
+    searchFields: ["familyId", "familyName", "headName", "applicationId", "village", "nativePlace", "contactNumber", "email"],
     dateField: "registrationDate",
   });
 
@@ -259,22 +292,16 @@ export default function AdminFamilies() {
         </div>
         <div className="flex items-center gap-2">
           <ExportMenu filename="families" title={t.title} columns={exportColumns} rows={filtered} />
+          {superAdmin && (
           <button onClick={openNew} className="inline-flex items-center gap-1.5 rounded-full bg-maroon px-5 py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark">
             <Plus className="h-4 w-4" /> {t.add}
           </button>
+          )}
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative min-w-[220px] flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t.searchPh}
-            className="w-full rounded-full border border-gold/40 bg-card py-2.5 pl-10 pr-4 text-sm outline-none focus:border-maroon"
-          />
-        </div>
+        <div className="min-w-[220px] flex-1"><SearchBox value={search} onChange={setSearch} suggestions={suggestions} placeholder={t.searchPh} /></div>
         <DateRangeFilter from={dateFrom} to={dateTo} onFromChange={setDateFrom} onToChange={setDateTo} />
       </div>
 
@@ -307,8 +334,8 @@ export default function AdminFamilies() {
                     <button onClick={() => viewFamily(f)} className="inline-flex items-center gap-1 rounded-full border border-gold/40 px-3 py-1.5 text-xs font-semibold text-maroon hover:bg-gold/10">
                       <Eye className="h-3.5 w-3.5" /> {t.view}
                     </button>
-                    <button onClick={() => openEdit(f)} className="rounded-full p-1.5 text-maroon hover:bg-maroon/10"><Pencil className="h-3.5 w-3.5" /></button>
-                    <button onClick={() => remove(f)} className="rounded-full p-1.5 text-destructive hover:bg-destructive/10"><Trash2 className="h-3.5 w-3.5" /></button>
+                    {superAdmin && <button onClick={() => openEdit(f)} className="rounded-full p-1.5 text-maroon hover:bg-maroon/10"><Pencil className="h-3.5 w-3.5" /></button>}
+                    {superAdmin && <button onClick={() => remove(f)} className="rounded-full p-1.5 text-destructive hover:bg-destructive/10"><Trash2 className="h-3.5 w-3.5" /></button>}
                   </div>
                 </td>
               </tr>
@@ -340,6 +367,7 @@ export default function AdminFamilies() {
                   <div><span className="text-muted-foreground">{t.email}:</span> {selected.email || "—"}</div>
                   <div className="col-span-2"><span className="text-muted-foreground">{t.address}:</span> {selected.address}, {selected.city}, {selected.state}</div>
                 </div>
+                {superAdmin && (
                 <button
                   onClick={() => resendCredentials(selected)}
                   disabled={resending}
@@ -348,9 +376,15 @@ export default function AdminFamilies() {
                   {resending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <KeyRound className="h-3.5 w-3.5" />}
                   {resending ? t.resending : t.resendCreds}
                 </button>
+                )}
               </div>
               <div>
                 <div className="text-xs font-semibold uppercase tracking-wide text-maroon">{t.members} ({members.length})</div>
+                {members.some((m) => m.status === "PENDING") && (
+                  <p className="mt-1 text-xs text-amber-800 dark:text-amber-300">
+                    {members.filter((m) => m.status === "PENDING").length} {t.pendingMembers}
+                  </p>
+                )}
                 <div className="mt-2 space-y-2">
                   {members.map((m) => (
                     <div key={m.id} className="flex items-center gap-3 rounded-lg border border-border p-2.5">
@@ -358,8 +392,21 @@ export default function AdminFamilies() {
                       <div className="flex-1">
                         <div className="text-sm font-medium text-foreground">{m.name}</div>
                         <div className="text-xs text-muted-foreground">{m.relationship} · {m.membershipId}</div>
+                        {(m.mobile || m.email) && <div className="truncate text-xs text-muted-foreground">{[m.mobile, m.email].filter(Boolean).join(" · ")}</div>}
                       </div>
-                      <StatusBadge status={m.status} />
+                      <div className="flex flex-col items-end gap-1.5">
+                        <StatusBadge status={m.status} />
+                        {m.status === "PENDING" && (
+                          <div className="flex gap-1.5">
+                            <button type="button" disabled={statusBusy === m.id} onClick={() => setMemberStatus(m, "ACTIVE")} className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60">
+                              {t.approveMember}
+                            </button>
+                            <button type="button" disabled={statusBusy === m.id} onClick={() => setMemberStatus(m, "INACTIVE")} className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground hover:bg-muted disabled:opacity-60">
+                              {t.deactivateMember}
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                   {members.length === 0 && <p className="text-xs text-muted-foreground">{t.noMembers}</p>}

@@ -52,6 +52,7 @@ export const publicHindi = {
   "Photo Gallery": "फोटो गैलरी",
   "Community Services": "सामुदायिक सेवाएँ",
   "Blood Donation": "रक्तदान",
+  "Blood Donor": "रक्तदाता",
   "Rent & Property": "किराया और संपत्ति",
   "Transport": "परिवहन",
   "Emergency Help": "आपातकालीन सहायता",

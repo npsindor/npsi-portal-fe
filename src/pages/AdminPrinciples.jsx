@@ -66,7 +66,7 @@ export default function AdminPrinciples() {
     }
   };
 
-  const { search, setSearch, page, setPage, totalPages, totalItems, pageSize, pageItems } = useTableControls(principles, {
+  const { search, setSearch, suggestions, page, setPage, totalPages, totalItems, pageSize, pageItems } = useTableControls(principles, {
     searchFields: ["titleEn", "titleHi"],
   });
 
@@ -84,7 +84,7 @@ export default function AdminPrinciples() {
       </div>
 
       <div className="mt-6 space-y-3">
-        {!loading && principles.length > 0 && <SearchBox value={search} onChange={setSearch} placeholder={t("principlesAdmin.searchPh")} />}
+        {!loading && principles.length > 0 && <SearchBox value={search} onChange={setSearch} suggestions={suggestions} placeholder={t("principlesAdmin.searchPh")} />}
         {loading ? <div className="flex justify-center py-16 text-muted-foreground"><Loader2 className="mr-2 h-6 w-6 animate-spin" />{t("principles.loading")}</div> : totalItems === 0 ? <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">{t("principles.empty")}</div> : pageItems.map((principle) => (
           <div key={principle.id} className="rounded-2xl border border-gold/30 bg-card p-4 shadow-sm">
             <div className="flex items-start gap-3">

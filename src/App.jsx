@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import ScrollToTop from './components/ScrollToTop';
 import RouteTitle from '@/components/RouteTitle';
 import { LanguageProvider } from '@/lib/i18n';
+import { PageVisibilityGate, SiteVisibilityProvider } from '@/lib/site-visibility';
 import { ThemeProvider } from '@/lib/ThemeContext';
 // Add page imports here
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -46,6 +47,8 @@ const PortalRegistration = lazy(() => import('@/pages/PortalRegistration'));
 const StudentRegistration = lazy(() => import('@/pages/StudentRegistration'));
 const AdminRegistrationPayments = lazy(() => import('@/pages/AdminRegistrationPayments'));
 const AdminAddressOptions = lazy(() => import('@/pages/AdminAddressOptions'));
+const AdminSiteVisibility = lazy(() => import('@/pages/AdminSiteVisibility'));
+const AdminRoles = lazy(() => import('@/pages/AdminRoles'));
 const AdminHomeHighlights = lazy(() => import('@/pages/AdminHomeHighlights'));
 const AdminCommunityServices = lazy(() => import('@/pages/AdminCommunityServices'));
 const Register = lazy(() => import('@/pages/Register'));
@@ -100,6 +103,7 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Suspense fallback={<RouteLoadingFallback />}>
+    <PageVisibilityGate>
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<Home />} />
@@ -154,7 +158,7 @@ const AuthenticatedApp = () => {
       </Route>
 
       {/* Admin portal (protected, admin role only) */}
-      <Route element={<ProtectedRoute unauthenticatedElement={<LoginRedirect />} requireRole="admin" unauthorizedElement={<Navigate to="/portal" replace />} />}>
+      <Route element={<ProtectedRoute unauthenticatedElement={<LoginRedirect />} requireAdminAccess unauthorizedElement={<Navigate to="/portal" replace />} />}>
         <Route element={<AdminLayout />}>
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/applications" element={<AdminApplications />} />
@@ -166,6 +170,8 @@ const AuthenticatedApp = () => {
           <Route path="/admin/transactions" element={<AdminTransactions />} />
           <Route path="/admin/registration-payments" element={<AdminRegistrationPayments />} />
           <Route path="/admin/address-options" element={<AdminAddressOptions />} />
+          <Route path="/admin/site-visibility" element={<AdminSiteVisibility />} />
+          <Route path="/admin/roles" element={<AdminRoles />} />
           <Route path="/admin/home-highlights" element={<AdminHomeHighlights />} />
           <Route path="/admin/community-services" element={<AdminCommunityServices />} />
           <Route path="/admin/page-content" element={<AdminPageContent />} />
@@ -192,6 +198,7 @@ const AuthenticatedApp = () => {
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>
+    </PageVisibilityGate>
     </Suspense>
   );
 };
@@ -243,7 +250,9 @@ function App() {
               <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                 <ScrollToTop />
                 <RouteTitle />
-                <AuthenticatedApp />
+                <SiteVisibilityProvider>
+                  <AuthenticatedApp />
+                </SiteVisibilityProvider>
               </Router>
               <Toaster />
             </QueryClientProvider>

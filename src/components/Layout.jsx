@@ -1,18 +1,23 @@
 import React from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Home, Users, CalendarDays, Bell, Settings, LogOut, Menu, X, Globe, MessageSquare, Wallet, House } from "lucide-react";
+import { Home, Users, CalendarDays, Bell, Settings, LogOut, Menu, X, Globe, MessageSquare, Wallet, House, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import { isFamilyOnlyPath } from "@/lib/student-flow";
 import LanguageToggle from "@/components/LanguageToggle";
 import ThemeToggle from "@/components/ThemeToggle";
 import MemberProfileChip from "@/components/MemberProfileChip";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
+import { hasAdminAccess } from "@/lib/admin-access";
 import logoImage from "@/images/logo.png";
 
 export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
+  const { lang } = useLang();
+  // A member the super admin gave admin work to (Admin → Assign roles) reaches the admin panel from here.
+  const adminLink = hasAdminAccess(user);
+  const adminLabel = lang === "hi" ? "एडमिन पैनल" : "Admin panel";
   const t = useT();
   const [menuOpen, setMenuOpen] = React.useState(false);
 
@@ -56,6 +61,12 @@ export default function Layout() {
           <Globe className="h-3.5 w-3.5" />
           {t("common.backToWebsite")}
         </Link>
+        {adminLink && (
+          <Link to="/admin" className="mx-4 mt-2 flex items-center gap-2 rounded-xl bg-maroon px-4 py-2.5 text-xs font-semibold text-cream transition hover:bg-maroon-dark">
+            <ShieldCheck className="h-3.5 w-3.5 text-gold" />
+            {adminLabel}
+          </Link>
+        )}
 
         <div className="px-6 pt-4">
           <MemberProfileChip variant="sidebar" />
@@ -97,9 +108,16 @@ export default function Layout() {
 
       {/* Mobile header */}
       <header className="sticky top-0 z-40 flex items-center justify-between border-b border-gold/20 bg-card/95 px-4 py-3 backdrop-blur lg:hidden">
-        <Link to="/" className="flex h-9 w-9 items-center justify-center rounded-lg border border-gold/50 bg-card text-maroon hover:bg-gold/10" title={t("common.backToWebsite")} aria-label={t("common.backToWebsite")}>
-          <Globe className="h-4 w-4" />
-        </Link>
+        <span className="flex items-center gap-2">
+          <Link to="/" className="flex h-9 w-9 items-center justify-center rounded-lg border border-gold/50 bg-card text-maroon hover:bg-gold/10" title={t("common.backToWebsite")} aria-label={t("common.backToWebsite")}>
+            <Globe className="h-4 w-4" />
+          </Link>
+          {adminLink && (
+            <Link to="/admin" className="flex h-9 w-9 items-center justify-center rounded-lg bg-maroon text-gold" title={adminLabel} aria-label={adminLabel}>
+              <ShieldCheck className="h-4 w-4" />
+            </Link>
+          )}
+        </span>
         <Link to="/portal" className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-gold/50 bg-maroon">
             <img src={logoImage} alt={t("brand.logoAlt")} className="h-full w-full rounded-lg object-contain" />

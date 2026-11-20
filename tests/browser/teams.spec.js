@@ -170,3 +170,137 @@ test('the old admin Core Team URL opens the central menu filtered to the Core Te
   await expect(page).toHaveURL(/\/admin\/event-members\?section=CORE_TEAM$/);
   await expect(page.getByLabel('Interested Event')).toHaveValue('CORE_TEAM');
 });
+
+test('Core Team page: each card shows the photo (initials without one), the name and below it the village', async ({ page }) => {
+  await en(page);
+  await mockApi(page, {
+    'GET /auth/me': NOT_LOGGED_IN,
+    'GET /event-members/teams': { event: null, sections: [{ ...SECTIONS[0], members: [
+      card({ id: 'k1', name: 'Mahesh Patidar', village: 'Ghegava', area: null, photoUrl: '/logo.png' }),
+      card({ id: 'k2', name: 'Yogesh Patidar', village: 'Dongargoan', area: null }),
+    ] }] },
+  });
+  await page.goto('/core-team');
+  const cards = page.locator('article');
+  await expect(cards).toHaveCount(2);
+  await expect(cards.first().getByRole('img', { name: 'Mahesh Patidar' })).toHaveAttribute('src', '/logo.png');
+  await expect(cards.nth(1).getByText('YP', { exact: true })).toBeVisible();
+  for (const [index, name, village] of [[0, 'Mahesh Patidar', 'Ghegava'], [1, 'Yogesh Patidar', 'Dongargoan']]) {
+    const nameBox = await cards.nth(index).getByRole('heading', { name }).boundingBox();
+    const villageBox = await cards.nth(index).getByText(village, { exact: true }).boundingBox();
+    expect(villageBox.y).toBeGreaterThan(nameBox.y);
+  }
+});
+
+test('admin: "Add to team" lists a person with name, village and photo, approved at once', async ({ page }) => {
+  await en(page);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const calls = await mockApi(page, {
+    'GET /auth/me': ADMIN,
+    'GET /event-member-applications': [],
+    'GET /event-member-sections/admin': { sections: [{ id: 's-core', key: 'CORE_TEAM', label: 'Core Team', heading: 'Core Team', isCoreTeam: true, status: 'ACTIVE', accepting: true, approved: 0, pending: 0 }], other: { pending: 0 } },
+    'POST /uploads': { file_url: '/uploads/photo.png', fileUrl: '/uploads/photo.png' },
+    'POST /event-member-applications': { status: 201, body: { id: 'n1', status: 'APPROVED' } },
+  });
+  await page.goto('/admin/event-members?section=CORE_TEAM');
+  await page.getByRole('button', { name: 'Add to team' }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Name *').fill('Mahesh Patidar');
+  await dialog.getByLabel('Name in Hindi').fill('महेश पाटीदार');
+  await dialog.getByRole('combobox', { name: /Village/ }).fill('Rampura');
+  await dialog.getByRole('option', { name: 'Rampura', exact: true }).click();
+  // A village from the portal list fills in its Hindi by itself.
+  await expect(dialog.getByLabel('Village in Hindi')).toHaveValue('रामपुरा');
+  await dialog.locator('input[type="file"]').setInputFiles({ name: 'photo.png', mimeType: 'image/png', buffer: Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]) });
+  await expect(dialog.locator('img')).toHaveAttribute('src', /photo\.png/);
+  await dialog.getByRole('button', { name: 'Add to team' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Added to the team.' })).toBeVisible();
+  const sent = calls.find((call) => call.key === 'POST /event-member-applications').body;
+  expect(sent).toMatchObject({ sectionKey: 'CORE_TEAM', name: 'Mahesh Patidar', nameHi: 'महेश पाटीदार', village: 'Rampura', villageHi: 'रामपुरा', approveNow: true, consent: true });
+  expect(sent.photoUrl).toMatch(/photo\.png/);
+  expect(sent.mobile).toBeUndefined();
+});
+
+test('Core Team page in Hindi: Hindi heading, names and villages (a listed village falls back to the portal list)', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'hi'));
+  await mockApi(page, {
+    'GET /auth/me': NOT_LOGGED_IN,
+    'GET /event-members/teams': { event: null, sections: [{ ...SECTIONS[0], members: [
+      card({ id: 'k1', name: 'Mahesh Patidar', nameHi: 'महेश पाटीदार', village: 'Ghegava', villageHi: 'घेगांव', area: null, designation: 'Coordinator', designationHi: 'समन्वयक' }),
+      card({ id: 'k2', name: 'Kamal Patidar', village: 'Rampura', area: null }),
+    ] }] },
+  });
+  await page.goto('/core-team');
+  await expect(page.getByRole('heading', { level: 1, name: 'कोर टीम' })).toBeVisible();
+  const cards = page.locator('article');
+  await expect(cards.first().getByRole('heading', { name: 'महेश पाटीदार' })).toBeVisible();
+  await expect(cards.first()).toContainText('घेगांव');
+  await expect(cards.first()).toContainText('समन्वयक');
+  await expect(cards.nth(1)).toContainText('Kamal Patidar');
+  await expect(cards.nth(1)).toContainText('रामपुरा');
+  await expect(page.getByRole('button', { name: 'सदस्य बनें' }).first()).toBeVisible();
+  // Back to English: the English names and villages.
+  await page.getByRole('button', { name: 'View in English' }).first().click();
+  await expect(cards.first().getByRole('heading', { name: 'Mahesh Patidar' })).toBeVisible();
+  await expect(cards.first()).toContainText('Ghegava');
+  await expect(page.getByRole('heading', { level: 1, name: 'Core Team' })).toBeVisible();
+});
+
+test('admin "Arrange order": approved team members in website order; arrows, a position number and drag move them; Save sends the order', async ({ page }) => {
+  await en(page);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const member = (id, name, sortOrder, extra = {}) => ({ id, name, village: 'Rampura', status: 'APPROVED', sortOrder, sectionId: 's-core', section: { key: 'CORE_TEAM', label: 'Core Team', heading: 'Core Team' }, createdAt: '2026-11-01T00:00:00.000Z', mobileDigits: null, ...extra });
+  const calls = await mockApi(page, {
+    'GET /auth/me': ADMIN,
+    'GET /event-member-applications': [member('m1', 'Asha', 1), member('m2', 'Bharat', 2), member('m3', 'Chetan', 3), member('m4', 'Deepak', 4), member('p1', 'Pending Person', 0, { status: 'PENDING' })],
+    'GET /event-member-sections/admin': { sections: [{ id: 's-core', key: 'CORE_TEAM', label: 'Core Team', heading: 'Core Team', isCoreTeam: true, status: 'ACTIVE', approved: 4, pending: 1 }], other: { pending: 0 } },
+    'PUT /event-member-sections/s-core/member-order': { ids: ['m4', 'm1', 'm3', 'm2'] },
+  });
+  await page.goto('/admin/event-members?section=CORE_TEAM');
+  await page.getByRole('button', { name: 'Arrange order' }).click();
+  const dialog = page.getByRole('dialog');
+  const names = () => dialog.getByTestId('order-row').locator('.font-semibold.truncate').allInnerTexts();
+  await expect.poll(names).toEqual(['Asha', 'Bharat', 'Chetan', 'Deepak']);
+  await expect(dialog.getByRole('button', { name: 'Save order' })).toBeDisabled();
+  // Deepak to number 1 by typing the position.
+  await dialog.getByRole('spinbutton', { name: 'Position: Deepak' }).fill('1');
+  await dialog.getByRole('spinbutton', { name: 'Position: Deepak' }).press('Enter');
+  await expect.poll(names).toEqual(['Deepak', 'Asha', 'Bharat', 'Chetan']);
+  // Bharat one place down with the arrow.
+  await dialog.getByRole('button', { name: 'Move down: Bharat' }).click();
+  await expect.poll(names).toEqual(['Deepak', 'Asha', 'Chetan', 'Bharat']);
+  // Drag Chetan onto Asha's place.
+  await dialog.getByTestId('order-row').nth(2).dragTo(dialog.getByTestId('order-row').nth(1));
+  await expect.poll(names).toEqual(['Deepak', 'Chetan', 'Asha', 'Bharat']);
+  await expect(dialog.getByText('Unsaved order')).toBeVisible();
+  await dialog.getByRole('button', { name: 'Save order' }).click();
+  await expect.poll(() => calls.find((call) => call.key === 'PUT /event-member-sections/s-core/member-order')?.body).toEqual({ ids: ['m4', 'm3', 'm1', 'm2'] });
+  await expect(page.getByRole('status').filter({ hasText: 'Order saved' })).toBeVisible();
+});
+
+test('admin deletes a team entry from the table: confirm first, Cancel keeps it, Yes sends DELETE and the row goes', async ({ page }) => {
+  await en(page);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const member = (id, name, status) => ({ id, name, village: 'Rampura', status, sortOrder: 1, sectionId: 's-core', section: { key: 'CORE_TEAM', label: 'Core Team', heading: 'Core Team' }, createdAt: '2026-11-01T00:00:00.000Z', mobileDigits: null });
+  let list = [member('m1', 'Asha', 'APPROVED'), member('m2', 'Bharat', 'PENDING')];
+  const calls = await mockApi(page, {
+    'GET /auth/me': ADMIN,
+    'GET /event-member-sections/admin': { sections: [{ id: 's-core', key: 'CORE_TEAM', label: 'Core Team', heading: 'Core Team', isCoreTeam: true, status: 'ACTIVE', approved: 1, pending: 1 }], other: { pending: 0 } },
+    'DELETE /event-member-applications/m1': { status: 204, body: null },
+  });
+  await page.route('**/api/v1/event-member-applications', (route) => route.fulfill({ json: list }));
+  await page.goto('/admin/event-members');
+  await expect(page.getByRole('button', { name: 'Delete: Bharat' })).toBeVisible();
+  await page.getByRole('button', { name: 'Delete: Asha' }).click();
+  const confirm = page.getByRole('alertdialog');
+  await expect(confirm).toContainText('Asha');
+  await confirm.getByRole('button', { name: 'Cancel' }).click();
+  expect(calls.some((call) => call.key === 'DELETE /event-member-applications/m1')).toBe(false);
+  await page.getByRole('button', { name: 'Delete: Asha' }).click();
+  list = [list[1]];
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Yes, delete' }).click();
+  await expect.poll(() => calls.some((call) => call.key === 'DELETE /event-member-applications/m1')).toBe(true);
+  await expect(page.getByRole('status').filter({ hasText: 'Entry deleted.' })).toBeVisible();
+  await expect(page.getByRole('row', { name: /Asha/ })).toHaveCount(0);
+  await expect(page.getByRole('row', { name: /Bharat/ })).toBeVisible();
+});

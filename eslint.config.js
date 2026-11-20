@@ -37,6 +37,8 @@ export default [
     rules: {
       "no-unused-vars": "off",
       "react/jsx-uses-vars": "error",
+      // A component used in JSX but never imported (e.g. a missing icon) fails the lint instead of crashing the page.
+      "react/jsx-no-undef": "error",
       "react/jsx-uses-react": "error",
       "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": [

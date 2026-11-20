@@ -70,7 +70,8 @@ test('admin: pending entries are flagged with their review note and excluded fro
   await expect(list.getByRole('status')).toContainText('Showing 1 of 5');
   await list.getByRole('row', { name: /Archana Lakhan/ }).getByRole('button', { name: 'History' }).click();
   await expect(page.getByText('Imported from statement')).toBeVisible();
-  await expect(page.getByText('Super Admin')).toBeVisible();
+  // The history entry names who did it (the top bar's role badge also says "Super Admin", so look inside the entry).
+  await expect(page.locator('li, tr').filter({ hasText: 'Imported from statement' }).first()).toContainText('Super Admin');
   await page.getByRole('button', { name: 'Reports / Excel' }).click();
   const [report] = await Promise.all([context.waitForEvent('page'), page.getByRole('button', { name: 'Full financial summary' }).first().click()]);
   await report.waitForLoadState();

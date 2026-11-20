@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarDays, MapPin, Bell, Users, UsersRound, Heart, BookOpen, UserPlus, GraduationCap, ClipboardCheck, Info, ScrollText, HelpCircle, Briefcase, Bus, Stethoscope, House, MessageSquare, Phone, Newspaper, HeartHandshake, Landmark, Sparkles } from "lucide-react";
+import { ArrowRight, Droplet, CalendarDays, MapPin, Bell, Users, UsersRound, Heart, BookOpen, UserPlus, GraduationCap, ClipboardCheck, Info, ScrollText, HelpCircle, Briefcase, Bus, Stethoscope, House, MessageSquare, Phone, Newspaper, HeartHandshake, Landmark, Sparkles } from "lucide-react";
 import { usePublicCopy } from '@/lib/public-copy';
 import PublicFooter from '@/components/PublicFooter';
 import CommunityHighlights, { ParticipationSection } from '@/components/CommunityHighlights';
@@ -16,6 +16,7 @@ import { localizedText } from "@/lib/utils";
 // Announcement `type` values (Admin → Sandesh) → [English, Hindi] badge text.
 const ANNOUNCEMENT_TYPES = { Notice: ["Notice", "सूचना"], Urgent: ["Urgent", "अत्यावश्यक"], News: ["News", "समाचार"], Festival: ["Festival", "त्योहार"], General: ["General", "सामान्य"], Event: ["Event", "कार्यक्रम"] };
 import { flatNavigation } from "@/lib/public-navigation";
+import { HomeSection, useSiteVisibility } from "@/lib/site-visibility";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { calendarDate } from "@/lib/dates";
 
@@ -23,6 +24,7 @@ import { calendarDate } from "@/lib/dates";
 const serviceIcons = {
   "About Us": [Landmark, "#3b82c4", "#123a63"],
   "Events & Programs": [CalendarDays, "#fbbf24", "#c2410c"],
+  "Blood Donor": [Droplet, "#f87171", "#b91c1c"],
   "Community Services": [HeartHandshake, "#f472b6", "#be185d"],
   "Career & Business": [Briefcase, "#818cf8", "#3730a3"],
   Sandesh: [Newspaper, "#38bdf8", "#0369a1"],
@@ -93,6 +95,7 @@ export default function Home() {
     { icon: Heart, title: t("home.p4t"), desc: t("home.p4d") },
   ];
 
+  const { isPageVisible } = useSiteVisibility();
   const importantServices = [
     { icon: UserPlus, title: t("home.service1t"), desc: t("home.service1d"), cta: t("home.serviceCta"), to: "/register" },
     { icon: GraduationCap, title: t("home.service2t"), desc: t("home.service2d"), cta: t("home.serviceCta"), to: "/student-register" },
@@ -103,14 +106,17 @@ export default function Home() {
     { icon: HelpCircle, title: t("home.service7t"), desc: t("home.service7d"), cta: t("home.serviceCta"), to: "/help" },
   ];
   const menuServices = flatNavigation
-    .filter((item) => item.label !== "Home" && serviceIcons[item.label])
+    .filter((item) => item.label !== "Home" && serviceIcons[item.label] && isPageVisible(item.to))
     .map((item) => ({ ...item, icon: serviceIcons[item.label][0], colors: serviceIcons[item.label].slice(1), title: c(item.label) }));
   return (
     <div className="min-h-screen bg-background">
       <PublicNav />
 
       <main>
+        <HomeSection id="counters">
         <CommunityCounters lang={lang} />
+        </HomeSection>
+        <HomeSection id="services">
         <section id="services" className="border-b border-border bg-card">
           <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-12 lg:gap-10">
             <div className="min-w-0 lg:col-span-4">
@@ -145,7 +151,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+        </HomeSection>
 
+        <HomeSection id="getStarted">
         <section className="border-y border-gold/20 bg-background">
           <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
             <div className="flex items-end justify-between gap-4">
@@ -156,7 +164,7 @@ export default function Home() {
               </div>
             </div>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {importantServices.slice(0, 4).map((service) => (
+              {importantServices.filter((service) => isPageVisible(service.to)).slice(0, 4).map((service) => (
                 <Link key={service.to} to={service.to} className="group premium-card flex min-h-48 flex-col p-5 transition hover:-translate-y-1 hover:border-gold/60 hover:shadow-lg sm:p-6">
                   <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-maroon text-gold transition group-hover:bg-gold group-hover:text-maroon"><service.icon className="h-5 w-5" /></span>
                   <h3 className="mt-4 font-display text-base font-semibold text-foreground">{service.title}</h3>
@@ -167,9 +175,13 @@ export default function Home() {
             </div>
           </div>
         </section>
+        </HomeSection>
 
+        <HomeSection id="participation">
         <ParticipationSection />
+        </HomeSection>
 
+        <HomeSection id="updates">
         <section id="updates" className="border-y border-border bg-background">
           <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
             <div className="flex items-end justify-between gap-4">
@@ -185,7 +197,7 @@ export default function Home() {
                 <article key={announcement.id} className="premium-card p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
                   <div className="flex items-center justify-between gap-3">
                     <span className="rounded-full bg-gold/15 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-amber-800">{ANNOUNCEMENT_TYPES[announcement.type]?.[lang === "hi" ? 1 : 0] || announcement.type}</span>
-                    <time className="text-xs text-muted-foreground">{announcement.date ? new Date(announcement.date).toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN") : ""}</time>
+                    <time className="text-xs text-muted-foreground">{announcement.date ? calendarDate(announcement.date).toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN") : ""}</time>
                   </div>
                   <h3 className="mt-4 font-display text-base font-semibold text-foreground">{localizedText(announcement, "title", lang)}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-3">{localizedText(announcement, "body", lang)}</p>
@@ -195,7 +207,9 @@ export default function Home() {
             <Link to="/news" className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-maroon sm:hidden">{t("news.viewAll")} <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </section>
+        </HomeSection>
 
+        <HomeSection id="pillars">
         <section className="bg-card">
           <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
             <div className="max-w-2xl">
@@ -214,7 +228,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+        </HomeSection>
 
+        <HomeSection id="events">
         <section id="events" className="bg-card">
           <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
             <div className="flex items-end justify-between gap-4">
@@ -282,8 +298,9 @@ export default function Home() {
             <Link to="/events" className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-maroon sm:hidden">{t("home.viewAll")} <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </section>
+        </HomeSection>
 
-        <CommunityHighlights afterServices={<HomeShowcase lang={lang} events={events} />} />
+        <CommunityHighlights afterServices={<HomeSection id="showcase"><HomeShowcase lang={lang} events={events} /></HomeSection>} />
       </main>
       <PublicFooter />
     </div>

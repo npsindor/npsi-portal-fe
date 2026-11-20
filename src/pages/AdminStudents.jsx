@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Check, X, AlertCircle, Eye, Plus, Pencil, Trash2, Loader2, GraduationCap, KeyRound } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
 import { base44 } from "@/api/base44Client";
+import { isSuperAdmin } from "@/lib/admin-access";
+import { useAuth } from "@/lib/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { useLang } from "@/lib/i18n";
 import { sanitizeMobile, sanitizePincode } from "@/lib/utils";
@@ -170,6 +172,9 @@ const emptyForm = () => ({
 });
 
 export default function AdminStudents() {
+  // The super admin manages records; a sub-admin (Admin → Assign roles) reviews and approves only.
+  const { user: currentUser } = useAuth();
+  const superAdmin = isSuperAdmin(currentUser);
   const { lang } = useLang();
   const t = L[lang];
   const { toast } = useToast();
@@ -293,7 +298,7 @@ export default function AdminStudents() {
     }
   };
 
-  const { search, setSearch, page, setPage, totalPages, totalItems, startIndex, pageSize, pageItems, filtered, dateFrom, setDateFrom, dateTo, setDateTo } = useTableControls(apps, {
+  const { search, setSearch, suggestions, page, setPage, totalPages, totalItems, startIndex, pageSize, pageItems, filtered, dateFrom, setDateFrom, dateTo, setDateTo } = useTableControls(apps, {
     searchFields: ["applicationId", "studentName", "course", "mobile"],
     dateField: "submittedDate",
   });
@@ -319,14 +324,16 @@ export default function AdminStudents() {
         </div>
         <div className="flex items-center gap-2">
           <ExportMenu filename="students" title={t.title} columns={exportColumns} rows={filtered} />
+          {superAdmin && (
           <button onClick={openNew} className="inline-flex items-center gap-1.5 rounded-full bg-maroon px-5 py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark">
             <Plus className="h-4 w-4" /> {t.add}
           </button>
+          )}
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <div className="min-w-[220px] flex-1"><SearchBox value={search} onChange={setSearch} placeholder={t.searchPh} /></div>
+        <div className="min-w-[220px] flex-1"><SearchBox value={search} onChange={setSearch} suggestions={suggestions} placeholder={t.searchPh} /></div>
         <DateRangeFilter from={dateFrom} to={dateTo} onFromChange={setDateFrom} onToChange={setDateTo} />
       </div>
 
@@ -357,13 +364,13 @@ export default function AdminStudents() {
                     <button onClick={() => setSelected(a)} className="inline-flex items-center gap-1 rounded-full border border-gold/40 px-3 py-1.5 text-xs font-semibold text-maroon hover:bg-gold/10">
                       <Eye className="h-3.5 w-3.5" /> {t.review}
                     </button>
-                    {a.status === "APPROVED" && (
+                    {superAdmin && a.status === "APPROVED" && (
                       <button onClick={() => resendCredentials(a)} disabled={resendingId === a.id} title={t.resendCreds} className="rounded-full p-1.5 text-maroon hover:bg-maroon/10 disabled:opacity-60">
                         {resendingId === a.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <KeyRound className="h-3.5 w-3.5" />}
                       </button>
                     )}
-                    <button onClick={() => openEdit(a)} className="rounded-full p-1.5 text-maroon hover:bg-maroon/10"><Pencil className="h-3.5 w-3.5" /></button>
-                    <button onClick={() => remove(a)} className="rounded-full p-1.5 text-destructive hover:bg-destructive/10"><Trash2 className="h-3.5 w-3.5" /></button>
+                    {superAdmin && <button onClick={() => openEdit(a)} className="rounded-full p-1.5 text-maroon hover:bg-maroon/10"><Pencil className="h-3.5 w-3.5" /></button>}
+                    {superAdmin && <button onClick={() => remove(a)} className="rounded-full p-1.5 text-destructive hover:bg-destructive/10"><Trash2 className="h-3.5 w-3.5" /></button>}
                   </div>
                 </td>
               </tr>

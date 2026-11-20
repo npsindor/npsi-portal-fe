@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useLang } from "@/lib/i18n";
 import ServicesOverview from "@/components/admin/ServicesOverview";
+import DashboardCharts from "@/components/admin/DashboardCharts";
 
 const L = {
   en: {
@@ -125,6 +126,8 @@ export default function AdminDashboard() {
           </div>
         ))}
       </div>
+
+      <DashboardCharts lang={lang} />
 
       <ServicesOverview lang={lang} />
 

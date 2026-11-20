@@ -1,6 +1,7 @@
 import { API } from './endpoints';
 import { API_BASE_URL } from './apiBaseUrl';
 import { getRecaptchaToken } from '../lib/recaptcha';
+import { rehostUploads } from './uploadUrls';
 
 const localApiBaseUrl = API_BASE_URL;
 
@@ -11,7 +12,13 @@ const localApiBaseUrl = API_BASE_URL;
 export const NETWORK_ERROR = 'Could not reach the server. Check your internet connection and try again. / सर्वर से संपर्क नहीं हो सका। इंटरनेट कनेक्शन जाँचें और फिर कोशिश करें।';
 export const apiFetch = async (url, options) => {
   try {
-    return await fetch(url, options);
+    const response = await fetch(url, options);
+    // Image links in API answers point at this site's API, whatever host they were uploaded through.
+    if (String(url).startsWith(localApiBaseUrl) && /json/i.test(response.headers.get('content-type') || '')) {
+      const json = response.json.bind(response);
+      response.json = async () => rehostUploads(await json(), localApiBaseUrl);
+    }
+    return response;
   } catch (cause) {
     if (cause?.name === 'AbortError') throw cause;
     const error = new Error(NETWORK_ERROR);
@@ -141,10 +148,10 @@ const createLocalAuth = () => ({
     const data = typeof emailOrData === 'object' ? emailOrData : { email: emailOrData, password };
     return request(API.auth.registrations, { method: 'POST', body: JSON.stringify(data) });
   },
-  verifyOtp: async (data) => {
-    // The API sets the session cookie.
-    return request(API.auth.otpVerifications, { method: 'POST', body: JSON.stringify(data) });
-  },
+  // The emailed code: a new account's first verification, or an administrator's second sign-in step (`email` may be
+  // the mobile number the administrator logged in with). The API sets the session cookie.
+  verifyOtp: async (data) =>
+    request(API.auth.otpVerifications, { method: 'POST', body: JSON.stringify({ ...data, recaptchaToken: await getRecaptchaToken('verify_code') }) }),
   resendOtp: async (email) => request(API.auth.otps, { method: 'POST', body: JSON.stringify({ email, recaptchaToken: await getRecaptchaToken('resend_code') }) }),
   // Mobile OTP (WhatsApp → SMS → email fallback): { mobile, purpose: 'REGISTER' | 'RESET', email?, recaptchaToken? }.
   requestMobileOtp: (data) => request(API.auth.mobileOtps, { method: 'POST', body: JSON.stringify(data) }),
@@ -345,6 +352,8 @@ export const base44 = {
     feedback: () => request(API.me.feedback),
     // The family's event registrations, cancelled ones included.
     eventRegistrations: () => request(API.me.eventRegistrations),
+    // Transfer requests this member filed that an admin hasn't decided yet.
+    transferRequests: () => request(API.me.transferRequests),
   },
   verifyFamily: (familyId) => request(API.familyVerification(familyId)),
   trackApplication: (applicationId, mobile) =>

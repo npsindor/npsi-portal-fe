@@ -29,6 +29,45 @@
     --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
     --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    /* Brand palette (RGB channels, used by the maroon / gold Tailwind colours): navy and gold for the public site. */
+    --brand-maroon: 16 42 67;
+    --brand-maroon-dark: 10 31 51;
+    --brand-maroon-light: 30 58 95;
+    --brand-gold: 196 154 67;
+    --brand-gold-light: 230 200 110;
+    --brand-gold-dark: 184 144 31;
+  }
+
+  /* Super admin portal: its own palette (royal plum + teal on a lavender page), set on <html> while an admin page is
+     open (AdminLayout), so admins can tell it apart from the family member portal at a glance; dialogs included. */
+  .admin-theme {
+    --brand-maroon: 59 7 100;
+    --brand-maroon-dark: 46 5 80;
+    --brand-maroon-light: 88 28 135;
+    --brand-gold: 20 184 166;
+    --brand-gold-light: 94 234 212;
+    --brand-gold-dark: 15 118 110;
+    --background: 270 40% 98%;
+    --primary: 275 87% 21%;
+    --ring: 275 87% 21%;
+    --accent: 173 80% 40%;
+    --accent-foreground: 275 87% 15%;
+    --border: 270 25% 89%;
+    --input: 270 25% 89%;
+    --muted: 270 30% 95%;
+    --secondary: 270 30% 93%;
+  }
+  .dark.admin-theme {
+    --background: 275 45% 8%;
+    --card: 275 40% 11%;
+    --popover: 275 40% 11%;
+    --primary: 275 60% 30%;
+    --accent: 173 70% 45%;
+    --ring: 173 70% 45%;
+    --border: 275 25% 20%;
+    --input: 275 25% 20%;
+    --muted: 275 30% 16%;
+    --secondary: 275 30% 16%;
   }
 
   .dark {

@@ -10,6 +10,8 @@ import { base44 } from "@/api/base44Client";
 import { useLang } from "@/lib/i18n";
 import { localizedText } from "@/lib/utils";
 import { categoryLabel, SANDESH_CATEGORIES } from "@/lib/sandesh";
+import SuggestSearchInput from "@/components/SuggestSearchInput";
+import { suggestValues } from "@/lib/search-suggestions";
 
 // Admin → News / Announcements "type" decides the section.
 const sandeshSection = (type) => (["News", "Event"].includes(type) ? "community" : type === "Festival" ? "greetings" : "notices");
@@ -92,7 +94,7 @@ export default function News() {
             <option value="">{t.allCategories}</option>
             {Object.keys(SANDESH_CATEGORIES).map((key) => <option key={key} value={key}>{categoryLabel(key, lang)}</option>)}
           </select>
-          <input type="search" aria-label={t.search} placeholder={t.search} value={query} onChange={(event) => setQuery(event.target.value)} maxLength={100} className="h-10 min-w-0 flex-1 rounded-full border border-border bg-card px-4 text-sm sm:max-w-xs" />
+          <SuggestSearchInput className="min-w-0 flex-1 sm:max-w-xs" value={query} onChange={setQuery} placeholder={t.search} ariaLabel={t.search} maxLength={100} icon={false} inputClassName="h-10 w-full rounded-full border border-border bg-card px-4 text-sm" suggestions={suggestValues(news || [], lang === "hi" ? ["titleHi", "title"] : ["title", "titleHi"], query)} />
           {filtering && <button type="button" onClick={() => { setCategory(""); setQuery(""); }} className="text-sm font-semibold text-maroon hover:underline">{t.clear}</button>}
           {filtering && news && filtered.length === 0 && <p role="status" className="w-full text-sm text-muted-foreground">{t.noMatch}</p>}
         </div>

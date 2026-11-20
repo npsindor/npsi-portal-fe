@@ -5,6 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useT, useLang } from "@/lib/i18n";
 import StatusBadge from "@/components/StatusBadge";
 import SearchBox from "@/components/admin/SearchBox";
+import { suggestValues } from "@/lib/search-suggestions";
 import ExportMenu from "@/components/ExportMenu";
 import TablePagination from "@/components/admin/TablePagination";
 import DateRangeFilter from "@/components/admin/DateRangeFilter";
@@ -53,6 +54,7 @@ export default function AdminEventRegistrations() {
       toast({ title: t("er.updateFailed"), description: e.message, variant: "destructive" });
     }
   };
+
 
   const visible = regs.filter((r) => {
     if (eventFilter !== "All" && r.eventId !== eventFilter) return false;
@@ -103,7 +105,7 @@ export default function AdminEventRegistrations() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <div className="min-w-[220px] flex-1"><SearchBox value={search} onChange={setSearch} placeholder={t("er.searchPh")} /></div>
+        <div className="min-w-[220px] flex-1"><SearchBox value={search} onChange={setSearch} suggestions={suggestValues(regs, ["registrationId", "registrantName"], search)} placeholder={t("er.searchPh")} /></div>
         <DateRangeFilter from={dateFrom} to={dateTo} onFromChange={setDateFrom} onToChange={setDateTo} />
       </div>
 

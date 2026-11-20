@@ -5,6 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useT, useLang } from "@/lib/i18n";
 import StatusBadge from "@/components/StatusBadge";
 import SearchBox from "@/components/admin/SearchBox";
+import { suggestValues } from "@/lib/search-suggestions";
 import ExportMenu from "@/components/ExportMenu";
 import TablePagination from "@/components/admin/TablePagination";
 import DateRangeFilter from "@/components/admin/DateRangeFilter";
@@ -60,6 +61,7 @@ export default function AdminTransferRequests() {
   const reject = () => decide("REJECTED");
   const correction = () => decide("CORRECTION_REQUIRED");
 
+
   const visible = all.filter((r) => {
     if (filter !== "All" && r.status !== filter) return false;
     if (search && !r.requestId?.toLowerCase().includes(search.toLowerCase()) && !r.requesterName?.toLowerCase().includes(search.toLowerCase())) return false;
@@ -101,7 +103,7 @@ export default function AdminTransferRequests() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <div className="min-w-[220px] flex-1"><SearchBox value={search} onChange={setSearch} placeholder={t("tr.searchPh")} /></div>
+        <div className="min-w-[220px] flex-1"><SearchBox value={search} onChange={setSearch} suggestions={suggestValues(all, ["requestId", "requesterName"], search)} placeholder={t("tr.searchPh")} /></div>
         <DateRangeFilter from={dateFrom} to={dateTo} onFromChange={setDateFrom} onToChange={setDateTo} />
       </div>
 
