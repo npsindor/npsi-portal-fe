@@ -21,10 +21,10 @@ const tenDigits = (value) => {
   return digits.slice(0, 10);
 };
 
-export default function MobileOtpForm({ purpose = "REGISTER", askEmail = false, onVerified, onUnsupported }) {
+export default function MobileOtpForm({ purpose = "REGISTER", askEmail = false, initialMobile = "", autoFocus = true, onVerified, onUnsupported }) {
   const { lang } = useLang();
   const t = regCopy[lang];
-  const [mobile, setMobile] = useState("");
+  const [mobile, setMobile] = useState(() => tenDigits(String(initialMobile || "")));
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [sent, setSent] = useState(null); // { channel }
@@ -100,7 +100,7 @@ export default function MobileOtpForm({ purpose = "REGISTER", askEmail = false, 
                 type="tel"
                 inputMode="numeric"
                 autoComplete="tel-national"
-                autoFocus
+                autoFocus={autoFocus}
                 placeholder="9876543210"
                 value={mobile}
                 onChange={(e) => setMobile(tenDigits(e.target.value))}

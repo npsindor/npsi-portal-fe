@@ -21,7 +21,7 @@ export default function MembershipPass({ family, onFlip }) {
       <div className="relative mt-5">
         <div className="text-[0.6rem] uppercase tracking-[0.18em] text-cream/60">Family ID</div>
         <div className="font-display text-2xl font-bold tracking-wide text-gold">{family?.familyId || "—"}</div>
-        <div className="mt-1 text-sm text-cream/90">{family?.familyName}</div>
+        <div className="mt-1 text-sm text-cream/90">{family?.headName || family?.familyName}</div>
       </div>
 
       <div className="relative mt-4 grid grid-cols-2 gap-3 text-sm">

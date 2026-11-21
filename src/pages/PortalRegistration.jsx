@@ -7,20 +7,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLang } from "@/lib/i18n";
+import { useAuth } from "@/lib/AuthContext";
 import { FEES, fill, regCopy, translateError, UPI } from "@/lib/registration-copy";
 import CreatableCombobox from "@/components/CreatableCombobox";
 import { INDORE_AREAS, mergeOptions } from "@/lib/native-places";
 import VillageCombobox from "@/components/VillageCombobox";
 import { indiaToday } from "@/lib/dates";
+import { isSchoolClass, MARITAL_STATUSES, optionLabel, STUDENT_COURSES } from "@/lib/member-options";
 
 const CITIES = ["Indore", "Ujjain", "Dewas", "Other"];
+// Student registration: the local address must be in Indore (district Indore), checked by the server too.
+const STUDENT_CITY = "Indore";
 const GENDERS = ["Male", "Female", "Other"];
 const OTHER = "__other__";
-const EMPTY = { firstName: "", lastName: "", gender: "", dob: "", city: "Indore", area: "", address: "", pincode: "", nativeVillage: "" };
+const EMPTY = { firstName: "", lastName: "", gender: "", dob: "", maritalStatus: "", education: "", city: "Indore", area: "", address: "", pincode: "", nativeVillage: "" };
 const STEP_KEYS = ["stepDetails", "stepAddress", "stepPayment", "stepReview"];
 const today = () => indiaToday();
-// Same rules as the server: before today, at most 120 years ago, at least 18 (member) / 3 (student) years old.
-const MIN_AGE = { FAMILY: 18, STUDENT: 3 };
+// Same rules as the server: before today, at most 120 years ago, at least 18 years old (member and student:
+// students register after 12th).
+const MIN_AGE = { FAMILY: 18, STUDENT: 18 };
 const yearsAgo = (years, from = today()) => `${String(Number(from.slice(0, 4)) - years).padStart(4, "0")}${from.slice(4)}`;
 const validDob = (dob, type) => /^\d{4}-\d{2}-\d{2}$/.test(dob) && dob < today() && dob >= yearsAgo(120) && dob <= yearsAgo(MIN_AGE[type] ?? 0);
 
@@ -81,7 +86,13 @@ function Wizard({ initial, onDone, t, lang, regType = "FAMILY" }) {
   const editing = Boolean(initial?.id);
   // A resubmission keeps its own type; a new registration uses the page's type (?type=student → STUDENT, ₹100).
   const type = initial?.type || regType;
-  const [form, setForm] = useState({ ...EMPTY, ...(initial?.form || {}) });
+  const student = type === "STUDENT";
+  const { refreshUser } = useAuth();
+  // A student registers with their local Indore address (district Indore); an older one elsewhere is entered again.
+  const [form, setForm] = useState(() => {
+    const start = { ...EMPTY, ...(initial?.form || {}) };
+    return student && start.city !== STUDENT_CITY ? { ...start, city: STUDENT_CITY, area: "", address: "", pincode: "" } : start;
+  });
   const [step, setStep] = useState(0);
   const [areas, setAreas] = useState([]);
   const [pincodes, setPincodes] = useState([]);
@@ -107,8 +118,15 @@ function Wizard({ initial, onDone, t, lang, regType = "FAMILY" }) {
 
   const amount = FEES[type] || 0;
   const validStep = (index) => {
-    if (index === 0) return form.firstName.trim() && form.lastName.trim() && form.gender && validDob(form.dob, type);
-    if (index === 1) return form.city && form.area.trim() && form.address.trim() && /^[1-9]\d{5}$/.test(form.pincode) && form.nativeVillage.trim();
+    if (index === 0)
+      return (
+        form.firstName.trim() &&
+        form.lastName.trim() &&
+        form.gender &&
+        validDob(form.dob, type) &&
+        (type === "STUDENT" ? form.education.trim() && !isSchoolClass(form.education) : form.maritalStatus)
+      );
+    if (index === 1) return (student ? form.city === STUDENT_CITY : form.city) && form.area.trim() && form.address.trim() && /^[1-9]\d{5}$/.test(form.pincode) && form.nativeVillage.trim();
     if (index === 2) return !needsNewScreenshot || screenshot?.fileId;
     return agree;
   };
@@ -134,9 +152,13 @@ function Wizard({ initial, onDone, t, lang, regType = "FAMILY" }) {
     setError("");
     setBusy(true);
     try {
-      const body = { type, ...form, screenshotFileId: screenshot?.fileId || undefined, utr: utr.trim() || undefined, lang };
+      const { maritalStatus, education, ...rest } = form;
+      const extra = type === "STUDENT" ? { education: education.trim() } : { maritalStatus };
+      const body = { type, ...rest, ...extra, screenshotFileId: screenshot?.fileId || undefined, utr: utr.trim() || undefined, lang };
       const result = editing ? await base44.registrations.resubmit(initial.id, body) : await base44.registrations.submit(body);
       setDone(result);
+      // The account is now a Student / Family Member account: reload it so the menu shows that portal's pages.
+      refreshUser?.();
     } catch (err) {
       setError(translateError(err.message, lang));
     } finally {
@@ -218,12 +240,41 @@ function Wizard({ initial, onDone, t, lang, regType = "FAMILY" }) {
                 {t[`dobRule${type}`]}
               </p>
             </div>
+            {type === "STUDENT" ? (
+              <div className="sm:col-span-2">
+                <CreatableCombobox
+                  id="reg-education"
+                  label={t.education}
+                  value={form.education}
+                  onChange={set("education")}
+                  options={STUDENT_COURSES}
+                  lang={lang}
+                  t={t}
+                />
+                <p className={`mt-1 text-xs ${isSchoolClass(form.education) ? "text-destructive" : "text-muted-foreground"}`} role={isSchoolClass(form.education) ? "alert" : undefined}>
+                  {isSchoolClass(form.education) ? t.educationAfter12 : t.educationHint}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="reg-marital">{t.maritalStatus} *</Label>
+                <select id="reg-marital" className={field} value={form.maritalStatus} onChange={(e) => set("maritalStatus")(e.target.value)} required>
+                  <option value="">{t.select}</option>
+                  {MARITAL_STATUSES.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {lang === "hi" ? o.hi : o.en}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         )}
 
         {step === 1 && (
           <>
-            <h3 className="font-semibold">{t.currentAddress}</h3>
+            <h3 className="font-semibold">{student ? t.localAddressIndore : t.currentAddress}</h3>
+            {student && <p className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">{t.studentIndoreHint}</p>}
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="reg-city">{t.city} *</Label>
@@ -233,9 +284,10 @@ function Wizard({ initial, onDone, t, lang, regType = "FAMILY" }) {
                   autoComplete="address-level2"
                   value={form.city}
                   onChange={(e) => setForm((current) => ({ ...current, city: e.target.value, area: "", pincode: "" }))}
+                  disabled={student}
                   required
                 >
-                  {CITIES.map((city) => (
+                  {(student ? [STUDENT_CITY] : CITIES).map((city) => (
                     <option key={city} value={city}>
                       {city === "Other" ? t.OtherCity : t[city]}
                     </option>
@@ -330,6 +382,7 @@ function Wizard({ initial, onDone, t, lang, regType = "FAMILY" }) {
                 [t.firstName, `${form.firstName} ${form.lastName}`],
                 [t.gender, t[form.gender]],
                 [t.dob, form.dob],
+                type === "STUDENT" ? [t.education, form.education] : [t.maritalStatus, optionLabel(MARITAL_STATUSES, form.maritalStatus, lang)],
                 [t.currentAddress, `${form.address}, ${form.area}, ${form.city === "Other" ? t.OtherCity : t[form.city]} - ${form.pincode}`],
                 [t.nativeVillage, form.nativeVillage],
                 [t.payment, `₹${amount}${utr ? ` · UTR ${utr}` : ""}`],
