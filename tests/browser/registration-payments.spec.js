@@ -29,7 +29,7 @@ test('registration payments show the review remarks and who approved them', asyn
   await expect.poll(() => calls.find((call) => call.key === 'POST /registration-payments/2/review')?.body).toMatchObject({ decision: 'VERIFIED', remarks: 'Paid via PhonePe, verified' });
 });
 
-test('payments: the count and total sit beside Refresh, and Export downloads the rows of the chosen filter', async ({ page }) => {
+test('payments: the count and amount received sit beside Refresh, and Export downloads the rows of the chosen filter', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
   const rows = [
@@ -43,7 +43,7 @@ test('payments: the count and total sit beside Refresh, and Export downloads the
   });
   await page.goto('/admin/registration-payments');
   const header = page.locator('header').filter({ has: page.getByRole('button', { name: 'Refresh' }) });
-  await expect(header.getByRole('status')).toHaveText('2 payments · Total ₹600');
+  await expect(header.getByRole('status')).toHaveText('2 payments · Received ₹500');
   await header.getByRole('button', { name: 'Export' }).click();
   const download = page.waitForEvent('download');
   await page.getByRole('menuitem', { name: 'CSV' }).click();
@@ -57,7 +57,7 @@ test('payments: the count and total sit beside Refresh, and Export downloads the
   expect(csv).toHaveLength(3);
   // A filter narrows the count, the total and the export.
   await page.getByRole('button', { name: 'Verified', exact: true }).click();
-  await expect(header.getByRole('status')).toHaveText('1 payment · Total ₹500');
+  await expect(header.getByRole('status')).toHaveText('1 payment · Received ₹500');
   await header.getByRole('button', { name: 'Export' }).click();
   const filtered = page.waitForEvent('download');
   await page.getByRole('menuitem', { name: 'CSV' }).click();
@@ -69,6 +69,6 @@ test('payments in Hindi: count, total and Export labels', async ({ page }) => {
   await mockApi(page, { 'GET /auth/me': ADMIN, 'GET /registration-payments': [payment({ id: '1' }), payment({ id: '2' }), payment({ id: '3', amount: 100 })] });
   await page.goto('/admin/registration-payments');
   const header = page.locator('header').filter({ has: page.getByRole('button', { name: 'रीफ्रेश' }) });
-  await expect(header.getByRole('status')).toHaveText('3 भुगतान · कुल ₹1,100');
+  await expect(header.getByRole('status')).toHaveText('3 भुगतान · प्राप्त ₹0');
   await expect(header.getByRole('button', { name: 'एक्सपोर्ट' })).toBeEnabled();
 });

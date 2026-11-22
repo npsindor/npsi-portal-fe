@@ -8,13 +8,13 @@
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
     "lint": "eslint .",
-    "test": "node --test --test-reporter=spec src/api/endpoints.test.js src/api/openapi.test.js src/api/uploadUrls.test.js src/routes.test.js src/lib/native-app.test.js",
+    "test": "node --test --test-reporter=spec src/api/endpoints.test.js src/api/openapi.test.js src/api/uploadUrls.test.js src/routes.test.js src/lib/native-app.test.js src/lib/revenue.test.js",
     "test:browser": "playwright test",
     "test:security": "playwright test --config playwright.security.config.js",
     "test:browser:all": "ALL_BROWSERS=1 playwright test",
-    "app:build:test": "VITE_API_BASE_URL=https://api-test.npsindore.org vite build --outDir dist-app && cap sync android",
-    "app:build:prod": "VITE_API_BASE_URL=https://api.npsindore.org vite build --outDir dist-app && cap sync android",
-    "app:open:android": "cap open android"
+    "app:open:android": "cap open android",
+    "app:sync": "cap sync android",
+    "app:apk": "cap sync android && cd android && ./gradlew assembleDebug"
   },
   "dependencies": {
     "@capacitor/app": "8.1.2",

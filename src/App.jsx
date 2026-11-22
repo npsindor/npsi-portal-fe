@@ -27,6 +27,7 @@ const BloodBecomeDonor = lazy(() => import('@/pages/BloodBecomeDonor'));
 const BloodRequest = lazy(() => import('@/pages/BloodRequest'));
 const BloodRequests = lazy(() => import('@/pages/BloodRequests'));
 const AdminBloodRequests = lazy(() => import('@/pages/AdminBloodRequests'));
+const AdminAuditLog = lazy(() => import('@/pages/AdminAuditLog'));
 const ConfirmReceiptPrompt = lazy(() => import('@/components/blood/ConfirmReceiptPrompt'));
 const AdminSagunCards = lazy(() => import('@/pages/AdminSagunCards'));
 const SagunVerify = lazy(() => import('@/pages/SagunVerify'));
@@ -206,6 +207,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/news" element={<AdminNews />} />
           <Route path="/admin/room-hunting" element={<AdminRoomHunting />} />
           <Route path="/admin/blood-requests" element={<AdminBloodRequests />} />
+          <Route path="/admin/audit-log" element={<AdminAuditLog />} />
           <Route path="/admin/sagun-cards" element={<AdminSagunCards />} />
           <Route path="/admin/event-members" element={<AdminEventMembers />} />
           {/* The old Core Team admin page: Core Team members are managed with every other team now. */}

@@ -74,6 +74,7 @@ const TITLES = [
   ['/admin/home-highlights', 'Admin · Home Highlights', 'एडमिन · होम हाइलाइट्स'],
   ['/admin/community-services', 'Admin · Community Services', 'एडमिन · सामुदायिक सेवाएँ'],
   ['/admin/blood-requests', 'Admin · Blood Requests', 'एडमिन · रक्त अनुरोध'],
+  ['/admin/audit-log', 'Admin · Audit Log', 'एडमिन · ऑडिट लॉग'],
   ['/admin/page-content', 'Admin · Page Content', 'एडमिन · पेज सामग्री'],
   ['/admin/settings', 'Admin · Settings', 'एडमिन · सेटिंग्स'],
 ];

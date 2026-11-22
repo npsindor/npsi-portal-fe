@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Search, UserCog, Eye, Contact, HandHeart, IdCard, Stethoscope, UsersRound, LayoutDashboard, FileCheck, Users, CalendarDays, CreditCard, Bell, Settings, LogOut, Shield, ScrollText, Menu, X, Landmark, Globe, GraduationCap, MessageSquare, ArrowRightLeft, TicketCheck, Lightbulb, Newspaper, Wallet, Sparkles, HeartHandshake, LayoutTemplate, House, Route, Droplet } from "lucide-react";
+import { Search, UserCog, Eye, Contact, HandHeart, IdCard, Stethoscope, UsersRound, LayoutDashboard, FileCheck, Users, CalendarDays, CreditCard, Bell, Settings, LogOut, Shield, ScrollText, Menu, X, Landmark, Globe, GraduationCap, MessageSquare, ArrowRightLeft, TicketCheck, Lightbulb, Newspaper, Wallet, Sparkles, HeartHandshake, LayoutTemplate, House, Route, Droplet, History } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import LanguageToggle from "@/components/LanguageToggle";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -54,6 +54,8 @@ export default function AdminLayout() {
     { label: t("contacts.title"), path: "/admin/contact-info", icon: Contact },
     { label: t("admin.feedback"), path: "/admin/feedback", icon: MessageSquare },
     { label: t("admin.settings"), path: "/admin/settings", icon: Settings },
+    // Super admin only: sub-admins see just their own areas, and the API refuses everyone else.
+    { label: lang === "hi" ? "ऑडिट लॉग" : "Audit Log", path: "/admin/audit-log", icon: History },
   ];
 
   // Super admin: every page, plus "Assign roles" at the top. A sub-admin (Admin → Assign roles) only the pages of their

@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 import { useLang } from "@/lib/i18n";
 import ServicesOverview from "@/components/admin/ServicesOverview";
 import DashboardCharts from "@/components/admin/DashboardCharts";
+import { awaitingCount, revenueOf } from "@/lib/revenue";
 
 const L = {
   en: {
@@ -55,7 +56,9 @@ export default function AdminDashboard() {
   useEffect(() => {
     (async () => {
       try {
-        const [fams, mems, apps, evs, txns, stuApps, students, contacts] = await Promise.all([
+        // Each figure loads on its own: one list this admin may not read (or a slow one failing) no longer turns every
+        // card into 0.
+        const settled = await Promise.allSettled([
           base44.entities.Family.listAll(),
           base44.entities.FamilyMember.listAll(),
           base44.entities.Application.list("-submittedDate", 5),
@@ -63,16 +66,16 @@ export default function AdminDashboard() {
           base44.entities.Transaction.listAll(),
           base44.entities.StudentApplication.listAll(),
           base44.entities.Student.listAll(),
-          base44.contactInfo.list({ limit: 1 }).catch(() => ({ total: 0 })),
+          base44.contactInfo.list({ limit: 1 }),
         ]);
+        const value = (index, fallback) => (settled[index].status === "fulfilled" && settled[index].value ? settled[index].value : fallback);
+        const [fams, mems, apps, evs, txns, stuApps, students] = [0, 1, 2, 3, 4, 5, 6].map((index) => value(index, []));
+        const contacts = value(7, { total: 0 });
         const activeMembers = mems.filter((m) => m.status === "ACTIVE").length;
         const pending = apps.filter((a) => a.status === "PENDING_VERIFICATION" || a.status === "SUBMITTED").length;
-        const parseAmount = (value) => {
-          const numeric = Number(String(value ?? "").replace(/[^\d.-]/g, ""));
-          return Number.isFinite(numeric) ? numeric : 0;
-        };
-        const revenue = txns.filter((tx) => tx.paymentStatus === "SUCCESS").reduce((s, tx) => s + parseAmount(tx.amount), 0);
-        const pendingPay = txns.filter((tx) => tx.paymentStatus === "PENDING").length;
+        // Settled payments (SUCCESS and admin-VERIFIED registration fees), less refunds actually sent.
+        const revenue = revenueOf(txns);
+        const pendingPay = awaitingCount(txns);
         setStats({
           families: fams.length,
           members: mems.length,
