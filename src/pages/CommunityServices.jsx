@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Ambulance, ArrowRight, CalendarDays, Droplet, Flame, HandHeart, LifeBuoy, MapPin, Phone, ShieldAlert, Siren, User } from "lucide-react";
 import { Link } from "react-router-dom";
-import PublicFooter from "@/components/PublicFooter";
-import PublicNav from "@/components/PublicNav";
 import { usePageContent } from "@/components/PageContent";
-import CommunityHero from "@/components/community/CommunityHero";
+import BloodHome from "@/components/blood/BloodHome";
+import BloodLayout from "@/components/blood/BloodLayout";
 import { CardSkeleton, EmptyState, SectionBlock, SectionOverview, formatDate, useSectionLanding } from "@/components/PageSections";
 import { base44 } from "@/api/base44Client";
 import { useLang } from "@/lib/i18n";
@@ -89,9 +88,6 @@ export default function CommunityServices() {
   const [posts, setPosts] = useState(null);
 
   useEffect(() => {
-    document.title = `${t.eyebrow} | ${lang === "hi" ? "निमाड़ पाटीदार संगठन, इंदौर" : "Nimar Patidar Sangathan, Indore"}`;
-  }, [t, lang]);
-  useEffect(() => {
     base44.communityPosts.list().then((rows) => setPosts(Array.isArray(rows) ? rows : [])).catch(() => setPosts([]));
   }, []);
   useSectionLanding({}, posts !== null);
@@ -107,10 +103,12 @@ export default function CommunityServices() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <PublicNav />
-      <main id="main-content">
-        <CommunityHero block={content.intro("hero")} eyebrow={t.eyebrow} title={t.title} intro={t.intro} lang={lang} />
+    <BloodLayout title={t.eyebrow} contained={false}>
+        {/* Blood Help Network home: hero, the two actions, figures and recent requests. The bottom padding makes room
+            for the section cards below, which overlap upwards by design. */}
+        <div className="mx-auto max-w-7xl px-4 pb-24 pt-8 sm:px-6 sm:pb-28">
+          <BloodHome />
+        </div>
         <SectionOverview
           lang={lang}
           sections={[
@@ -182,8 +180,6 @@ export default function CommunityServices() {
             </div>
           </div>
         </section>
-      </main>
-      <PublicFooter />
-    </div>
+    </BloodLayout>
   );
 }

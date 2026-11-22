@@ -23,6 +23,11 @@ const Sagun = lazy(() => import('@/pages/Sagun'));
 const MyRoomHunting = lazy(() => import('@/pages/MyRoomHunting'));
 const SearchResults = lazy(() => import('@/pages/SearchResults'));
 const AdminRoomHunting = lazy(() => import('@/pages/AdminRoomHunting'));
+const BloodBecomeDonor = lazy(() => import('@/pages/BloodBecomeDonor'));
+const BloodRequest = lazy(() => import('@/pages/BloodRequest'));
+const BloodRequests = lazy(() => import('@/pages/BloodRequests'));
+const AdminBloodRequests = lazy(() => import('@/pages/AdminBloodRequests'));
+const ConfirmReceiptPrompt = lazy(() => import('@/components/blood/ConfirmReceiptPrompt'));
 const AdminSagunCards = lazy(() => import('@/pages/AdminSagunCards'));
 const SagunVerify = lazy(() => import('@/pages/SagunVerify'));
 const EventPage = lazy(() => import('@/pages/EventPage'));
@@ -133,6 +138,12 @@ const AuthenticatedApp = () => {
       <Route path="/room-hunting" element={<RoomHunting />} />
       <Route path="/search" element={<SearchResults />} />
       <Route path="/community-services" element={<CommunityServices />} />
+      {/* Blood Help Network pages for registered members: login first, then back here. */}
+      <Route element={<ProtectedRoute unauthenticatedElement={<LoginRedirect />} />}>
+        <Route path="/community-services/become-donor" element={<BloodBecomeDonor />} />
+        <Route path="/community-services/request-blood" element={<BloodRequest />} />
+        <Route path="/community-services/blood-requests" element={<BloodRequests />} />
+      </Route>
       <Route path="/career-business" element={<Careers />} />
       <Route path="/sagun" element={<Sagun />} />
       <Route path="/sagun/verify/:token" element={<SagunVerify />} />
@@ -194,6 +205,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/news" element={<AdminNews />} />
           <Route path="/admin/room-hunting" element={<AdminRoomHunting />} />
+          <Route path="/admin/blood-requests" element={<AdminBloodRequests />} />
           <Route path="/admin/sagun-cards" element={<AdminSagunCards />} />
           <Route path="/admin/event-members" element={<AdminEventMembers />} />
           {/* The old Core Team admin page: Core Team members are managed with every other team now. */}
@@ -259,6 +271,8 @@ function App() {
                 <SiteVisibilityProvider>
                   <AuthenticatedApp />
                 </SiteVisibilityProvider>
+                {/* After login: "Did you receive the required blood?" for the member's own blood requests. */}
+                <Suspense fallback={null}><ConfirmReceiptPrompt /></Suspense>
               </Router>
               <Toaster />
             </QueryClientProvider>

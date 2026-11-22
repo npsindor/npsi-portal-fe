@@ -91,6 +91,7 @@ export const publicHindi = {
   "Application Status": "आवेदन की स्थिति",
   "Community Rules": "सामुदायिक नियम",
   "All rights reserved.": "सर्वाधिकार सुरक्षित।",
+  "Back to top": "ऊपर जाएँ",
   "Community listings and submitted information may require verification.": "सामुदायिक लिस्टिंग और प्रस्तुत जानकारी का सत्यापन आवश्यक हो सकता है।",
   "A community platform promoting unity, cultural heritage, education, professional opportunities, and social welfare.": "एकता, सांस्कृतिक विरासत, शिक्षा, व्यावसायिक अवसर और समाज कल्याण को बढ़ावा देने वाला सामुदायिक मंच।",
   "Help connect people who need blood with willing donors through a responsible, privacy-conscious process. Donor registration, requests, and contact coordination require review and consent.": "ज़रूरतमंदों को इच्छुक रक्तदाताओं से ज़िम्मेदारी और गोपनीयता के साथ जोड़ने की पहल। रक्तदाता पंजीकरण, अनुरोध और संपर्क साझा करने के लिए समीक्षा और सहमति आवश्यक है।",

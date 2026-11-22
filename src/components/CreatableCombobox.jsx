@@ -1,4 +1,4 @@
-import { useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
@@ -10,6 +10,11 @@ const norm = (text) => String(text || "").toLowerCase().replace(/\s+/g, " ").tri
 export default function CreatableCombobox({ id, label, value, onChange, options, lang, t, required = true, maxLength = 150, autoComplete = "off", hideLabel = false, inputClassName }) {
   const listId = useId();
   const inputRef = useRef(null);
+  // Leaving the field closes the list a moment later (so a click on an option still lands); coming back cancels that,
+  // or a quick return would see the list it just opened close again.
+  const closeTimer = useRef(null);
+  const cancelClose = () => clearTimeout(closeTimer.current);
+  useEffect(() => cancelClose, []);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   // The list filters only while the user types; opening it on a saved value (listed or not) shows every option.
@@ -28,6 +33,7 @@ export default function CreatableCombobox({ id, label, value, onChange, options,
   const type = (typed) => {
     const exact = options.find((option) => [option.value, option.en, option.hi].some((name) => norm(name) === norm(typed)));
     onChange(exact ? exact.value : typed);
+    cancelClose();
     setTyping(true);
     setOpen(true);
     setActive(-1);
@@ -78,9 +84,9 @@ export default function CreatableCombobox({ id, label, value, onChange, options,
           value={text}
           required={required}
           onChange={(event) => type(event.target.value)}
-          onFocus={() => { setTyping(false); setOpen(true); }}
-          onClick={() => setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 120)}
+          onFocus={() => { cancelClose(); setTyping(false); setOpen(true); }}
+          onClick={() => { cancelClose(); setOpen(true); }}
+          onBlur={() => { cancelClose(); closeTimer.current = setTimeout(() => setOpen(false), 120); }}
           onKeyDown={onKeyDown}
         />
         <button

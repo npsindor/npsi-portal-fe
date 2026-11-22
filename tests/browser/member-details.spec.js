@@ -114,3 +114,35 @@ test('Settings: an unverified mobile is verified with the code sent to it; a ver
   expect(calls.find((call) => call.key === 'POST /auth/mobile-otps').body).toMatchObject({ mobile: '9876500001', purpose: 'REGISTER' });
   await expect(box).toHaveCount(0);
 });
+
+test('a registered family adds a member without admin approval: the message says so, and no approval note shows', async ({ page }) => {
+  await en(page);
+  const added = member({ id: 'm9', name: 'Neha Patidar', relationship: 'Daughter', gender: 'Female', status: 'ACTIVE', dob: '2001-02-03', maritalStatus: 'UNMARRIED' });
+  await mockApi(page, {
+    'GET /auth/me': MEMBER,
+    'GET /me/family': { family: FAMILY, members: [MEMBERS[0]] },
+    'POST /family-members': { status: 201, body: added },
+  });
+  await page.goto('/portal/family');
+  await page.getByRole('button', { name: 'Add Member' }).first().click();
+  await page.getByPlaceholder('Full name').fill('Neha Patidar');
+  await page.locator('select').first().selectOption('Daughter');
+  await page.locator('.sticky.bottom-0').getByRole('button', { name: 'Add Member' }).click();
+  await expect(page.getByText(/Neha Patidar added to your family\. Members aged 18\+/).first()).toBeVisible();
+  await expect(page.getByText(/will approve the new member/)).toHaveCount(0);
+});
+
+test('a member whose email is someone else\'s login still waits for the admin, and the message says so', async ({ page }) => {
+  await en(page);
+  await mockApi(page, {
+    'GET /auth/me': MEMBER,
+    'GET /me/family': { family: FAMILY, members: [MEMBERS[0]] },
+    'POST /family-members': { status: 201, body: member({ id: 'm10', name: 'Other Login', relationship: 'Brother', status: 'PENDING' }) },
+  });
+  await page.goto('/portal/family');
+  await page.getByRole('button', { name: 'Add Member' }).first().click();
+  await page.getByPlaceholder('Full name').fill('Other Login');
+  await page.locator('select').first().selectOption('Brother');
+  await page.locator('.sticky.bottom-0').getByRole('button', { name: 'Add Member' }).click();
+  await expect(page.getByText(/Other Login added\. The Sangathan will approve the new member shortly\./).first()).toBeVisible();
+});

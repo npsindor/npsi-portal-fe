@@ -30,3 +30,6 @@ Thumbs.db
 test-results/
 playwright-report/
 security-report/
+
+# Mobile app web build (npm run app:build:*)
+dist-app/

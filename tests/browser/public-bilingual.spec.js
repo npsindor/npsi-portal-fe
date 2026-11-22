@@ -104,15 +104,15 @@ test('mobile language toggle persists and translates existing drafts without los
   await page.setViewportSize({ width: 320, height: 900 });
   await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN });
   await page.goto('/community-services');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('One message. The whole samaj stands with you.');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Donate Blood,Save Lives');
   await switchLanguage(page, true);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('एक संदेश, और पूरा समाज आपके साथ।');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('रक्तदान करें,जीवन बचाएँ');
   for (const name of ['रक्तदान', 'आपातकालीन सहायता', 'समाज कल्याण']) await expect(page.getByRole('heading', { level: 2, name, exact: true })).toBeVisible();
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('lang', 'hi');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('एक संदेश, और पूरा समाज आपके साथ।');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('रक्तदान करें,जीवन बचाएँ');
   await switchLanguage(page, false);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('One message. The whole samaj stands with you.');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Donate Blood,Save Lives');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
