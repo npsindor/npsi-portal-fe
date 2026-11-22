@@ -21,6 +21,11 @@ test('family registration guides the user through validation, payment proof, and
   await page.locator('#reg-last').fill('Member');
   await page.locator('#reg-gender').selectOption('Female');
   await page.locator('#reg-dob').fill('1995-01-01');
+  // Marital status is asked of the family head; without it the step doesn't move on.
+  await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page.locator('#reg-marital')).toHaveJSProperty('validity.valueMissing', true);
+  await expect(page.locator('#reg-education')).toHaveCount(0);
+  await page.locator('#reg-marital').selectOption('UNMARRIED');
   await page.getByRole('button', { name: 'Next' }).click();
 
   await page.locator('#reg-area').fill('Vijay Nagar');
@@ -35,10 +40,13 @@ test('family registration guides the user through validation, payment proof, and
   await page.locator('#reg-screenshot').setInputFiles({ name: 'payment.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/l9kAAAAASUVORK5CYII=', 'base64') });
   await expect.poll(() => calls.some(call => call.key === 'POST /me/payment-screenshots')).toBe(true);
   await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page.getByText('Marital status', { exact: true })).toBeVisible();
+  await expect(page.getByText('Unmarried', { exact: true })).toBeVisible();
   await page.getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Submit' }).click();
 
   await expect(page.getByRole('status')).toContainText('NPSI-APP-TEST-1');
   const submission = calls.find(call => call.key === 'POST /me/registrations');
-  expect(submission.body).toMatchObject({ type: 'FAMILY', firstName: 'Test', lastName: 'Member', screenshotFileId: 'payment-shot-1' });
+  expect(submission.body).toMatchObject({ type: 'FAMILY', firstName: 'Test', lastName: 'Member', maritalStatus: 'UNMARRIED', screenshotFileId: 'payment-shot-1' });
+  expect(submission.body).not.toHaveProperty('education');
 });

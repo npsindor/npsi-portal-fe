@@ -42,6 +42,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Reload the account quietly (no loading state, so the page stays as it is), e.g. after a registration changes
+  // which portal it belongs to.
+  const refreshUser = async () => {
+    try {
+      const currentUser = await base44.auth.currentSession();
+      if (currentUser) setUser(currentUser);
+    } catch {}
+  };
+
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
@@ -61,6 +70,7 @@ export const AuthProvider = ({ children }) => {
       logout,
       navigateToLogin,
       checkUserAuth,
+      refreshUser,
     }}>
       {children}
     </AuthContext.Provider>

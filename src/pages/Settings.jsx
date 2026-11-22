@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
 import LanguageToggle from "@/components/LanguageToggle";
 import MembershipPass from "@/components/MembershipPass";
+import VerifyMobileCard from "@/components/VerifyMobileCard";
 import { useLang, useT } from "@/lib/i18n";
 import { translateError } from "@/lib/registration-copy";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -136,6 +137,8 @@ export default function Settings() {
           </div>
         </div>
       </div>
+
+      <VerifyMobileCard user={user} onVerified={checkUserAuth} />
 
       {/* Family membership card */}
       <div>

@@ -39,8 +39,45 @@ test('student registration follows the member steps with the ₹100 fee and subm
   await page.locator('#reg-first').fill('Test');
   await page.locator('#reg-last').fill('Student');
   await page.locator('#reg-gender').selectOption('Male');
+  // Students register at 18 or older (after 12th): a 17-year-old is refused.
+  const dob = page.locator('#reg-dob');
+  const yearsAgo = (years) => { const d = new Date(); d.setFullYear(d.getFullYear() - years); return d.toISOString().slice(0, 10); };
+  await expect(page.locator('#reg-dob-rule')).toContainText('at least 18 years old');
+  await dob.fill(yearsAgo(17));
+  await expect(page.locator('#reg-dob-rule')).toHaveClass(/text-destructive/);
   await page.locator('#reg-dob').fill('2005-06-01');
+  await expect(page.locator('#reg-marital')).toHaveCount(0);
+  // Education: a searchable list of courses after 12th (no school classes) that also takes a typed course.
+  const education = page.locator('#reg-education');
+  await education.click();
+  await expect(page.getByRole('option', { name: 'MBBS' })).toBeVisible();
+  await expect(page.getByRole('option', { name: 'Graduate (Pursuing)', exact: true })).toBeVisible();
+  for (const name of ['12th', '11th', '10th', 'LKG', 'UKG']) await expect(page.getByRole('option', { name, exact: true })).toHaveCount(0);
+  // A typed school class is refused too.
+  await education.fill('12th');
+  await page.locator('#reg-first').click();
+  await expect(page.getByRole('alert').filter({ hasText: 'courses after 12th' })).toBeVisible();
   await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page.locator('#reg-first')).toBeVisible();
+  await education.click();
+  await education.fill('b.tech');
+  await expect(page.getByRole('option', { name: 'B.Tech / B.E. (Computer Science)' })).toBeVisible();
+  await expect(page.getByRole('option', { name: 'MBBS' })).toHaveCount(0);
+  // Picked with the keyboard (the first match), which doesn't wait for the list to stop moving on a busy machine.
+  await education.press('ArrowDown');
+  await expect(education).toHaveAttribute('aria-activedescendant', /-0$/);
+  await education.press('Enter');
+  await expect(education).toHaveValue('B.Tech / B.E. (Computer Science)');
+  await education.fill('B.Sc. Forensic Science');
+  await page.locator('#reg-first').click();
+  await expect(education).toHaveValue('B.Sc. Forensic Science');
+  await page.getByRole('button', { name: 'Next' }).click();
+  // The local address must be in Indore (district Indore): the city is fixed, with a hint for students from elsewhere.
+  await expect(page.getByRole('heading', { name: 'Local address in Indore' })).toBeVisible();
+  await expect(page.getByText('If you are from another district, e.g. Khargone')).toBeVisible();
+  await expect(page.locator('#reg-city')).toBeDisabled();
+  await expect(page.locator('#reg-city')).toHaveValue('Indore');
+  expect(await page.locator('#reg-city option').allTextContents()).toEqual(['Indore']);
   await page.locator('#reg-area').fill('Vijay Nagar');
   await page.locator('#reg-address').fill('100 Test Road');
   await page.locator('#reg-pincode').fill('452010');
@@ -53,7 +90,52 @@ test('student registration follows the member steps with the ₹100 fee and subm
   await page.getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Submit' }).click();
   await expect(page.getByRole('status')).toContainText('NPSI-STU-APP-TEST-1');
-  expect(calls.find((call) => call.key === 'POST /me/registrations').body).toMatchObject({ type: 'STUDENT', firstName: 'Test', lastName: 'Student', screenshotFileId: 'shot-1' });
+  expect(calls.find((call) => call.key === 'POST /me/registrations').body).toMatchObject({ type: 'STUDENT', firstName: 'Test', lastName: 'Student', education: 'B.Sc. Forensic Science', city: 'Indore', screenshotFileId: 'shot-1' });
+});
+
+test('after a student registration the account is reloaded: no My Family, and no Add Member anywhere', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  let submitted = false;
+  await mockApi(page, {
+    'GET /me/registrations': { registrations: [], completion: null },
+    'GET /me/family': { family: null, members: [] },
+    'POST /me/payment-screenshots': { fileId: 'shot-1' },
+    'POST /me/registrations': { applicationId: 'NPSI-STU-APP-TEST-2' },
+  });
+  await page.route('**/api/v1/auth/me', (route) =>
+    route.fulfill({ json: { ...MEMBER, account: submitted ? { type: 'STUDENT', status: 'PENDING' } : { type: 'NONE', status: 'NONE' } } }),
+  );
+  await page.route('**/api/v1/me/registrations', (route) => {
+    if (route.request().method() === 'POST') submitted = true;
+    return route.fallback();
+  });
+  await page.goto('/portal/family');
+  await expect(page.getByRole('heading', { name: 'My Family' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Family', exact: true }).first()).toBeVisible();
+  // No approved family: nothing to add a member to.
+  await expect(page.getByRole('button', { name: 'Add Member' })).toHaveCount(0);
+  await page.goto('/portal/registration?type=student');
+  await page.locator('#reg-first').fill('New');
+  await page.locator('#reg-last').fill('Student');
+  await page.locator('#reg-gender').selectOption('Female');
+  await page.locator('#reg-dob').fill('2004-06-01');
+  await page.locator('#reg-education').fill('B.Com.');
+  await page.locator('#reg-first').click();
+  await page.getByRole('button', { name: 'Next' }).click();
+  await page.locator('#reg-area').fill('Palasia');
+  await page.locator('#reg-address').fill('12 Hostel Road');
+  await page.locator('#reg-pincode').fill('452001');
+  await page.locator('#reg-village').fill('Khargone');
+  await page.getByRole('button', { name: 'Next' }).click();
+  await page.locator('#reg-screenshot').setInputFiles({ name: 'payment.png', mimeType: 'image/png', buffer: PNG });
+  await page.getByRole('button', { name: 'Next' }).click();
+  await page.getByRole('checkbox').check();
+  await page.getByRole('button', { name: 'Submit' }).click();
+  await expect(page.getByRole('status')).toContainText('NPSI-STU-APP-TEST-2');
+  await expect(page.getByRole('link', { name: 'Family', exact: true })).toHaveCount(0);
+  await page.goto('/portal/family');
+  await expect(page).toHaveURL(/\/portal$/);
 });
 
 for (const width of [1440, 390]) {

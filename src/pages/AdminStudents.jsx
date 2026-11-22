@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Check, X, AlertCircle, Eye, Plus, Pencil, Trash2, Loader2, GraduationCap, KeyRound } from "lucide-react";
+import { Check, X, AlertCircle, Eye, Plus, Pencil, Trash2, Loader2, GraduationCap, KeyRound, IndianRupee, ExternalLink } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
 import { base44 } from "@/api/base44Client";
 import { isSuperAdmin } from "@/lib/admin-access";
@@ -13,6 +13,11 @@ import TablePagination from "@/components/admin/TablePagination";
 import ExportMenu from "@/components/ExportMenu";
 import DateRangeFilter from "@/components/admin/DateRangeFilter";
 import { latestBirthDate } from "@/lib/dates";
+
+// Registration-fee statuses that count as paid (SUCCESS: older settled payments). An application without a fee record
+// (older free registrations, admin entries) is not held back, the same rule as family applications.
+const PAID = ["VERIFIED", "SUCCESS"];
+const feeSettled = (application) => !application?.payment || PAID.includes(application.payment.status);
 
 const STATUSES = ["DRAFT", "SUBMITTED", "PENDING_VERIFICATION", "CORRECTION_REQUIRED", "APPROVED", "REJECTED"];
 
@@ -89,6 +94,20 @@ const L = {
     notifCorrectionMsg: "Your student application needs correction:",
     notifRejectedTitle: "Student Application Rejected",
     notifRejectedMsg: "Your student application has been rejected:",
+    thPayment: "Payment",
+    payment: "Registration fee",
+    payNone: "No fee recorded",
+    payStatus: { PENDING: "Payment pending", SUBMITTED: "Proof submitted", VERIFIED: "Verified", SUCCESS: "Verified", REJECTED: "Rejected", REFUND_REQUESTED: "Refund requested", REFUND_PROCESSING: "Refund processing", REFUNDED: "Refunded", REFUND_REJECTED: "Refund rejected" },
+    utr: "UTR",
+    noProof: "No screenshot uploaded. Match the payment with the UPI account statement.",
+    viewProof: "View payment screenshot",
+    verifyPayment: "Verify payment",
+    rejectPayment: "Reject payment",
+    payReason: "Reason for rejecting the payment",
+    payReasonReq: "Enter the reason for rejecting the payment.",
+    paymentVerified: "Payment verified",
+    paymentRejected: "Payment rejected",
+    payFirst: "Verify the ₹100 payment before approving this application.",
   },
   hi: {
     title: "स्टूडेंट मैनेजमेंट",
@@ -162,6 +181,20 @@ const L = {
     notifCorrectionMsg: "आपके स्टूडेंट आवेदन में सुधार आवश्यक है:",
     notifRejectedTitle: "स्टूडेंट आवेदन अस्वीकृत",
     notifRejectedMsg: "आपका स्टूडेंट आवेदन अस्वीकृत किया गया है:",
+    thPayment: "भुगतान",
+    payment: "रजिस्ट्रेशन शुल्क",
+    payNone: "शुल्क दर्ज नहीं",
+    payStatus: { PENDING: "भुगतान बाकी", SUBMITTED: "प्रमाण जमा", VERIFIED: "सत्यापित", SUCCESS: "सत्यापित", REJECTED: "अस्वीकृत", REFUND_REQUESTED: "रिफंड अनुरोधित", REFUND_PROCESSING: "रिफंड प्रक्रिया में", REFUNDED: "रिफंड पूरा", REFUND_REJECTED: "रिफंड अस्वीकृत" },
+    utr: "UTR",
+    noProof: "स्क्रीनशॉट अपलोड नहीं हुआ। UPI खाते के स्टेटमेंट से भुगतान मिलाएँ।",
+    viewProof: "भुगतान स्क्रीनशॉट देखें",
+    verifyPayment: "भुगतान सत्यापित करें",
+    rejectPayment: "भुगतान अस्वीकार करें",
+    payReason: "भुगतान अस्वीकार करने का कारण",
+    payReasonReq: "भुगतान अस्वीकार करने का कारण लिखें।",
+    paymentVerified: "भुगतान सत्यापित",
+    paymentRejected: "भुगतान अस्वीकृत",
+    payFirst: "आवेदन स्वीकृत करने से पहले ₹100 का भुगतान सत्यापित करें।",
   },
 };
 
@@ -187,6 +220,8 @@ export default function AdminStudents() {
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
   const [resendingId, setResendingId] = useState(null);
+  const [paying, setPaying] = useState(false);
+  const [payReject, setPayReject] = useState(null); // reason text while rejecting the payment
 
   const resendCredentials = async (a) => {
     if (!a.email) {
@@ -239,6 +274,41 @@ export default function AdminStudents() {
       setProcessing(false);
     }
   };
+
+  // The fee is reviewed here as on Admin → Registration payments (same endpoint and rules).
+  const openProof = async (payment) => {
+    const preview = window.open("about:blank", "_blank");
+    try {
+      const url = URL.createObjectURL(await base44.registrations.screenshot(payment.id));
+      if (preview) preview.location.href = url;
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (err) {
+      preview?.close();
+      toast({ title: t.actionFailed, description: err.message, variant: "destructive" });
+    }
+  };
+  const reviewPayment = async (decision) => {
+    const reason = (payReject || "").trim();
+    if (decision === "REJECTED" && !reason) {
+      toast({ title: t.payReasonReq, variant: "destructive" });
+      return;
+    }
+    setPaying(true);
+    try {
+      const result = await base44.registrations.reviewPayment(selected.payment.id, { decision, remarks: reason || undefined, lang });
+      const status = result?.paymentStatus || decision;
+      const payment = { ...selected.payment, status, adminRemarks: reason || selected.payment.adminRemarks };
+      setSelected({ ...selected, payment });
+      setApps((list) => list.map((a) => (a.id === selected.id ? { ...a, payment } : a)));
+      setPayReject(null);
+      toast({ title: decision === "VERIFIED" ? t.paymentVerified : t.paymentRejected });
+    } catch (err) {
+      toast({ title: t.actionFailed, description: err.message, variant: "destructive" });
+    } finally {
+      setPaying(false);
+    }
+  };
+  const closeReview = () => { setSelected(null); setAction(null); setPayReject(null); };
 
   const openNew = () => setEditing(emptyForm());
 
@@ -309,7 +379,14 @@ export default function AdminStudents() {
     { key: "course", label: t.thCourse },
     { key: "submittedDate", label: t.thSubmitted },
     { key: "status", label: t.thStatus },
+    { key: "paymentStatus", label: t.thPayment },
   ];
+  const exportRows = filtered.map((a) => ({ ...a, paymentStatus: a.payment ? t.payStatus[a.payment.status] || a.payment.status : t.payNone }));
+  const payBadge = (payment) => {
+    if (!payment) return <span className="text-xs text-muted-foreground">{t.payNone}</span>;
+    const tone = PAID.includes(payment.status) ? "bg-green-100 text-green-800" : payment.status === "REJECTED" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-800";
+    return <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${tone}`}>₹{payment.amount} · {t.payStatus[payment.status] || payment.status}</span>;
+  };
 
   if (loading) return <div className="flex h-64 items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-gold/30 border-t-maroon" /></div>;
 
@@ -323,7 +400,7 @@ export default function AdminStudents() {
           <p className="mt-1 text-sm text-muted-foreground">{t.sub}</p>
         </div>
         <div className="flex items-center gap-2">
-          <ExportMenu filename="students" title={t.title} columns={exportColumns} rows={filtered} />
+          <ExportMenu filename="students" title={t.title} columns={exportColumns} rows={exportRows} />
           {superAdmin && (
           <button onClick={openNew} className="inline-flex items-center gap-1.5 rounded-full bg-maroon px-5 py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark">
             <Plus className="h-4 w-4" /> {t.add}
@@ -338,7 +415,7 @@ export default function AdminStudents() {
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-gold/30 bg-card">
-        <table className="w-full min-w-[720px] text-left text-sm">
+        <table className="w-full min-w-[820px] text-left text-sm">
           <thead className="border-b border-border bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
               <th className="px-4 py-3">#</th>
@@ -347,6 +424,7 @@ export default function AdminStudents() {
               <th className="px-4 py-3">{t.thCourse}</th>
               <th className="px-4 py-3">{t.thSubmitted}</th>
               <th className="px-4 py-3">{t.thStatus}</th>
+              <th className="px-4 py-3">{t.thPayment}</th>
               <th className="px-4 py-3 text-right">{t.thActions}</th>
             </tr>
           </thead>
@@ -359,6 +437,7 @@ export default function AdminStudents() {
                 <td className="px-4 py-3">{a.course || "—"}<span className="block text-xs text-muted-foreground">{a.institution || ""}</span></td>
                 <td className="px-4 py-3 text-muted-foreground">{a.submittedDate ? new Date(a.submittedDate).toLocaleDateString(locale) : "—"}</td>
                 <td className="px-4 py-3"><StatusBadge status={a.status} /></td>
+                <td className="px-4 py-3">{payBadge(a.payment)}</td>
                 <td className="px-4 py-3 text-right">
                   <div className="inline-flex items-center gap-1.5">
                     <button onClick={() => setSelected(a)} className="inline-flex items-center gap-1 rounded-full border border-gold/40 px-3 py-1.5 text-xs font-semibold text-maroon hover:bg-gold/10">
@@ -376,7 +455,7 @@ export default function AdminStudents() {
               </tr>
             ))}
             {totalItems === 0 && (
-              <tr><td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">{t.empty}</td></tr>
+              <tr><td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">{t.empty}</td></tr>
             )}
           </tbody>
         </table>
@@ -385,7 +464,7 @@ export default function AdminStudents() {
 
       {/* Review drawer */}
       {selected && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/50" onClick={() => { setSelected(null); setAction(null); }}>
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/50" onClick={closeReview}>
           <div className="h-full w-full max-w-md overflow-y-auto bg-card p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <div>
@@ -414,6 +493,46 @@ export default function AdminStudents() {
                 <div className="mt-1 text-xs text-muted-foreground">{selected.guardianMobile}</div>
                 <div className="mt-1 text-xs text-muted-foreground">{selected.address}, {selected.city}, {selected.state} {selected.pincode}</div>
               </div>
+              <section aria-label={t.payment} className="rounded-xl border border-gold/30 bg-cream p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-maroon"><IndianRupee className="h-4 w-4" /> {t.payment}</div>
+                  {payBadge(selected.payment)}
+                </div>
+                {selected.payment && (
+                  <div className="mt-2 space-y-2 text-xs text-muted-foreground">
+                    <div>{selected.payment.transactionId}{selected.payment.utr ? ` · ${t.utr}: ${selected.payment.utr}` : ""}</div>
+                    {selected.payment.hasScreenshot ? (
+                      <button type="button" onClick={() => openProof(selected.payment)} className="inline-flex items-center gap-1 font-semibold text-maroon underline">
+                        {t.viewProof} <ExternalLink className="h-3 w-3" />
+                      </button>
+                    ) : (
+                      <p>{t.noProof}</p>
+                    )}
+                    {selected.payment.adminRemarks && <p className="whitespace-pre-line text-foreground">{selected.payment.adminRemarks}</p>}
+                    {selected.status !== "APPROVED" && ["PENDING", "SUBMITTED", "REJECTED"].includes(selected.payment.status) && payReject === null && (
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        <button type="button" disabled={paying} onClick={() => reviewPayment("VERIFIED")} className="inline-flex items-center justify-center gap-1 rounded-full bg-green-600 py-2 text-xs font-semibold text-white hover:bg-green-700 disabled:opacity-60">
+                          {paying ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />} {t.verifyPayment}
+                        </button>
+                        {selected.payment.status !== "REJECTED" && (
+                          <button type="button" disabled={paying} onClick={() => setPayReject("")} className="inline-flex items-center justify-center gap-1 rounded-full border border-red-300 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60">
+                            <X className="h-3.5 w-3.5" /> {t.rejectPayment}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    {payReject !== null && (
+                      <div className="space-y-2 pt-1">
+                        <textarea aria-label={t.payReason} placeholder={t.payReason} value={payReject} onChange={(e) => setPayReject(e.target.value)} rows={2} maxLength={1000} className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-maroon" />
+                        <div className="flex gap-2">
+                          <button type="button" disabled={paying} onClick={() => reviewPayment("REJECTED")} className="flex-1 rounded-full bg-red-600 py-2 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-60">{t.confirm} {t.rejectPayment}</button>
+                          <button type="button" onClick={() => setPayReject(null)} className="rounded-full border border-border px-4 py-2 text-xs font-semibold text-muted-foreground hover:bg-muted">{t.cancel}</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </section>
               {selected.adminRemarks && (
                 <div className="rounded-xl border border-orange-300 bg-orange-50 p-3 text-sm text-orange-700">
                   <div className="font-semibold">{t.adminRemarks}:</div> {selected.adminRemarks}
@@ -432,9 +551,10 @@ export default function AdminStudents() {
                     className="w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon"
                   />
                 )}
+                {!action && !feeSettled(selected) && <p role="status" className="rounded-lg bg-amber-50 p-2 text-xs text-amber-800">{t.payFirst}</p>}
                 {!action && (
                   <div className="grid grid-cols-3 gap-2">
-                    <button onClick={() => setAction("approve")} className="inline-flex flex-col items-center gap-1 rounded-xl bg-green-600 py-3 text-xs font-semibold text-white hover:bg-green-700">
+                    <button onClick={() => setAction("approve")} disabled={!feeSettled(selected)} title={feeSettled(selected) ? undefined : t.payFirst} className="inline-flex flex-col items-center gap-1 rounded-xl bg-green-600 py-3 text-xs font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50">
                       <Check className="h-4 w-4" /> {t.approve}
                     </button>
                     <button onClick={() => setAction("correction")} className="inline-flex flex-col items-center gap-1 rounded-xl bg-amber-500 py-3 text-xs font-semibold text-white hover:bg-amber-600">

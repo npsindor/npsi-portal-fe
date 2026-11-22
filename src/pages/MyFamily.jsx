@@ -11,6 +11,7 @@ import { resolveMyFamily } from "@/lib/resolveMyFamily";
 import { sagunApi } from "@/api/sagunApi";
 import { isPastBirthDate, latestBirthDate } from "@/lib/dates";
 import { translateError } from "@/lib/registration-copy";
+import { EDUCATION_LEVELS, MARITAL_STATUSES, OCCUPATIONS, optionLabel, showsApprovalNote, withCurrent } from "@/lib/member-options";
 
 const relationships = ["Spouse", "Son", "Daughter", "Father", "Mother", "Brother", "Sister", "Other"];
 const genders = ["Male", "Female", "Other"];
@@ -55,6 +56,7 @@ const L = {
     email: "Email",
     education: "Education",
     occupation: "Occupation",
+    maritalStatus: "Marital Status",
     address: "Address",
     select: "Select...",
     cancel: "Cancel",
@@ -115,6 +117,7 @@ const L = {
     email: "ईमेल",
     education: "शिक्षा",
     occupation: "व्यवसाय",
+    maritalStatus: "वैवाहिक स्थिति",
     address: "पता",
     select: "चुनें...",
     cancel: "रद्द करें",
@@ -155,7 +158,7 @@ const L = {
   },
 };
 
-const emptyForm = { name: "", relationship: "", gender: "", dob: "", mobile: "", email: "", education: "", occupation: "", address: "" };
+const emptyForm = { name: "", relationship: "", gender: "", dob: "", mobile: "", email: "", education: "", occupation: "", maritalStatus: "", address: "" };
 
 function isDuplicateName(name, members, exceptId = null) {
   const key = name.trim().toLowerCase();
@@ -248,7 +251,7 @@ export default function MyFamily() {
     setForm({
       name: m.name || "", relationship: m.relationship || "", gender: m.gender || "",
       dob: m.dob || "", mobile: m.mobile || "", email: m.email || "",
-      education: m.education || "", occupation: m.occupation || "", address: m.address || "",
+      education: m.education || "", occupation: m.occupation || "", maritalStatus: m.maritalStatus || "", address: m.address || "",
     });
     setShowForm(true);
   };
@@ -285,6 +288,7 @@ export default function MyFamily() {
         email: form.email.trim(),
         education: form.education,
         occupation: form.occupation,
+        maritalStatus: form.maritalStatus || null,
         address: form.address,
       };
       if (editing) {
@@ -339,9 +343,12 @@ export default function MyFamily() {
           {family && <p className="mt-1 text-sm text-muted-foreground">{family.familyName} · {family.familyId}</p>}
         </div>
         <div className="flex flex-wrap gap-2">
-          <button onClick={openAdd} className="inline-flex items-center justify-center gap-1.5 rounded-full bg-maroon px-5 py-2.5 text-sm font-semibold text-cream shadow-sm transition hover:bg-maroon-dark">
-            <UserPlus className="h-4 w-4" /> {t.addMember}
-          </button>
+          {/* Members are added to an approved family only (a Student account has none; the server refuses it too). */}
+          {family && (
+            <button onClick={openAdd} className="inline-flex items-center justify-center gap-1.5 rounded-full bg-maroon px-5 py-2.5 text-sm font-semibold text-cream shadow-sm transition hover:bg-maroon-dark">
+              <UserPlus className="h-4 w-4" /> {t.addMember}
+            </button>
+          )}
           {transferPending ? (
             <span role="status" className="inline-flex items-center justify-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-5 py-2.5 text-sm font-semibold text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200">
               <ArrowRightLeft className="h-4 w-4" /> {t.transferPending} ({transferPending.requestId})
@@ -364,18 +371,18 @@ export default function MyFamily() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-semibold text-foreground">{m.name}</div>
-                <div className="text-xs text-muted-foreground">{relLabel(m.relationship)}{m.gender ? ` · ${genderLabel(m.gender)}` : ""}</div>
+                <div className="text-xs text-muted-foreground">{relLabel(m.relationship)}{m.gender ? ` · ${genderLabel(m.gender)}` : ""}{m.maritalStatus ? ` · ${optionLabel(MARITAL_STATUSES, m.maritalStatus, lang)}` : ""}</div>
                 {m.membershipId && <div className="mt-0.5 font-mono text-[0.65rem] font-medium text-maroon">{m.membershipId}</div>}
               </div>
               <StatusBadge status={m.status} />
             </div>
-            {m.status === "PENDING" && <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">{t.pendingNote}</p>}
+            {showsApprovalNote(m) && <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">{t.pendingNote}</p>}
             <div className="mt-4 space-y-1.5 text-xs text-muted-foreground">
               {m.dob && <div className="flex items-center gap-1.5"><span className="font-medium text-foreground/70">{t.dob}:</span> {new Date(m.dob).toLocaleDateString(locale)}</div>}
               {m.mobile && <div className="flex items-center gap-1.5"><Phone className="h-3 w-3 text-gold" /> {m.mobile}</div>}
               {m.email && <div className="flex items-center gap-1.5 truncate"><Mail className="h-3 w-3 shrink-0 text-gold" /> <span className="truncate">{m.email}</span></div>}
-              {m.education && <div className="flex items-center gap-1.5"><GraduationCap className="h-3 w-3 text-gold" /> {m.education}</div>}
-              {m.occupation && <div className="flex items-center gap-1.5"><Briefcase className="h-3 w-3 text-gold" /> {m.occupation}</div>}
+              {m.education && <div className="flex items-center gap-1.5"><GraduationCap className="h-3 w-3 text-gold" /> {optionLabel(EDUCATION_LEVELS, m.education, lang)}</div>}
+              {m.occupation && <div className="flex items-center gap-1.5"><Briefcase className="h-3 w-3 text-gold" /> {optionLabel(OCCUPATIONS, m.occupation, lang)}</div>}
               {m.address && <div className="flex items-center gap-1.5"><MapPin className="h-3 w-3 text-gold" /> {m.address}</div>}
             </div>
             <SagunToggle member={m} info={sagun[m.id]} t={t} busy={sagunBusy === m.id} onToggle={toggleSagun} />
@@ -396,9 +403,11 @@ export default function MyFamily() {
             </div>
             <div className="mt-3 text-sm font-semibold text-foreground">{t.noMembers}</div>
             <p className="mt-1 text-xs text-muted-foreground">{t.noMembersSub}</p>
-            <button onClick={openAdd} className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-maroon px-4 py-2 text-xs font-semibold text-cream hover:bg-maroon-dark">
-              <UserPlus className="h-3.5 w-3.5" /> {t.addMember}
-            </button>
+            {family && (
+              <button onClick={openAdd} className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-maroon px-4 py-2 text-xs font-semibold text-cream hover:bg-maroon-dark">
+                <UserPlus className="h-3.5 w-3.5" /> {t.addMember}
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -446,14 +455,19 @@ export default function MyFamily() {
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.email}</label>
                 <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="name@example.com" className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
               </div>
-              <div>
-                <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.education}</label>
-                <input value={form.education} onChange={(e) => setForm({ ...form, education: e.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.occupation}</label>
-                <input value={form.occupation} onChange={(e) => setForm({ ...form, occupation: e.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
-              </div>
+              {[
+                ["education", t.education, EDUCATION_LEVELS],
+                ["occupation", t.occupation, OCCUPATIONS],
+                ["maritalStatus", t.maritalStatus, MARITAL_STATUSES],
+              ].map(([key, label, options]) => (
+                <div key={key}>
+                  <label htmlFor={`member-${key}`} className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</label>
+                  <select id={`member-${key}`} value={form[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">
+                    <option value="">{t.select}</option>
+                    {withCurrent(options, form[key]).map((o) => <option key={o.value} value={o.value}>{lang === "hi" ? o.hi : o.en}</option>)}
+                  </select>
+                </div>
+              ))}
               <div className="sm:col-span-2">
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.address}</label>
                 <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />

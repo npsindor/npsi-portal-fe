@@ -5,7 +5,8 @@ import { ADMIN, MEMBER, mockApi } from './mock-api.js';
 // one open transfer request per member, the administrator's emailed sign-in code, and reset tokens kept out of URLs.
 const FAMILY = { id: 'f-1', familyId: 'NPSI-FAM-000024', familyName: 'Patidar Parivar', headName: 'Ram Patidar', status: 'ACTIVE', memberCount: 2, email: 'ram@example.com' };
 const HEAD = { id: 'm-1', familyId: FAMILY.familyId, membershipId: 'NPSI-MEM-000001', name: 'Ram Patidar', relationship: 'Head', status: 'ACTIVE' };
-const NEW_MEMBER = { id: 'm-2', familyId: FAMILY.familyId, membershipId: 'NPSI-MEM-000055', name: 'Kid Patidar', relationship: 'Son', status: 'PENDING' };
+// A pending unmarried adult: the "waiting for approval" note is for them (Shagun Bandhan); see member-details.spec.js.
+const NEW_MEMBER = { id: 'm-2', familyId: FAMILY.familyId, membershipId: 'NPSI-MEM-000055', name: 'Kid Patidar', relationship: 'Son', status: 'PENDING', dob: '2000-01-02', maritalStatus: 'UNMARRIED' };
 
 test.beforeEach(async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });

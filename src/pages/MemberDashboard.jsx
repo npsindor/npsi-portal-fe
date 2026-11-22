@@ -232,8 +232,7 @@ export default function MemberDashboard() {
                 </button>
                 <div className="mt-2 text-[0.65rem] text-cream/60">Tap QR to enlarge for scanning</div>
                 <div className="mt-4 font-display text-xl font-bold text-gold">{family.familyId}</div>
-                <div className="text-sm text-cream/90">{family.familyName}</div>
-                <div className="mt-1 text-xs text-cream/60">{t.head}: {family.headName}</div>
+                <div className="text-sm font-medium text-cream/90">{family.headName || family.familyName}</div>
                 <div className="mt-1 text-xs text-green-300">● {family.status}</div>
               </div>
             </div>
@@ -259,7 +258,7 @@ export default function MemberDashboard() {
             />
             <div className="text-center">
               <div className="font-display text-base font-bold text-maroon">{family.familyId}</div>
-              <div className="text-xs text-muted-foreground">{family.familyName}</div>
+              <div className="text-xs text-muted-foreground">{family.headName || family.familyName}</div>
             </div>
             <button onClick={() => setShowQrZoom(false)} className="w-full rounded-full bg-maroon py-2.5 text-sm font-semibold text-cream">
               {t.close}

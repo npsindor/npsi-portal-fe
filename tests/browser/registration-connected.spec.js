@@ -53,6 +53,7 @@ test('member registration: titles, date-of-birth rules, Indore areas and the 62 
     await expect(page.locator('#reg-dob-rule')).toHaveClass(/text-destructive/);
   }
   await dob.fill(isoYearsAgo(30));
+  await page.locator('#reg-marital').selectOption('MARRIED');
   await page.getByRole('button', { name: 'Next' }).click();
 
   const area = page.locator('#reg-area');
@@ -84,6 +85,9 @@ test('an approved student is offered "Become a family member", which opens the â
   await expect(page.getByRole('status').filter({ hasText: 'Your student details have been filled in' })).toBeVisible();
   await expect(page.locator('#reg-first')).toHaveValue('Ravi');
   await expect(page.locator('#reg-dob')).toHaveValue(student.form.dob);
+  // A student form has no marital status: the family form asks for it.
+  await expect(page.locator('#reg-marital')).toHaveValue('');
+  await page.locator('#reg-marital').selectOption('UNMARRIED');
   await page.getByRole('button', { name: 'Next' }).click();
   await expect(page.locator('#reg-area')).toHaveValue('Vijay Nagar');
   await expect(page.locator('#reg-village')).toHaveValue('Temla');
