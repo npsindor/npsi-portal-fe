@@ -74,6 +74,8 @@ export const API = {
     profileCompletion: `${API_PREFIX}/me/profile-completion`,
   },
   registrationPayments: `${API_PREFIX}/registration-payments`,
+  // Super admin: correct (PATCH) or delete one registration payment.
+  registrationPayment: (id) => `${API_PREFIX}/registration-payments/${encodeURIComponent(id)}`,
   registrationPaymentReview: (id) => `${API_PREFIX}/registration-payments/${encodeURIComponent(id)}/review`,
   registrationPaymentScreenshot: (id) => `${API_PREFIX}/registration-payments/${encodeURIComponent(id)}/screenshot`,
   // Admin dashboard charts (monthly transactions, users, registrations).

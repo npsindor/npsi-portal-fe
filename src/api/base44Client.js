@@ -302,6 +302,8 @@ export const base44 = {
     },
     payments: (status = '', limit = 200) => request(`${API.registrationPayments}?${new URLSearchParams({ limit: String(limit), ...(status ? { status } : {}) })}`),
     reviewPayment: (id, body) => request(API.registrationPaymentReview(id), { method: 'POST', body: JSON.stringify(body) }),
+    editPayment: (id, body) => request(API.registrationPayment(id), { method: 'PATCH', body: JSON.stringify(body) }),
+    deletePayment: (id) => request(API.registrationPayment(id), { method: 'DELETE' }),
     screenshot: async (id) => {
       const response = await apiFetch(`${localApiBaseUrl}${API.registrationPaymentScreenshot(id)}`, { credentials: 'include' });
       if (!response.ok) throw Object.assign(new Error('Record not found'), { status: response.status });
