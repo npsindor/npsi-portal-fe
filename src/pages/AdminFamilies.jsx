@@ -35,6 +35,10 @@ const L = {
     thCity: "City",
     thStatus: "Status",
     thActions: "Actions",
+    thWebsite: "On website",
+    websiteHint: "Show the head's photo in the home page carousel and the family's birthday wishes",
+    websiteOn: "Shown on the home page",
+    websiteOff: "Hidden from the home page",
     view: "View",
     empty: "No families found.",
     family: "Family",
@@ -96,6 +100,10 @@ const L = {
     thCity: "शहर",
     thStatus: "स्थिति",
     thActions: "क्रियाएँ",
+    thWebsite: "वेबसाइट पर",
+    websiteHint: "मुखिया की फ़ोटो होमपेज कैरोसेल में और परिवार की जन्मदिन शुभकामनाएँ दिखाएँ",
+    websiteOn: "होमपेज पर दिख रहा है",
+    websiteOff: "होमपेज से छिपा है",
     view: "देखें",
     empty: "कोई परिवार नहीं मिला।",
     family: "परिवार",
@@ -155,6 +163,23 @@ export default function AdminFamilies() {
   const t = L[lang];
   const { toast } = useToast();
   const [families, setFamilies] = useState([]);
+  const [togglingId, setTogglingId] = useState(null);
+  // Home page "NPS Family Heads" carousel and birthday wishes: shown only for the families switched on here.
+  const toggleWebsite = async (family, on) => {
+    const set = (value) => setFamilies((list) => list.map((item) => (item.id === family.id ? { ...item, showOnHome: value } : item)));
+    set(on); // shown at once; put back if the save fails
+    setTogglingId(family.id);
+    try {
+      const updated = await base44.entities.Family.update(family.id, { showOnHome: on });
+      set(updated?.showOnHome ?? on);
+      toast({ title: on ? t.websiteOn : t.websiteOff, description: family.headName || family.familyId });
+    } catch (err) {
+      set(!on);
+      toast({ title: err.message, variant: "destructive" });
+    } finally {
+      setTogglingId(null);
+    }
+  };
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [members, setMembers] = useState([]);
@@ -316,6 +341,7 @@ export default function AdminFamilies() {
               <th className="px-4 py-3">{t.thMembers}</th>
               <th className="px-4 py-3">{t.thCity}</th>
               <th className="px-4 py-3">{t.thStatus}</th>
+              <th className="px-4 py-3" title={t.websiteHint}>{t.thWebsite}</th>
               <th className="px-4 py-3 text-right">{t.thActions}</th>
             </tr>
           </thead>
@@ -329,6 +355,21 @@ export default function AdminFamilies() {
                 <td className="px-4 py-3">{f.memberCount || 0}</td>
                 <td className="px-4 py-3 text-muted-foreground">{f.city}</td>
                 <td className="px-4 py-3"><StatusBadge status={f.status} /></td>
+                <td className="px-4 py-3">
+                  {/* Only the super admin decides who appears on the public home page. */}
+                  <label className="inline-flex items-center gap-2" title={t.websiteHint}>
+                    <input
+                      type="checkbox"
+                      role="switch"
+                      className="h-4 w-4 accent-[#102A43]"
+                      checked={Boolean(f.showOnHome)}
+                      disabled={!superAdmin || togglingId === f.id}
+                      aria-label={`${t.thWebsite}: ${f.headName || f.familyId}`}
+                      onChange={(event) => toggleWebsite(f, event.target.checked)}
+                    />
+                    <span className="sr-only">{f.showOnHome ? t.websiteOn : t.websiteOff}</span>
+                  </label>
+                </td>
                 <td className="px-4 py-3 text-right">
                   <div className="inline-flex gap-1.5">
                     <button onClick={() => viewFamily(f)} className="inline-flex items-center gap-1 rounded-full border border-gold/40 px-3 py-1.5 text-xs font-semibold text-maroon hover:bg-gold/10">
@@ -340,7 +381,7 @@ export default function AdminFamilies() {
                 </td>
               </tr>
             ))}
-            {totalItems === 0 && <tr><td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">{t.empty}</td></tr>}
+            {totalItems === 0 && <tr><td colSpan={9} className="px-4 py-10 text-center text-muted-foreground">{t.empty}</td></tr>}
           </tbody>
         </table>
         <TablePagination page={page} totalPages={totalPages} totalItems={totalItems} pageSize={pageSize} onPageChange={setPage} />

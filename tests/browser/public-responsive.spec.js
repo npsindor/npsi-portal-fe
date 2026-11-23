@@ -13,7 +13,7 @@ for (const width of [320, 390, 768, 1440]) {
     if (width < 1280) await menu.click();
     const nav = page.getByRole('navigation', { name: 'Main navigation' });
     await (await navLink(page, 'Blood Donor')).click();
-    await expect(page.getByRole('heading', { name: 'One message. The whole samaj stands with you.' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Donate Blood, Save Lives' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Blood Donation', level: 2 })).toBeVisible();
     if (width < 1280) await expect(nav).toBeHidden();
     for (const path of ['/', '/community-services', '/career-business', '/sagun', '/contact', '/public-feedback']) {

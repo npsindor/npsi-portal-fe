@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">NPS Indore</string>
+    <string name="title_activity_main">NPS Indore</string>
+    <string name="package_name">org.npsindore.app</string>
+    <string name="custom_url_scheme">org.npsindore.app</string>
+</resources>

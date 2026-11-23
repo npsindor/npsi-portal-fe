@@ -8,12 +8,19 @@
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
     "lint": "eslint .",
-    "test": "node --test --test-reporter=spec src/api/endpoints.test.js src/api/openapi.test.js src/api/uploadUrls.test.js src/routes.test.js",
+    "test": "node --test --test-reporter=spec src/api/endpoints.test.js src/api/openapi.test.js src/api/uploadUrls.test.js src/routes.test.js src/lib/native-app.test.js src/lib/revenue.test.js",
     "test:browser": "playwright test",
     "test:security": "playwright test --config playwright.security.config.js",
-    "test:browser:all": "ALL_BROWSERS=1 playwright test"
+    "test:browser:all": "ALL_BROWSERS=1 playwright test",
+    "app:open:android": "cap open android",
+    "app:sync": "cap sync android",
+    "app:apk": "cap sync android && cd android && ./gradlew assembleDebug"
   },
   "dependencies": {
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.6.0",
+    "@capacitor/splash-screen": "8.0.2",
+    "@capacitor/status-bar": "8.0.4",
     "@fontsource/inter": "5.3.0",
     "@fontsource/poppins": "5.3.0",
     "@hello-pangea/dnd": "^17.0.0",
@@ -86,6 +93,8 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@capacitor/android": "8.6.0",
+    "@capacitor/cli": "8.6.0",
     "@eslint/js": "^9.19.0",
     "@playwright/test": "^1.63.0",
     "@types/node": "^22.13.5",

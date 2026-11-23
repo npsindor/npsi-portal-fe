@@ -10,6 +10,7 @@ import DateRangeFilter from "@/components/admin/DateRangeFilter";
 import { inDateRange } from "@/lib/dateRangeFilter";
 import SuggestSearchInput from "@/components/SuggestSearchInput";
 import { suggestValues } from "@/lib/search-suggestions";
+import { registrationFeesReceived, revenueOf } from "@/lib/revenue";
 
 const TYPES = ["Family Registration", "Membership Payment", "Event Registration", "Donation", "Other"];
 // Stored type → Hindi label (the stored English value stays the same).
@@ -31,6 +32,8 @@ const L = {
     totalRevenue: "Total Revenue",
     totalTxns: "Total Transactions",
     successful: "Successful",
+    registrationFees: "Registration fees received",
+    registrationFeesHint: "Same figure as Received on Registration payments",
     searchPh: "Search by Txn ID or Family ID...",
     allStatus: "All Status",
     allTypes: "All Types",
@@ -73,6 +76,8 @@ const L = {
     totalRevenue: "कुल आय",
     totalTxns: "कुल लेन-देन",
     successful: "सफल",
+    registrationFees: "प्राप्त रजिस्ट्रेशन शुल्क",
+    registrationFeesHint: "रजिस्ट्रेशन भुगतान पेज के ‘प्राप्त’ जितना ही",
     searchPh: "Txn आईडी या परिवार आईडी से खोजें...",
     allStatus: "सभी स्थिति",
     allTypes: "सभी प्रकार",
@@ -150,7 +155,9 @@ export default function AdminTransactions() {
     const numeric = Number(String(value ?? "").replace(/[^\d.-]/g, ""));
     return Number.isFinite(numeric) ? numeric : 0;
   };
-  const totalRevenue = filtered.filter((tx) => tx.paymentStatus === "SUCCESS").reduce((s, tx) => s + parseAmount(tx.amount), 0);
+  // The same rule as the dashboard: settled payments (SUCCESS / VERIFIED), less refunds actually sent.
+  const totalRevenue = revenueOf(filtered);
+  const registrationReceived = registrationFeesReceived(filtered);
 
   const openNew = () => {
     const now = Date.now().toString(36).toUpperCase();
@@ -236,7 +243,7 @@ export default function AdminTransactions() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-2xl border border-gold/30 bg-card p-4">
           <div className="text-xs uppercase tracking-wide text-muted-foreground">{t.totalRevenue}</div>
           <div className="mt-1 font-display text-2xl font-bold text-green-600">₹{totalRevenue.toLocaleString(locale)}</div>
@@ -247,7 +254,12 @@ export default function AdminTransactions() {
         </div>
         <div className="rounded-2xl border border-gold/30 bg-card p-4">
           <div className="text-xs uppercase tracking-wide text-muted-foreground">{t.successful}</div>
-          <div className="mt-1 font-display text-2xl font-bold text-green-600">{filtered.filter((tx) => tx.paymentStatus === "SUCCESS").length}</div>
+          <div className="mt-1 font-display text-2xl font-bold text-green-600">{filtered.filter((tx) => ["SUCCESS", "VERIFIED"].includes(tx.paymentStatus)).length}</div>
+        </div>
+        <div className="rounded-2xl border border-gold/30 bg-card p-4" title={t.registrationFeesHint}>
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">{t.registrationFees}</div>
+          <div className="mt-1 font-display text-2xl font-bold text-green-600">₹{registrationReceived.toLocaleString(locale)}</div>
+          <div className="mt-1 text-xs text-muted-foreground">{t.registrationFeesHint}</div>
         </div>
       </div>
 

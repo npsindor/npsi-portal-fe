@@ -33,7 +33,9 @@ export const SITE_PAGES = [
 export const HOME_SECTIONS = [
   { key: 'counters', en: 'Community counters (families, members…)', hi: 'समुदाय के आँकड़े (परिवार, सदस्य…)' },
   { key: 'services', en: 'Logo slider and community services (first section)', hi: 'लोगो स्लाइडर और समुदाय की सेवाएँ (पहला सेक्शन)' },
+  { key: 'familyHeads', en: 'NPS Family Heads (photo carousel)', hi: 'NPS परिवार मुखिया (फ़ोटो कैरोसेल)' },
   { key: 'getStarted', en: 'Get started: important services', hi: 'शुरुआत करें: ज़रूरी सेवाएँ' },
+  { key: 'birthdays', en: 'Today Birthday (beside Get started)', hi: 'आज जन्मदिन (शुरुआत करें के साथ)' },
   { key: 'participation', en: 'Your participation', hi: 'आपकी भागीदारी' },
   { key: 'updates', en: 'From the Sangathan: announcements', hi: 'आधिकारिक जानकारी: सूचनाएँ' },
   { key: 'pillars', en: 'What brings us together', hi: 'हमारी प्रतिबद्धता' },

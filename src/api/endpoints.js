@@ -39,6 +39,12 @@ export const API = {
   sehat: `${API_PREFIX}/sehat-saathi`,
   safar: `${API_PREFIX}/safar-saathi`,
   roomHunting: `${API_PREFIX}/room-hunting`,
+  // Community Services → Blood Help Network: donors, blood requests, follow-up, admin verification.
+  bloodHelp: `${API_PREFIX}/blood-help`,
+  // Home page: family heads carousel and today's birthdays (admin-chosen families only).
+  homeMembers: `${API_PREFIX}/home-members`,
+  // Super admin: every deletion (who, when, what, a copy of the record). Read only.
+  auditLogs: `${API_PREFIX}/audit-logs`,
   search: `${API_PREFIX}/search`,
   contactInfo: `${API_PREFIX}/contact-info`,
   uploads: `${API_PREFIX}/uploads`,

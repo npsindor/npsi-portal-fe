@@ -7,6 +7,8 @@ import CommunityHighlights, { ParticipationSection } from '@/components/Communit
 import HomeShowcase from '@/components/HomeShowcase';
 import CommunityCounters from '@/components/CommunityCounters';
 import HomeLogoCarousel from '@/components/HomeLogoCarousel';
+import FamilyHeadsCarousel from '@/components/FamilyHeadsCarousel';
+import TodayBirthdays from '@/components/TodayBirthdays';
 import PublicNav from "@/components/PublicNav";
 import { introCopy, usePageContent } from "@/components/PageContent";
 import { base44 } from "@/api/base44Client";
@@ -95,7 +97,9 @@ export default function Home() {
     { icon: Heart, title: t("home.p4t"), desc: t("home.p4d") },
   ];
 
-  const { isPageVisible } = useSiteVisibility();
+  const { isPageVisible, isSectionVisible } = useSiteVisibility();
+  // "Get started" shares its row with "Today Birthday" (Admin → Page visibility can switch either off).
+  const birthdays = isSectionVisible("birthdays");
   const importantServices = [
     { icon: UserPlus, title: t("home.service1t"), desc: t("home.service1d"), cta: t("home.serviceCta"), to: "/register" },
     { icon: GraduationCap, title: t("home.service2t"), desc: t("home.service2d"), cta: t("home.serviceCta"), to: "/student-register" },
@@ -153,9 +157,14 @@ export default function Home() {
         </section>
         </HomeSection>
 
+        <HomeSection id="familyHeads">
+        <FamilyHeadsCarousel />
+        </HomeSection>
+
         <HomeSection id="getStarted">
         <section className="border-y border-gold/20 bg-background">
-          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+          <div className={`mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 sm:py-16 ${birthdays ? "lg:grid-cols-[minmax(0,1fr)_22rem]" : ""}`}>
+            <div className="min-w-0">
             <div className="flex items-end justify-between gap-4">
               <div>
                 <span className="eyebrow"><Sparkles className="h-3.5 w-3.5" /> {lang === "hi" ? "शुरुआत करें" : "Get started"}</span>
@@ -163,7 +172,7 @@ export default function Home() {
                 <p className="mt-2 text-sm text-muted-foreground">{t("home.servicesSub")}</p>
               </div>
             </div>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className={`mt-8 grid gap-4 sm:grid-cols-2 ${birthdays ? "" : "lg:grid-cols-4"}`}>
               {importantServices.filter((service) => isPageVisible(service.to)).slice(0, 4).map((service) => (
                 <Link key={service.to} to={service.to} className="group premium-card flex min-h-48 flex-col p-5 transition hover:-translate-y-1 hover:border-gold/60 hover:shadow-lg sm:p-6">
                   <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-maroon text-gold transition group-hover:bg-gold group-hover:text-maroon"><service.icon className="h-5 w-5" /></span>
@@ -173,6 +182,8 @@ export default function Home() {
                 </Link>
               ))}
             </div>
+            </div>
+            {birthdays && <TodayBirthdays />}
           </div>
         </section>
         </HomeSection>

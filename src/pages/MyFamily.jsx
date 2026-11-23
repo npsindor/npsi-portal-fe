@@ -79,6 +79,7 @@ const L = {
     updatedDesc: "updated.",
     added: "Member added",
     addedDesc: "added. The Sangathan will approve the new member shortly.",
+    addedActive: "added to your family. Members aged 18+ (21+ for men) can be shown in Shagun Bandhan by ticking the box on their card.",
     pendingNote: "Waiting for admin approval. Until then this member can't be registered for events or Shagun Bandhan.",
     transferPending: "Transfer request pending",
     failUpdate: "Failed to update member",
@@ -140,6 +141,7 @@ const L = {
     updatedDesc: "अपडेट हुआ।",
     added: "सदस्य जोड़ा गया",
     addedDesc: "जोड़ा गया। संगठन जल्द ही नए सदस्य को स्वीकृति देगा।",
+    addedActive: "परिवार में जोड़ा गया। 18+ (पुरुष 21+) सदस्यों को उनके कार्ड पर टिक करके शगुन बंधन में दिखाया जा सकता है।",
     pendingNote: "प्रशासक की स्वीकृति की प्रतीक्षा है। तब तक यह सदस्य कार्यक्रम या शगुन बंधन में पंजीकृत नहीं हो सकता।",
     transferPending: "ट्रांसफर अनुरोध लंबित है",
     failUpdate: "सदस्य अपडेट करने में विफल",
@@ -296,8 +298,9 @@ export default function MyFamily() {
         toast({ title: t.updated, description: `${payload.name} ${t.updatedDesc}` });
       } else {
         // The server keeps the family's member count.
-        await base44.entities.FamilyMember.create({ ...payload, familyId: family.familyId });
-        toast({ title: t.added, description: `${payload.name} ${t.addedDesc}` });
+        // A registered family's member is active at once; only an email that is someone else's login waits for an admin.
+        const created = await base44.entities.FamilyMember.create({ ...payload, familyId: family.familyId });
+        toast({ title: t.added, description: `${payload.name} ${created?.status === "PENDING" ? t.addedDesc : t.addedActive}` });
       }
       setForm(emptyForm);
       setEditing(null);

@@ -613,3 +613,22 @@ section[id], article[id] { scroll-margin-top: 15rem; }
   .home-service-icon { animation: none !important; }
   .home-service-group[aria-hidden="true"] { display: none; }
 }
+
+/* Home page "NPS Family Heads": a slow, endless strip (two copies of the list, moved by half its width).
+   Pauses while hovered or focused; people who asked for less motion get a still, scrollable row instead. */
+@keyframes family-heads-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.family-heads-track {
+  animation: family-heads-scroll var(--family-heads-duration, 60s) linear infinite;
+}
+.family-heads-strip:hover .family-heads-track,
+.family-heads-strip:focus-within .family-heads-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .family-heads-strip { overflow-x: auto; }
+  .family-heads-track { animation: none; }
+  .family-heads-track [data-copy="2"] { display: none; }
+}

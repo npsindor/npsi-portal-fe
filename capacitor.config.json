@@ -1,0 +1,25 @@
+{
+  "appId": "org.npsindore.app",
+  "appName": "NPS Indore",
+  "webDir": "app-shell",
+  "appendUserAgent": "NPSIndoreApp",
+  "server": {
+    "url": "https://npsindore.org",
+    "androidScheme": "https",
+    "errorPath": "offline.html"
+  },
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2500,
+      "launchAutoHide": true,
+      "backgroundColor": "#102A43",
+      "showSpinner": false
+    },
+    "SystemBars": {
+      "insetsHandling": "css"
+    }
+  }
+}

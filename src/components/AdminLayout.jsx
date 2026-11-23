@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Search, UserCog, Eye, Contact, HandHeart, IdCard, Stethoscope, UsersRound, LayoutDashboard, FileCheck, Users, CalendarDays, CreditCard, Bell, Settings, LogOut, Shield, ScrollText, Menu, X, Landmark, Globe, GraduationCap, MessageSquare, ArrowRightLeft, TicketCheck, Lightbulb, Newspaper, Wallet, Sparkles, HeartHandshake, LayoutTemplate, House, Route } from "lucide-react";
+import { Search, UserCog, Eye, Contact, HandHeart, IdCard, Stethoscope, UsersRound, LayoutDashboard, FileCheck, Users, CalendarDays, CreditCard, Bell, Settings, LogOut, Shield, ScrollText, Menu, X, Landmark, Globe, GraduationCap, MessageSquare, ArrowRightLeft, TicketCheck, Lightbulb, Newspaper, Wallet, Sparkles, HeartHandshake, LayoutTemplate, House, Route, Droplet, History } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import LanguageToggle from "@/components/LanguageToggle";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -46,6 +46,7 @@ export default function AdminLayout() {
     { label: lang === "hi" ? "पेज दृश्यता (चालू / बंद)" : "Page visibility (on / off)", path: "/admin/site-visibility", icon: Eye },
     { label: lang === "hi" ? "समाज की झलक (होमपेज)" : "Community highlights", path: "/admin/home-highlights", icon: Sparkles },
     { label: lang === "hi" ? "सामुदायिक सेवाएँ" : "Community Services", path: "/admin/community-services", icon: HandHeart },
+    { label: lang === "hi" ? "रक्त अनुरोध (सत्यापन)" : "Blood Requests", path: "/admin/blood-requests", icon: Droplet },
     { label: t("admin.rules"), path: "/admin/rules", icon: ScrollText },
     { label: t("admin.principles"), path: "/admin/principles", icon: Lightbulb },
     { label: lang === "hi" ? "पता सूची" : "Address lists", path: "/admin/address-options", icon: Globe },
@@ -53,6 +54,8 @@ export default function AdminLayout() {
     { label: t("contacts.title"), path: "/admin/contact-info", icon: Contact },
     { label: t("admin.feedback"), path: "/admin/feedback", icon: MessageSquare },
     { label: t("admin.settings"), path: "/admin/settings", icon: Settings },
+    // Super admin only: sub-admins see just their own areas, and the API refuses everyone else.
+    { label: lang === "hi" ? "ऑडिट लॉग" : "Audit Log", path: "/admin/audit-log", icon: History },
   ];
 
   // Super admin: every page, plus "Assign roles" at the top. A sub-admin (Admin → Assign roles) only the pages of their
