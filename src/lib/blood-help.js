@@ -89,6 +89,7 @@ const en = {
   sendSelected: "Send to Selected Donors",
   sending: "Sending…",
   sent: (n) => `Sent to ${n} donor${n === 1 ? "" : "s"} as a portal notification.`,
+  sentBadge: "Sent",
   noSuggestions: "No eligible registered donor matches this blood group right now. Share the request in the Sangathan WhatsApp group too.",
   exact: "Same group",
   compatible: "Compatible",
@@ -136,7 +137,6 @@ const en = {
   saved: "Saved",
   errors: {
     BLOOD_MEMBERS_ONLY: "The Blood Help Network is for registered NPS members.",
-    BLOOD_DONOR_MOBILE: "Add your mobile number in Settings first, so the requester can reach you on WhatsApp.",
   },
 };
 
@@ -214,6 +214,7 @@ const hi = {
   sendSelected: "चुने गए रक्तदाताओं को भेजें",
   sending: "भेजा जा रहा है…",
   sent: (n) => `${n} रक्तदाताओं को पोर्टल सूचना भेज दी गई।`,
+  sentBadge: "भेजा गया",
   noSuggestions: "अभी इस रक्त समूह से मेल खाता कोई पात्र पंजीकृत रक्तदाता नहीं है। अनुरोध संगठन के WhatsApp समूह में भी साझा करें।",
   exact: "समान समूह",
   compatible: "अनुकूल",
@@ -258,7 +259,10 @@ const hi = {
   saved: "सहेजा गया",
   errors: {
     BLOOD_MEMBERS_ONLY: "रक्त सहायता नेटवर्क पंजीकृत NPS सदस्यों के लिए है।",
-    BLOOD_DONOR_MOBILE: "पहले सेटिंग्स में अपना मोबाइल नंबर जोड़ें, ताकि अनुरोधकर्ता आपसे WhatsApp पर संपर्क कर सकें।",
+    "This request was already sent to the selected donors.": "यह अनुरोध चुने गए रक्तदाताओं को पहले ही भेजा जा चुका है।",
+    "You already have 3 blood requests in progress. Confirm one as received before adding another.":
+      "आपके 3 रक्त अनुरोध पहले से प्रगति में हैं। नया अनुरोध जोड़ने से पहले किसी एक में रक्त मिलने की पुष्टि करें।",
+    "Enter a valid 10-digit mobile number.": "10 अंकों का सही मोबाइल नंबर दर्ज करें।",
   },
 };
 
