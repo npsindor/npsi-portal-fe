@@ -143,3 +143,41 @@ test('a member adds several photos to a listing, picks the cover and removes one
   const file = (name) => expect.stringMatching(new RegExp(`/uploads/${name}$`));
   expect(calls.find((call) => call.key === 'POST /room-hunting/listings').body).toMatchObject({ photoUrl: file('p3.png'), photoUrls: [file('p3.png'), file('p2.png')] });
 });
+
+test('a registered member who searches and then adds a property gets the form, not the registration message', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  await mockApi(page, {
+    'GET /auth/me': MEMBER,
+    'GET /room-hunting/options': { propertyTypes: [{ value: '1 BHK', hi: '1 BHK' }], areas: [{ value: 'Vijay Nagar', hi: 'विजय नगर' }] },
+    'GET /room-hunting/me': { eligible: true, accountKind: 'STUDENT', listings: [], requirements: [], enquiriesSent: [] },
+    'GET /room-hunting/listings': { items: [], total: 0, page: 1, pageSize: 12 },
+  });
+  await page.goto('/room-hunting');
+  await page.locator('#room-search').fill('vijay');
+  await page.getByRole('button', { name: 'Search', exact: true }).click();
+  await page.getByRole('button', { name: 'Add Rental Property' }).first().click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByText('Property Type', { exact: false }).first()).toBeVisible();
+  await expect(dialog.getByText(/Please complete Family or Student Registration/)).toHaveCount(0);
+});
+
+test('if the membership check fails, the member is offered a retry instead of being told to register', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  let calls = 0;
+  await mockApi(page, {
+    'GET /auth/me': MEMBER,
+    'GET /room-hunting/options': { propertyTypes: [], areas: [] },
+    'GET /room-hunting/listings': { items: [], total: 0, page: 1, pageSize: 12 },
+  });
+  await page.route('**/api/v1/room-hunting/me', (route) => {
+    calls += 1;
+    return calls === 1 ? route.fulfill({ status: 503, json: { error: 'Service unavailable' } }) : route.fulfill({ json: { eligible: true, accountKind: 'FAMILY', listings: [], requirements: [], enquiriesSent: [] } });
+  });
+  await page.goto('/room-hunting');
+  await page.getByRole('button', { name: 'Add Rental Property' }).first().click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('alert')).toHaveText('We could not check your membership just now. Please try again.');
+  await expect(dialog.getByText(/Please complete Family or Student Registration/)).toHaveCount(0);
+  await dialog.getByRole('button', { name: 'Try again' }).click();
+  await expect(dialog.getByText('Property Type', { exact: false }).first()).toBeVisible();
+});

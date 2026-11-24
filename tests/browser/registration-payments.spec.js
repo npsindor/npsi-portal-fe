@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { ADMIN, mockApi } from './mock-api.js';
+import { ADMIN, MEMBER, mockApi } from './mock-api.js';
 
 const payment = (o) => ({ id: o.id, transactionId: `TXN-${o.id}`, type: 'Family Registration', amount: 500, paymentStatus: 'SUBMITTED', referenceId: `NPSI-APP-${o.id}`, utr: null, adminRemarks: null, reviewedAt: null, reviewer: null, hasScreenshot: false, refundAmount: null, refundReference: null, applicant: { type: 'FAMILY', name: `Applicant ${o.id}`, mobile: '9000000000', status: 'PENDING_VERIFICATION' }, ...o });
 
@@ -13,7 +13,7 @@ test('registration payments show the review remarks and who approved them', asyn
   const calls = await mockApi(page, { 'GET /auth/me': ADMIN, 'GET /registration-payments': rows, 'POST /registration-payments/2/review': { ...rows[1], paymentStatus: 'VERIFIED' } });
   await page.goto('/admin/registration-payments');
   const table = page.getByRole('table');
-  await expect(table.getByRole('columnheader')).toHaveText(['Applicant', 'Amount', 'Application', 'Payment proof', 'Status', 'Remarks', 'Approved by', 'Review']);
+  await expect(table.getByRole('columnheader')).toHaveText(['Applicant', 'Amount', 'Application', 'Payment proof', 'Status', 'Remarks', 'Approved by', 'Review', 'Action']);
   const verified = table.getByRole('row', { name: /Applicant 1/ });
   await expect(verified.getByRole('cell').nth(5)).toHaveText('UTR matched with bank statement');
   await expect(verified.getByRole('cell').nth(6)).toContainText('Ramesh Patidar');
@@ -71,4 +71,53 @@ test('payments in Hindi: count, total and Export labels', async ({ page }) => {
   const header = page.locator('header').filter({ has: page.getByRole('button', { name: 'रीफ्रेश' }) });
   await expect(header.getByRole('status')).toHaveText('3 भुगतान · प्राप्त ₹0');
   await expect(header.getByRole('button', { name: 'एक्सपोर्ट' })).toBeEnabled();
+});
+
+test('super admin: Action column after Review with Edit (amount, UTR, remarks) and Delete (with confirmation)', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 900 });
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  const rows = [payment({ id: '1', paymentStatus: 'VERIFIED', utr: '111', applicant: { type: 'FAMILY', name: 'Applicant 1', status: 'APPROVED' } }), payment({ id: '2' })];
+  const calls = await mockApi(page, {
+    'GET /auth/me': ADMIN,
+    'GET /registration-payments': rows,
+    'PATCH /registration-payments/1': { status: 200, body: { ...rows[0], amount: 100, utr: '412345678901' } },
+    'DELETE /registration-payments/1': { status: 204, body: null },
+    'DELETE /registration-payments/2': { status: 409, body: { error: 'This application is still waiting for a decision. Reject the payment (or decide the application) instead of deleting it.' } },
+  });
+  await page.goto('/admin/registration-payments');
+  const table = page.getByRole('table');
+  await expect(table.getByRole('columnheader')).toHaveText(['Applicant', 'Amount', 'Application', 'Payment proof', 'Status', 'Remarks', 'Approved by', 'Review', 'Action']);
+  const first = table.getByRole('row', { name: /Applicant 1/ });
+  await first.getByRole('button', { name: 'Edit: Applicant 1' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Edit payment' });
+  await dialog.getByLabel('Amount (₹)').fill('0');
+  await dialog.getByRole('button', { name: 'Save' }).click();
+  await expect(dialog.getByRole('alert')).toHaveText('Enter an amount of at least ₹1.');
+  await dialog.getByLabel('Amount (₹)').fill('100');
+  await dialog.getByLabel('UTR').fill(' 412345678901 ');
+  await dialog.getByLabel('Remarks').fill('Student fee');
+  await dialog.getByRole('button', { name: 'Save' }).click();
+  await expect.poll(() => calls.find((c) => c.key === 'PATCH /registration-payments/1')?.body).toEqual({ amount: 100, utr: '412345678901', adminRemarks: 'Student fee' });
+  await expect(page.getByRole('status').filter({ hasText: 'Payment updated.' })).toBeVisible();
+  // Delete refused by the server: the reason shows in the dialog and nothing is removed.
+  await table.getByRole('row', { name: /Applicant 2/ }).getByRole('button', { name: 'Delete: Applicant 2' }).click();
+  const confirm = page.getByRole('alertdialog', { name: 'Delete this payment?' });
+  await expect(confirm).toContainText('A copy is kept in the Audit Log');
+  await confirm.getByRole('button', { name: 'Yes, delete' }).click();
+  await expect(confirm.getByRole('alert')).toContainText('still waiting for a decision');
+  await confirm.getByRole('button', { name: 'Cancel' }).click();
+  await first.getByRole('button', { name: 'Delete: Applicant 1' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Yes, delete' }).click();
+  await expect.poll(() => calls.some((c) => c.key === 'DELETE /registration-payments/1')).toBe(true);
+  await expect(page.getByRole('status').filter({ hasText: 'Payment deleted.' })).toBeVisible();
+});
+
+test('payments staff (sub-admin) review payments but get no Edit / Delete', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  const staff = { ...MEMBER, adminAccess: { superAdmin: false, areas: ['PAYMENTS'], allVillages: true, villages: [] } };
+  await mockApi(page, { 'GET /auth/me': staff, 'GET /registration-payments': [payment({ id: '1' })] });
+  await page.goto('/admin/registration-payments');
+  await expect(page.getByRole('columnheader', { name: 'Review' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Action' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^Delete:/ })).toHaveCount(0);
 });

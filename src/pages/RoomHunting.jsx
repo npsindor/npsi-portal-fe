@@ -44,10 +44,14 @@ export default function RoomHunting() {
 
   useEffect(() => { document.title = `${t.title} | ${lang === 'hi' ? 'निमाड़ पाटीदार संगठन, इंदौर' : 'Nimar Patidar Sangathan, Indore'}`; }, [t, lang]);
   useEffect(() => { roomApi.options().then((value) => setOptions({ propertyTypes: value?.propertyTypes || [], areas: value?.areas || [] })).catch(() => setOptions({ propertyTypes: [], areas: [] })); }, []);
-  useEffect(() => {
+  // Whether this login may add a property. A failed check (network, server restart) is not "not registered": it shows a
+  // retry instead of the registration message.
+  const checkAccount = useCallback(() => {
     if (!isAuthenticated) { setAccount(null); return; }
-    roomApi.mine().then((mine) => setAccount({ eligible: Boolean(mine?.eligible), kind: mine?.accountKind })).catch(() => setAccount({ eligible: false }));
+    setAccount(null);
+    roomApi.mine().then((mine) => setAccount({ eligible: Boolean(mine?.eligible), kind: mine?.accountKind })).catch(() => setAccount({ failed: true }));
   }, [isAuthenticated]);
+  useEffect(() => { checkAccount(); }, [checkAccount, user?.id]);
 
   const load = useCallback(async (page = 1) => {
     setLoading(true); setError('');
@@ -132,6 +136,7 @@ export default function RoomHunting() {
         <DialogDescription>{t.addPropertyHint}</DialogDescription>
         {!isAuthenticated ? <div className="space-y-3 text-sm"><p>{t.membersOnly}</p><div className="flex flex-wrap gap-2"><Link to={loginPath} className={primary}>{t.login}</Link><Link to="/register" className={secondary}>{t.register}</Link></div></div>
           : !account ? <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin" /></div>
+          : account.failed ? <div className="space-y-3 text-sm"><p role="alert">{t.accountCheckFailed}</p><button type="button" className={primary} onClick={checkAccount}>{t.retry}</button></div>
           : !account.eligible ? <div className="space-y-3 text-sm"><p role="alert">{t.membersOnly}</p><div className="flex flex-wrap gap-2"><Link to="/portal/registration" className={primary}>{lang === 'hi' ? 'परिवार पंजीकरण' : 'Family Registration'}</Link><Link to="/student-register" className={secondary}>{lang === 'hi' ? 'विद्यार्थी पंजीकरण' : 'Student Registration'}</Link></div></div>
           : <ListingForm t={t} lang={lang} user={user} options={options} onCancel={() => setAdding(false)} onSaved={(_saved, message) => { setAdding(false); setNotice(message); }} />}
       </DialogContent>

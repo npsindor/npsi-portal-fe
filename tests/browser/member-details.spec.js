@@ -40,10 +40,11 @@ test('add member: education, occupation and marital status are lists, and the ch
     'LKG', 'UKG', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th',
     'Graduate (Pursuing)', 'Graduate', 'Post Graduate (Pursuing)', 'Post Graduate',
   ]);
-  expect(await values('member-occupation')).toEqual(['Business', 'Government Job', 'Private Job', 'Retired', 'Student', 'Shopkeeper', 'Doctor']);
+  expect(await values('member-occupation')).toEqual(['Business', 'Government Job', 'Private Job', 'Retired', 'Student', 'Shopkeeper', 'Doctor', 'Housewife']);
   expect(await values('member-maritalStatus')).toEqual(['MARRIED', 'UNMARRIED']);
   await page.getByPlaceholder('Full name').fill('Abhinandan Patidar');
   await page.locator('select').first().selectOption('Son');
+  await page.locator('input[type=date]').fill('2000-01-02');
   await page.locator('#member-education').selectOption('UKG');
   await page.locator('#member-occupation').selectOption('Student');
   await page.locator('#member-maritalStatus').selectOption('UNMARRIED');
@@ -145,4 +146,44 @@ test('a member whose email is someone else\'s login still waits for the admin, a
   await page.locator('select').first().selectOption('Brother');
   await page.locator('.sticky.bottom-0').getByRole('button', { name: 'Add Member' }).click();
   await expect(page.getByText(/Other Login added\. The Sangathan will approve the new member shortly\./).first()).toBeVisible();
+});
+
+test('Housewife is an occupation (Hindi: गृहिणी) and is saved', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'hi'));
+  await mockApi(page, { 'GET /auth/me': MEMBER, 'GET /me/family': { family: FAMILY, members: [MEMBERS[0]] } });
+  await page.goto('/portal/family');
+  await page.getByRole('button', { name: 'सदस्य जोड़ें' }).first().click();
+  await expect(page.locator('#member-occupation option[value="Housewife"]')).toHaveText('गृहिणी');
+});
+
+test('son / daughter: Marital Status shows only once the birth date makes them 18+; other relations always see it', async ({ page }) => {
+  await en(page);
+  const calls = await mockApi(page, {
+    'GET /auth/me': MEMBER,
+    'GET /me/family': { family: FAMILY, members: [MEMBERS[0]] },
+    'POST /family-members': { status: 201, body: member({ id: 'm20', name: 'Little One', relationship: 'Daughter', status: 'ACTIVE' }) },
+  });
+  await page.goto('/portal/family');
+  await page.getByRole('button', { name: 'Add Member' }).first().click();
+  const marital = page.locator('#member-maritalStatus');
+  const dob = page.locator('input[type=date]');
+  const yearsAgo = (years, days = 0) => { const d = new Date(); d.setFullYear(d.getFullYear() - years); d.setDate(d.getDate() + days); return d.toISOString().slice(0, 10); };
+  await expect(marital).toBeVisible();
+  await page.locator('select').first().selectOption('Daughter');
+  await expect(marital).toHaveCount(0);
+  await dob.fill(yearsAgo(17));
+  await expect(marital).toHaveCount(0);
+  await dob.fill(yearsAgo(18, -1));
+  await expect(marital).toBeVisible();
+  await marital.selectOption('UNMARRIED');
+  await page.locator('select').first().selectOption('Son');
+  await expect(marital).toBeVisible();
+  await page.locator('select').first().selectOption('Brother');
+  await dob.fill(yearsAgo(10));
+  await expect(marital).toBeVisible();
+  // A child under 18 is saved without a marital status, even if one was picked before the birth date changed.
+  await page.locator('select').first().selectOption('Daughter');
+  await page.getByPlaceholder('Full name').fill('Little One');
+  await page.locator('.sticky.bottom-0').getByRole('button', { name: 'Add Member' }).click();
+  await expect.poll(() => calls.find((call) => call.key === 'POST /family-members')?.body).toMatchObject({ name: 'Little One', relationship: 'Daughter', maritalStatus: null });
 });

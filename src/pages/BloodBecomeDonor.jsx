@@ -6,18 +6,22 @@ import BloodGroupSelect from "@/components/blood/BloodGroupSelect";
 import BloodLayout from "@/components/blood/BloodLayout";
 import MembersOnly from "@/components/blood/MembersOnly";
 import PageHeading from "@/components/blood/PageHeading";
-import { bloodError, formatDay, useBloodCopy } from "@/lib/blood-help";
+import { bloodError, formatDay, useBloodCopy, validMobile } from "@/lib/blood-help";
 import { indiaToday } from "@/lib/dates";
 
-const readOnly = "flex h-11 items-center rounded-lg bg-muted px-3 text-sm text-foreground";
+// Same look as before (grey field), now editable.
+const contactField =
+  "flex h-11 w-full items-center rounded-lg border border-transparent bg-muted px-3 text-sm text-foreground outline-none focus:border-[#C8102E] focus:ring-2 focus:ring-[#C8102E]/20 aria-[invalid=true]:border-destructive";
+const digits10 = (value) => String(value || "").replace(/\D/g, "").slice(-10);
 
-// Page 2: register as a donor. Name, mobile and city come from the member's own records (read-only); the member only
-// enters the blood group and the last donation date.
+// Page 2: register as a donor. Name, mobile and city start from the member's profile (or what they saved before) and
+// can be edited; they are saved with the blood group and last donation date.
 export default function BloodBecomeDonor() {
   const { t, lang } = useBloodCopy();
   const [profile, setProfile] = useState(null);
   const [state, setState] = useState("loading");
-  const [form, setForm] = useState({ bloodGroup: "", lastDonationDate: "", available: true });
+  const [form, setForm] = useState({ name: "", mobile: "", city: "", bloodGroup: "", lastDonationDate: "", available: true });
+  const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState(null);
 
@@ -26,7 +30,15 @@ export default function BloodBecomeDonor() {
       .profile()
       .then((data) => {
         setProfile(data);
-        if (data.donor) setForm({ bloodGroup: data.donor.bloodGroup, lastDonationDate: data.donor.lastDonationDate || "", available: data.donor.available });
+        // Blank when the profile has nothing for a field.
+        setForm({
+          name: data.name || "",
+          mobile: digits10(data.mobile),
+          city: data.city || "",
+          bloodGroup: data.donor?.bloodGroup || "",
+          lastDonationDate: data.donor?.lastDonationDate || "",
+          available: data.donor ? data.donor.available : true,
+        });
         setState("ready");
       })
       .catch((error) => setState(error.status === 403 ? "members" : "error"));
@@ -34,11 +46,25 @@ export default function BloodBecomeDonor() {
 
   const submit = async (event) => {
     event.preventDefault();
+    const next = {};
+    if (!form.name.trim()) next.name = t.required(t.name);
+    if (!form.mobile.trim()) next.mobile = t.required(t.mobile);
+    else if (!validMobile(form.mobile)) next.mobile = t.badMobile;
+    if (!form.city.trim()) next.city = t.required(t.cityAddress);
+    setErrors(next);
+    if (Object.keys(next).length) return setMessage(null);
     if (!form.bloodGroup) return setMessage({ ok: false, text: t.required(t.bloodGroup) });
     setBusy(true);
     setMessage(null);
     try {
-      const donor = await bloodApi.saveDonor({ bloodGroup: form.bloodGroup, lastDonationDate: form.lastDonationDate || undefined, available: form.available });
+      const donor = await bloodApi.saveDonor({
+        name: form.name.trim(),
+        mobile: form.mobile.trim(),
+        city: form.city.trim(),
+        bloodGroup: form.bloodGroup,
+        lastDonationDate: form.lastDonationDate || undefined,
+        available: form.available,
+      });
       const wasDonor = Boolean(profile?.donor);
       setProfile((current) => ({ ...current, donor }));
       setMessage({ ok: true, text: wasDonor ? t.donorUpdated : t.donorSaved });
@@ -49,10 +75,29 @@ export default function BloodBecomeDonor() {
     }
   };
 
-  const info = (label, value) => (
+  const field = (key, label, props = {}) => (
     <div className="space-y-1.5">
-      <div className="text-sm font-semibold">{label}</div>
-      <div className={readOnly}>{value || <span className="text-muted-foreground">{t.missing}</span>}</div>
+      <label htmlFor={`donor-${key}`} className="text-sm font-semibold">
+        {label} <span className="text-[#C8102E]">*</span>
+      </label>
+      <input
+        id={`donor-${key}`}
+        className={contactField}
+        value={form[key]}
+        required
+        aria-invalid={Boolean(errors[key])}
+        aria-describedby={errors[key] ? `donor-${key}-error` : undefined}
+        onChange={(event) => {
+          const value = key === "mobile" ? event.target.value.replace(/[^\d+\s]/g, "") : event.target.value;
+          setForm((current) => ({ ...current, [key]: value }));
+        }}
+        {...props}
+      />
+      {errors[key] && (
+        <p id={`donor-${key}-error`} className="text-xs text-destructive">
+          {errors[key]}
+        </p>
+      )}
     </div>
   );
 
@@ -89,9 +134,9 @@ export default function BloodBecomeDonor() {
                 {t.yourInfo} <span className="font-normal text-muted-foreground">{t.autoFilled}</span>
               </div>
               <div className="grid gap-4 p-5 sm:grid-cols-3">
-                {info(t.name, profile.name)}
-                {info(t.mobile, profile.mobile && `+91 ${profile.mobile.slice(0, 5)} ${profile.mobile.slice(5)}`)}
-                {info(t.cityAddress, profile.city)}
+                {field("name", t.name, { maxLength: 150, autoComplete: "name" })}
+                {field("mobile", t.mobile, { type: "tel", inputMode: "numeric", maxLength: 14, autoComplete: "tel" })}
+                {field("city", t.cityAddress, { maxLength: 150, autoComplete: "address-level2" })}
               </div>
               {(!profile.name || !profile.mobile) && (
                 <p className="px-5 text-xs text-muted-foreground">

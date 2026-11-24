@@ -14,6 +14,7 @@ const en = {
   loginToEnquire: 'Log in as a registered member or student to send an enquiry.',
   addProperty: 'Add Rental Property', addPropertyHint: 'Registered family members and students can list a room or house. Listings are checked by the Sangathan before they are public.',
   postRequirement: 'Post Your Room Requirement', postRequirementHint: 'Tell us what you need. We match it with listings and let suitable owners know.',
+  accountCheckFailed: 'We could not check your membership just now. Please try again.', retry: 'Try again',
   myDashboard: 'My Room Hunting', login: 'Log in', register: 'Register',
   membersOnly: 'Adding a rental property is available to registered NPS family members and registered students. Please complete Family or Student Registration first.',
   // Requirement form
@@ -59,6 +60,7 @@ const hi = {
   loginToEnquire: 'पूछताछ भेजने के लिए पंजीकृत सदस्य या विद्यार्थी के रूप में लॉगिन करें।',
   addProperty: 'किराए की संपत्ति जोड़ें', addPropertyHint: 'पंजीकृत परिवार सदस्य और विद्यार्थी कमरा या मकान सूचीबद्ध कर सकते हैं। सार्वजनिक होने से पहले संगठन लिस्टिंग की जाँच करता है।',
   postRequirement: 'अपनी कमरे की आवश्यकता बताएं', postRequirementHint: 'बताइए आपको क्या चाहिए। हम इसे लिस्टिंग से मिलाते हैं और उपयुक्त मालिकों को सूचित करते हैं।',
+  accountCheckFailed: 'अभी आपकी सदस्यता की जाँच नहीं हो सकी। कृपया फिर प्रयास करें।', retry: 'फिर प्रयास करें',
   myDashboard: 'मेरा आवास सहयोग', login: 'लॉगिन', register: 'पंजीकरण',
   membersOnly: 'किराए की संपत्ति जोड़ना पंजीकृत परिवार सदस्यों और पंजीकृत विद्यार्थियों के लिए उपलब्ध है। कृपया पहले परिवार या विद्यार्थी पंजीकरण करें।',
   name: 'आपका नाम', mobile: 'मोबाइल नंबर', emailOptional: 'ईमेल (वैकल्पिक)', budget: 'मासिक बजट', budgetMin: 'न्यूनतम (वैकल्पिक)', budgetMax: 'अधिकतम',

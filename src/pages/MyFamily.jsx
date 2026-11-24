@@ -11,7 +11,7 @@ import { resolveMyFamily } from "@/lib/resolveMyFamily";
 import { sagunApi } from "@/api/sagunApi";
 import { isPastBirthDate, latestBirthDate } from "@/lib/dates";
 import { translateError } from "@/lib/registration-copy";
-import { EDUCATION_LEVELS, MARITAL_STATUSES, OCCUPATIONS, optionLabel, showsApprovalNote, withCurrent } from "@/lib/member-options";
+import { asksMaritalStatus, EDUCATION_LEVELS, MARITAL_STATUSES, OCCUPATIONS, optionLabel, showsApprovalNote, withCurrent } from "@/lib/member-options";
 
 const relationships = ["Spouse", "Son", "Daughter", "Father", "Mother", "Brother", "Sister", "Other"];
 const genders = ["Male", "Female", "Other"];
@@ -290,7 +290,8 @@ export default function MyFamily() {
         email: form.email.trim(),
         education: form.education,
         occupation: form.occupation,
-        maritalStatus: form.maritalStatus || null,
+        // A son or daughter under 18 (or without a birth date) has no marital status.
+        maritalStatus: asksMaritalStatus(form.relationship, form.dob) ? form.maritalStatus || null : null,
         address: form.address,
       };
       if (editing) {
@@ -461,7 +462,7 @@ export default function MyFamily() {
               {[
                 ["education", t.education, EDUCATION_LEVELS],
                 ["occupation", t.occupation, OCCUPATIONS],
-                ["maritalStatus", t.maritalStatus, MARITAL_STATUSES],
+                ...(asksMaritalStatus(form.relationship, form.dob) ? [["maritalStatus", t.maritalStatus, MARITAL_STATUSES]] : []),
               ].map(([key, label, options]) => (
                 <div key={key}>
                   <label htmlFor={`member-${key}`} className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</label>
