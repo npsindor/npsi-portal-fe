@@ -43,7 +43,7 @@ test('home (member): recent requests with only the six columns and a WhatsApp co
   await expect(page.getByRole('link', { name: 'View All Requests' })).toHaveAttribute('href', '/community-services/blood-requests');
 });
 
-test('become a donor: account details are read-only; only blood group and last donation date are sent', async ({ page }) => {
+test('become a donor: name, mobile and city are filled from the profile, editable, required, and saved with the donor', async ({ page }) => {
   await en(page);
   const calls = await mockApi(page, {
     'GET /auth/me': MEMBER,
@@ -52,16 +52,42 @@ test('become a donor: account details are read-only; only blood group and last d
   });
   await page.goto('/community-services/become-donor');
   await expect(page.getByRole('heading', { name: 'Become a Donor', level: 1 })).toBeVisible();
-  for (const text of ['Rahul Sharma', '+91 98765 43210', 'Indore']) await expect(page.getByText(text, { exact: true })).toBeVisible();
-  await expect(page.locator('form input:not([type=checkbox]):not([type=date])')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Register as Donor' }).click();
-  await expect(page.getByRole('alert')).toHaveText('Blood Group is required.');
+  const name = page.getByLabel('Name');
+  const mobile = page.getByLabel('Mobile Number');
+  const city = page.getByLabel('City / Address');
+  await expect(name).toHaveValue('Rahul Sharma');
+  await expect(mobile).toHaveValue('9876543210');
+  await expect(city).toHaveValue('Indore');
+  for (const input of [name, mobile, city]) {
+    await expect(input).toBeEditable();
+    await expect(input).not.toHaveAttribute('readonly');
+  }
+  await name.fill('');
+  await mobile.fill('12345');
+  await city.fill('');
   await page.locator('#donor-group').selectOption('O+');
+  await page.getByRole('button', { name: 'Register as Donor' }).click();
+  await expect(page.getByText('Name is required.')).toBeVisible();
+  await expect(page.getByText('Enter a valid 10-digit mobile number.')).toBeVisible();
+  await expect(page.getByText('City / Address is required.')).toBeVisible();
+  expect(calls.some((call) => call.key === 'PUT /blood-help/me/donor')).toBe(false);
+  await name.fill('Rahul K. Sharma');
+  await mobile.fill('98260 11111');
+  await city.fill('Vijay Nagar, Indore');
   await page.locator('#donor-last').fill('2024-04-15');
   await page.getByRole('button', { name: 'Register as Donor' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'You are registered as a blood donor' })).toBeVisible();
-  expect(calls.find((call) => call.key === 'PUT /blood-help/me/donor').body).toEqual({ bloodGroup: 'O+', lastDonationDate: '2024-04-15', available: true });
+  expect(calls.find((call) => call.key === 'PUT /blood-help/me/donor').body).toEqual({
+    name: 'Rahul K. Sharma', mobile: '98260 11111', city: 'Vijay Nagar, Indore', bloodGroup: 'O+', lastDonationDate: '2024-04-15', available: true,
+  });
   await expect(page.getByRole('button', { name: 'Update Donor Details' })).toBeVisible();
+});
+
+test('become a donor: fields the profile does not have start blank', async ({ page }) => {
+  await en(page);
+  await mockApi(page, { 'GET /auth/me': MEMBER, 'GET /blood-help/me/profile': { ...PROFILE, name: '', mobile: '', city: '' } });
+  await page.goto('/community-services/become-donor');
+  for (const label of ['Name', 'Mobile Number', 'City / Address']) await expect(page.getByLabel(label)).toHaveValue('');
 });
 
 test('a non-member sees why the network is closed to them', async ({ page }) => {

@@ -22,6 +22,7 @@ export const OCCUPATIONS = [
   { value: "Student", en: "Student", hi: "विद्यार्थी" },
   { value: "Shopkeeper", en: "Shopkeeper", hi: "दुकानदार" },
   { value: "Doctor", en: "Doctor", hi: "डॉक्टर" },
+  { value: "Housewife", en: "Housewife", hi: "गृहिणी" },
 ];
 
 export const MARITAL_STATUSES = [
@@ -101,6 +102,12 @@ export const ageFrom = (dob, today = indiaToday()) => {
   const age = y - Number(match[1]) - (m < Number(match[2]) || (m === Number(match[2]) && d < Number(match[3])) ? 1 : 0);
   return age >= 0 ? age : null;
 };
+
+// Marital status is asked for a son or daughter only once the birth date shows them 18 or older (no birth date: not
+// asked); for every other relationship it is always asked.
+export const CHILD_RELATIONSHIPS = ["Son", "Daughter"];
+export const asksMaritalStatus = (relationship, dob, today = indiaToday()) =>
+  !CHILD_RELATIONSHIPS.includes(relationship) || (ageFrom(dob, today) ?? 0) >= 18;
 
 // The "waiting for approval: no events or Shagun Bandhan yet" note matters only to an unmarried adult
 // (Shagun Bandhan is for them); it isn't shown on other members' cards.
