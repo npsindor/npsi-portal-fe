@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useLang } from "@/lib/i18n";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import { fill, regCopy, translateError } from "@/lib/registration-copy";
+import { sanitizeMobile } from "@/lib/utils";
 
 const RESEND_SECONDS = 30;
 
@@ -15,11 +16,7 @@ const RESEND_SECONDS = 30;
 // (create a password for a new account, or set a new one).
 // The +91 prefix is shown beside the field, so it holds the 10-digit number only: a pasted "+91 98765 43210"
 // or "098765 43210" keeps its last 10 digits, and typing stops at 10.
-const tenDigits = (value) => {
-  let digits = value.replace(/\D/g, "");
-  if (digits.length > 10 && /^(91|0)/.test(digits)) digits = digits.replace(/^(91|0)/, "");
-  return digits.slice(0, 10);
-};
+const tenDigits = sanitizeMobile;
 
 export default function MobileOtpForm({ purpose = "REGISTER", askEmail = false, initialMobile = "", autoFocus = true, onVerified, onUnsupported }) {
   const { lang } = useLang();

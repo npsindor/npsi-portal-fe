@@ -24,11 +24,8 @@ export const localizedText = (item, field, lang) => {
 // Strips non-digits, drops any leading digit that isn't 6-9 (Indian mobile
 // numbers never start with 0-5 — this also auto-corrects a leading 0 typed
 // by habit), and caps at 10 digits.
-export const sanitizeMobile = (value) => {
-  let digits = String(value || "").replace(/\D/g, "");
-  while (digits && !/[6-9]/.test(digits[0])) digits = digits.slice(1);
-  return digits.slice(0, 10);
-};
+// Mobile helpers live in mobile.js (no browser globals, so Node tests can import them).
+export { isValidMobile, normalizeField, sanitizeMobile } from "./mobile.js";
 
 // Strips non-digits and caps at 6 digits, for Indian PIN codes.
 export const sanitizePincode = (value) => String(value || "").replace(/\D/g, "").slice(0, 6);

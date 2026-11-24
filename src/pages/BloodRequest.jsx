@@ -9,6 +9,7 @@ import MembersOnly from "@/components/blood/MembersOnly";
 import PageHeading from "@/components/blood/PageHeading";
 import UnitsStepper from "@/components/blood/UnitsStepper";
 import { BLOOD_PATHS, bloodError, useBloodCopy, validMobile } from "@/lib/blood-help";
+import { sanitizeMobile } from "@/lib/utils";
 
 const EMPTY = { patientName: "", bloodGroup: "", units: 1, hospital: "", city: "Indore", contactName: "", contactPhone: "" };
 const input = "h-11 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-[#C8102E] focus:ring-2 focus:ring-[#C8102E]/20 aria-[invalid=true]:border-destructive";
@@ -158,7 +159,7 @@ export default function BloodRequest() {
                     <input {...attrs("contactName")} className={input} maxLength={150} value={form.contactName} onChange={text("contactName")} autoComplete="name" />
                   </Field>
                   <Field id="blood-contactPhone" label={t.contactMobile} error={errors.contactPhone}>
-                    <input {...attrs("contactPhone")} className={input} inputMode="numeric" maxLength={14} value={form.contactPhone} onChange={(event) => set("contactPhone")(event.target.value.replace(/[^\d+\s]/g, ""))} autoComplete="tel" />
+                    <input {...attrs("contactPhone")} className={input} inputMode="numeric" maxLength={16} value={form.contactPhone} onChange={(event) => set("contactPhone")(sanitizeMobile(event.target.value))} autoComplete="tel" />
                   </Field>
                 </div>
               </fieldset>

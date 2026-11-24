@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { roomApi } from '@/api/roomHuntingApi';
 import { comboCopy, optionList, roomError } from '@/lib/room-copy';
 import { field, label, primary, secondary } from '@/components/room/room-ui';
+import { normalizeField } from "@/lib/utils";
 
 const MAX_PHOTO = 5 * 1024 * 1024;
 const MAX_PHOTOS = 6;
@@ -25,7 +26,7 @@ export default function ListingForm({ t, lang, user, options, listing, onSaved, 
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const requestId = useRef(crypto.randomUUID());
-  const set = (key, value) => { setForm((current) => ({ ...current, [key]: value })); setError(''); };
+  const set = (key, value) => { setForm((current) => ({ ...current, [key]: normalizeField(key, value) })); setError(''); };
 
   const upload = async (files) => {
     const list = [...(files || [])];
@@ -93,7 +94,7 @@ export default function ListingForm({ t, lang, user, options, listing, onSaved, 
     <fieldset className="space-y-3 rounded-2xl border border-border p-4"><legend className="px-1 text-sm font-semibold">{t.contact}</legend>
       <div className="grid gap-4 sm:grid-cols-3">
         <label className={label}>{t.contactName} *<input className={field} maxLength={150} required value={form.contactName} onChange={(e) => set('contactName', e.target.value)} /></label>
-        <label className={label}>{t.contactMobile} *<input className={field} type="tel" inputMode="numeric" maxLength={10} required value={form.contactMobile} onChange={(e) => set('contactMobile', e.target.value.replace(/\D/g, '').slice(0, 10))} /></label>
+        <label className={label}>{t.contactMobile} *<input className={field} type="tel" inputMode="numeric" maxLength={16} pattern="[6-9][0-9]{9}" required value={form.contactMobile} onChange={(e) => set('contactMobile', e.target.value.replace(/\D/g, '').slice(0, 10))} /></label>
         <label className={label}>{t.contactEmail}<input className={field} type="email" maxLength={254} value={form.contactEmail} onChange={(e) => set('contactEmail', e.target.value)} /></label>
       </div>
       <p className="text-xs text-muted-foreground">{t.visibilityHint}</p>

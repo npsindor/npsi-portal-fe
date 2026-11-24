@@ -12,6 +12,7 @@ import { sagunApi } from "@/api/sagunApi";
 import { isPastBirthDate, latestBirthDate } from "@/lib/dates";
 import { translateError } from "@/lib/registration-copy";
 import { asksMaritalStatus, EDUCATION_LEVELS, MARITAL_STATUSES, OCCUPATIONS, optionLabel, showsApprovalNote, withCurrent } from "@/lib/member-options";
+import { isValidMobile, sanitizeMobile } from "@/lib/utils";
 
 const relationships = ["Spouse", "Son", "Daughter", "Father", "Mother", "Brother", "Sister", "Other"];
 const genders = ["Male", "Female", "Other"];
@@ -258,7 +259,6 @@ export default function MyFamily() {
     setShowForm(true);
   };
 
-  const sanitizeMobile = (v) => v.replace(/\D/g, "").slice(0, 10);
 
   const submit = async () => {
     if (!form.name || !form.relationship) {
@@ -274,7 +274,7 @@ export default function MyFamily() {
       toast({ title: t.invalidDob, description: dobCheck.msg, variant: "destructive" });
       return;
     }
-    if (form.mobile && sanitizeMobile(form.mobile).length < 10) {
+    if (form.mobile && !isValidMobile(sanitizeMobile(form.mobile))) {
       toast({ title: t.invalidMobile, description: t.mobile10, variant: "destructive" });
       return;
     }
@@ -453,7 +453,7 @@ export default function MyFamily() {
               </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.mobile}</label>
-                <input type="tel" inputMode="numeric" maxLength={10} value={form.mobile} onChange={(e) => setForm({ ...form, mobile: sanitizeMobile(e.target.value) })} placeholder="9876543210" className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
+                <input type="tel" inputMode="numeric" maxLength={16} value={form.mobile} onChange={(e) => setForm({ ...form, mobile: sanitizeMobile(e.target.value) })} placeholder="9876543210" className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
               </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.email}</label>

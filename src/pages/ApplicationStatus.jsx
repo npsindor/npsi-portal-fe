@@ -4,6 +4,7 @@ import PublicNav from "@/components/PublicNav";
 import StatusBadge from "@/components/StatusBadge";
 import { base44 } from "@/api/base44Client";
 import { useT } from "@/lib/i18n";
+import { sanitizeMobile } from "@/lib/utils";
 
 export default function ApplicationStatus() {
   const t = useT();
@@ -59,11 +60,12 @@ export default function ApplicationStatus() {
               <input
                 id="application-mobile"
                 type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                maxLength={20}
+                inputMode="numeric"
+                autoComplete="tel-national"
+                maxLength={16}
+                pattern="[6-9][0-9]{9}"
                 value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
+                onChange={(e) => setMobile(sanitizeMobile(e.target.value))}
                 placeholder="9876543210"
                 required
                 className="mt-1.5 w-full rounded-xl border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon"

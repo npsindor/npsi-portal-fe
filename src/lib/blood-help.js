@@ -1,5 +1,6 @@
 // Blood Help Network (Community Services → Blood Donor): shared constants and the page text in English and Hindi.
 import { useLang } from "@/lib/i18n";
+import { sanitizeMobile } from "@/lib/utils";
 
 export const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 export const MAX_UNITS = 10;
@@ -281,4 +282,4 @@ export const formatDay = (value, lang) => {
   return Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString(lang === "hi" ? "hi-IN" : "en-IN", { day: "numeric", month: "short", year: "numeric" });
 };
 
-export const validMobile = (value) => /^[6-9]\d{9}$/.test(String(value || "").replace(/\D/g, "").slice(-10));
+export const validMobile = (value) => /^[6-9]\d{9}$/.test(sanitizeMobile(value));

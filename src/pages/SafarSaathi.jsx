@@ -10,6 +10,7 @@ import { useLang } from '@/lib/i18n';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { safarCopy } from '@/lib/safar-copy';
+import { normalizeField } from "@/lib/utils";
 
 const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 const fresh = () => ({ clientRequestId: crypto.randomUUID(), kind: 'REQUEST', requestType: 'TRAVEL', name: '', phone: '', email: '', origin: '', destination: '', travelDate: '', preferredTime: '', itemDetails: '', instructions: '', notificationMethod: 'IN_APP', consent: false });
@@ -34,7 +35,7 @@ export default function SafarSaathi() {
   const profileFilled = useRef(false);
   const accountVersion = useRef(0);
   const dateText = value => new Date(value).toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' });
-  const setField = (key, value) => setForm(current => ({ ...current, [key]: value }));
+  const setField = (key, value) => setForm(current => ({ ...current, [key]: normalizeField(key, value) }));
 
   useEffect(() => { document.title = `${t.title} | Nimar Patidar Sangathan, Indore`; }, [t]);
   const refresh = useCallback(async (silent = false) => {
@@ -103,7 +104,7 @@ export default function SafarSaathi() {
         <div className="flex flex-col gap-3 sm:flex-row">{[['REQUEST', t.requestMode], ['OFFER', t.offerMode]].map(([kind, label]) => <button type="button" key={kind} aria-pressed={form.kind === kind} className={form.kind === kind ? primary : secondary} onClick={() => setForm(current => ({ ...current, kind, requestType: kind === 'OFFER' ? 'BOTH' : 'TRAVEL', clientRequestId: crypto.randomUUID() }))}>{label}</button>)}</div>
         <h3 className="mt-6 text-lg font-semibold">{isOffer ? t.offerTitle : t.formTitle}</h3>
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
-          {[['name', t.name, 'text', 150], ['phone', t.phone, 'tel', 20], ['email', t.email, 'email', 254], ['origin', t.origin, 'text', 150], ['destination', t.destination, 'text', 150], ['travelDate', t.date, 'date'], ['preferredTime', t.time, 'time']].map(([key, label, type, maxLength]) => <label key={key} className="min-w-0 text-sm font-medium" htmlFor={`safar-${key}`}>{label}{key !== 'email' && ' *'}<input id={`safar-${key}`} className={fieldClass} type={type} maxLength={maxLength} required={key !== 'email'} min={type === 'date' ? today() : undefined} value={form[key]} onChange={event => setField(key, event.target.value)} /></label>)}
+          {[['name', t.name, 'text', 150], ['phone', t.phone, 'tel', 16], ['email', t.email, 'email', 254], ['origin', t.origin, 'text', 150], ['destination', t.destination, 'text', 150], ['travelDate', t.date, 'date'], ['preferredTime', t.time, 'time']].map(([key, label, type, maxLength]) => <label key={key} className="min-w-0 text-sm font-medium" htmlFor={`safar-${key}`}>{label}{key !== 'email' && ' *'}<input id={`safar-${key}`} className={fieldClass} type={type} inputMode={key === 'phone' ? 'numeric' : undefined} pattern={key === 'phone' ? '[6-9][0-9]{9}' : undefined} maxLength={maxLength} required={key !== 'email'} min={type === 'date' ? today() : undefined} value={form[key]} onChange={event => setField(key, event.target.value)} /></label>)}
           <label className="min-w-0 text-sm font-medium" htmlFor="safar-requestType">{isOffer ? t.offerType : t.type} *<select id="safar-requestType" className={fieldClass} value={form.requestType} onChange={event => setField('requestType', event.target.value)}>{(isOffer ? ['BOTH', 'TRAVEL', 'DELIVERY'] : ['TRAVEL', 'DELIVERY', 'URGENT']).map(type => <option key={type} value={type}>{t[type]}</option>)}</select></label>
           {form.requestType === 'DELIVERY' && !isOffer && <label className="text-sm font-medium sm:col-span-2" htmlFor="safar-itemDetails">{t.item} *<textarea id="safar-itemDetails" rows={3} required className={fieldClass} maxLength={1000} value={form.itemDetails} onChange={event => setField('itemDetails', event.target.value)} /></label>}
           <label className="text-sm font-medium sm:col-span-2" htmlFor="safar-instructions">{t.instructions}<textarea id="safar-instructions" rows={3} className={fieldClass} maxLength={2000} value={form.instructions} onChange={event => setField('instructions', event.target.value)} /></label>

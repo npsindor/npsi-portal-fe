@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { getRecaptchaToken } from '@/lib/recaptcha';
+import { normalizeField } from "@/lib/utils";
 
 export default function ContactInfo() {
   const { lang, setLang, t } = useLang();
@@ -20,7 +21,7 @@ export default function ContactInfo() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState({ fullName: '', contactNumber: '', email: '', indoreArea: '', nativeVillage: '', otherArea: '', otherVillage: '', isStudent: false });
-  const change = (key, value) => setForm(current => ({ ...current, [key]: value }));
+  const change = (key, value) => setForm(current => ({ ...current, [key]: normalizeField(key, value) }));
   const submit = async (event) => {
     event.preventDefault();
     if (submitting.current) return;
@@ -62,9 +63,9 @@ export default function ContactInfo() {
             <CheckCircle2 className="h-14 w-14 text-primary" aria-hidden="true" />
             <Button onClick={() => navigate('/')}>{t('contact.home')}</Button>
           </div> : <form onSubmit={submit} noValidate className="mt-4 space-y-2.5 sm:space-y-4">
-            {[['fullName', 'contact.fullName', 'text', 'name', 150], ['contactNumber', 'contact.phone', 'tel', 'tel', 20], ['email', 'contact.email', 'email', 'email', 254]].map(([key, label, type, autoComplete, maxLength]) => <div key={key} className="space-y-1">
+            {[['fullName', 'contact.fullName', 'text', 'name', 150], ['contactNumber', 'contact.phone', 'tel', 'tel-national', 16], ['email', 'contact.email', 'email', 'email', 254]].map(([key, label, type, autoComplete, maxLength]) => <div key={key} className="space-y-1">
               <Label htmlFor={key}>{t(label)}{key !== 'email' ? ' *' : ''}</Label>
-              <Input className="h-11 text-base" id={key} type={type} autoComplete={autoComplete} required={key !== 'email'} maxLength={maxLength} value={form[key]} disabled={busy} onChange={event => change(key, event.target.value)} />
+              <Input className="h-11 text-base" id={key} type={type} inputMode={key === 'contactNumber' ? 'numeric' : undefined} pattern={key === 'contactNumber' ? '[6-9][0-9]{9}' : undefined} autoComplete={autoComplete} required={key !== 'email'} maxLength={maxLength} value={form[key]} disabled={busy} onChange={event => change(key, event.target.value)} />
             </div>)}
             <ContactLocationSelect id="indoreArea" label={t('contact.area')} options={indoreAreas} value={form.indoreArea} other={form.otherArea} onChange={v => change('indoreArea', v)} onOtherChange={v => change('otherArea', v)} otherLabel={t('contact.otherArea')} disabled={busy} />
             <ContactLocationSelect id="nativeVillage" label={t('contact.village')} options={nimadVillages} value={form.nativeVillage} other={form.otherVillage} onChange={v => change('nativeVillage', v)} onOtherChange={v => change('otherVillage', v)} otherLabel={t('contact.otherVillage')} disabled={busy} />

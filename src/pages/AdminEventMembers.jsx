@@ -13,6 +13,7 @@ import { errorText, eventMemberCopy, sectionLabel } from '@/lib/event-member-cop
 import { useLang } from '@/lib/i18n';
 import SuggestSearchInput from '@/components/SuggestSearchInput';
 import { suggestValues } from '@/lib/search-suggestions';
+import { normalizeField } from "@/lib/utils";
 
 const PAGE = 25;
 const OTHER = 'OTHER';
@@ -305,7 +306,7 @@ function AddToTeamDialog({ a, t, lang, sections, defaultSection, onClose, onDone
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
-  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: normalizeField(key, e.target.value) }));
   const upload = async (file) => {
     if (!file) return;
     setUploading(true); setError('');
@@ -344,7 +345,7 @@ function AddToTeamDialog({ a, t, lang, sections, defaultSection, onClose, onDone
         <p className="text-xs text-muted-foreground sm:col-span-2">{a.hindiHint}</p>
         <label className="block font-semibold">{a.designation}<input className={field} maxLength={150} value={form.designation} onChange={set('designation')} /></label>
         <label className="block font-semibold">{a.designationHi}<input className={field} lang="hi" maxLength={150} value={form.designationHi} onChange={set('designationHi')} /></label>
-        <label className="block font-semibold">{a.addMobile}<input className={field} inputMode="numeric" maxLength={14} value={form.mobile} onChange={set('mobile')} /></label>
+        <label className="block font-semibold">{a.addMobile}<input className={field} inputMode="numeric" maxLength={16} pattern="[6-9][0-9]{9}" value={form.mobile} onChange={set('mobile')} /></label>
         <label className="block font-semibold">{a.addEmail}<input type="email" className={field} maxLength={255} value={form.email} onChange={set('email')} /></label>
         <div className="flex items-center gap-3 sm:col-span-2">
           {form.photoUrl ? <img src={form.photoUrl} alt="" className="h-20 w-16 rounded-lg object-cover" /> : <span className="flex h-20 w-16 items-center justify-center rounded-lg bg-muted text-xs">—</span>}

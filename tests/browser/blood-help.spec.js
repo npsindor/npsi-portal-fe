@@ -63,7 +63,7 @@ test('become a donor: name, mobile and city are filled from the profile, editabl
     await expect(input).not.toHaveAttribute('readonly');
   }
   await name.fill('');
-  await mobile.fill('12345');
+  await mobile.fill('98765');
   await city.fill('');
   await page.locator('#donor-group').selectOption('O+');
   await page.getByRole('button', { name: 'Register as Donor' }).click();
@@ -72,13 +72,14 @@ test('become a donor: name, mobile and city are filled from the profile, editabl
   await expect(page.getByText('City / Address is required.')).toBeVisible();
   expect(calls.some((call) => call.key === 'PUT /blood-help/me/donor')).toBe(false);
   await name.fill('Rahul K. Sharma');
-  await mobile.fill('98260 11111');
+  await mobile.fill('+91 98260 11111');
+  await expect(mobile).toHaveValue('9826011111');
   await city.fill('Vijay Nagar, Indore');
   await page.locator('#donor-last').fill('2024-04-15');
   await page.getByRole('button', { name: 'Register as Donor' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'You are registered as a blood donor' })).toBeVisible();
   expect(calls.find((call) => call.key === 'PUT /blood-help/me/donor').body).toEqual({
-    name: 'Rahul K. Sharma', mobile: '98260 11111', city: 'Vijay Nagar, Indore', bloodGroup: 'O+', lastDonationDate: '2024-04-15', available: true,
+    name: 'Rahul K. Sharma', mobile: '9826011111', city: 'Vijay Nagar, Indore', bloodGroup: 'O+', lastDonationDate: '2024-04-15', available: true,
   });
   await expect(page.getByRole('button', { name: 'Update Donor Details' })).toBeVisible();
 });
@@ -127,7 +128,7 @@ test('request blood: validation, units stepper, then donor suggestions with Sele
   await page.locator('#blood-contactPhone').fill('98260 12345');
   await page.getByRole('button', { name: 'Submit Blood Request' }).click();
   await expect.poll(() => calls.find((call) => call.key === 'POST /blood-help/requests')?.body).toEqual({
-    patientName: 'Suresh Patidar', bloodGroup: 'B+', units: 2, hospital: 'Aurobindo Hospital', city: 'Indore', contactName: 'Amit Patidar', contactPhone: '98260 12345', lang: 'en',
+    patientName: 'Suresh Patidar', bloodGroup: 'B+', units: 2, hospital: 'Aurobindo Hospital', city: 'Indore', contactName: 'Amit Patidar', contactPhone: '9826012345', lang: 'en',
   });
   await expect(page.getByText('Your blood request BR-1234ABCD is submitted.')).toBeVisible();
   const list = page.getByRole('region', { name: 'Eligible Donor Suggestions' });
