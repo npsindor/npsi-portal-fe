@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, HeartHandshake, BriefcaseBusiness } from 'lucide-react';
 import { services, careers } from '@/lib/community-content';
 import { HomeSection } from '@/lib/site-visibility';
+import { useAuth } from '@/lib/AuthContext';
+import { isRegisteredMember } from '@/lib/membership';
 
 // `afterServices` is rendered right after the "Explore Community Services" block (the homepage puts Community highlights there).
 export default function CommunityHighlights({ afterServices = null }) {
@@ -26,10 +28,12 @@ export default function CommunityHighlights({ afterServices = null }) {
 // "Your Participation Makes Our Community Stronger.": the membership steps; the homepage shows it right below the top section.
 export function ParticipationSection() {
   const c = usePublicCopy();
+  // A registered member is not asked to register again.
+  const member = isRegisteredMember(useAuth().user);
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16"><h2 className="section-title">{c("Your Participation Makes Our Community Stronger.")}</h2><p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{c("Become part of a connected community that values cooperation, shared progress, cultural heritage, and service to society.")}</p>
       <ol className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{[['Register', 'Enter the required details and submit your membership application.'], ['Review', 'The authorized team reviews your application according to approved procedures.'], ['Family Registration', 'Add family members with the required consent and verification.'], ['Confirmation', 'Receive application status and membership confirmation when approved.']].map(([title, description], index) => <li key={title} className="rounded-xl border border-border bg-card p-6"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-maroon font-semibold text-gold">{index + 1}</span><h3 className="mt-4 font-semibold">{c(title)}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c(description)}</p></li>)}</ol>
-      <p className="mt-5 text-xs text-muted-foreground">{c("Submitting an application does not guarantee membership approval.")}</p><div className="mt-6 flex flex-col gap-3 sm:flex-row"><Link to="/register" className="rounded-lg bg-maroon px-6 py-3 text-center text-sm font-semibold text-cream">{c("Register Your Family")}</Link><Link to="/sagun" className="rounded-lg border border-border px-6 py-3 text-center text-sm font-semibold">{c("Discover Shagun Bandhan")}</Link></div>
+      <p className="mt-5 text-xs text-muted-foreground">{c("Submitting an application does not guarantee membership approval.")}</p><div className="mt-6 flex flex-col gap-3 sm:flex-row">{!member && <Link to="/register" className="rounded-lg bg-maroon px-6 py-3 text-center text-sm font-semibold text-cream">{c("Register Your Family")}</Link>}<Link to="/sagun" className="rounded-lg border border-border px-6 py-3 text-center text-sm font-semibold">{c("Discover Shagun Bandhan")}</Link></div>
     </section>
   );
 }

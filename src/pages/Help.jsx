@@ -6,9 +6,12 @@ import {
 } from "lucide-react";
 import PublicNav from "@/components/PublicNav";
 import { useLang } from "@/lib/i18n";
+import { useAuth } from "@/lib/AuthContext";
+import { isRegisteredMember } from "@/lib/membership";
 
 export default function Help() {
   const { lang } = useLang();
+  const member = isRegisteredMember(useAuth().user);
   const en = lang === "en";
 
   const steps = en ? [
@@ -262,8 +265,8 @@ export default function Help() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+      {/* CTA (not for a registered member) */}
+      {!member && <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
         <div className="rounded-2xl border border-gold/30 bg-card p-8 text-center">
           <h3 className="font-display text-xl font-semibold text-maroon">{en ? "Ready to begin?" : "शुरू करने के लिए तैयार?"}</h3>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{en ? "Register your family today and become part of the Nimar Patidar Sangathan, Indore community." : "आज ही अपना परिवार रजिस्टर करें और निमाड़ पाटीदार संगठन, इंदौर सामुदायिक परिवार का हिस्सा बनें।"}</p>
@@ -276,7 +279,7 @@ export default function Help() {
             </Link>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* Footer */}
       <footer className="bg-maroon text-cream">

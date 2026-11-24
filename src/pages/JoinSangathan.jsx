@@ -8,6 +8,7 @@ import { useLang } from "@/lib/i18n";
 import { FEES } from "@/lib/registration-copy";
 import { useSiteVisibility } from "@/lib/site-visibility";
 import { STUDENT_REGISTRATION_PATH, studentLoginPath } from "@/lib/student-flow";
+import { isRegisteredMember } from "@/lib/membership";
 
 const FAMILY_FORM = "/portal/registration";
 const COPY = {
@@ -25,6 +26,9 @@ const COPY = {
     haveFamily: "Already registered? Family Member Login",
     haveStudent: "Already registered? Student Login",
     status: "Already applied? Check application status",
+    memberTitle: "You are already a registered member",
+    memberText: "Your registration with the Sangathan is approved, so every member service on the website is open to you. There is nothing more to register.",
+    memberCta: "Go to My Portal",
     none: "Registration is closed right now. Please check again later.",
   },
   hi: {
@@ -41,6 +45,9 @@ const COPY = {
     haveFamily: "पहले से पंजीकृत? परिवार सदस्य लॉगिन",
     haveStudent: "पहले से पंजीकृत? विद्यार्थी लॉगिन",
     status: "आवेदन कर चुके हैं? आवेदन की स्थिति देखें",
+    memberTitle: "आप पहले से पंजीकृत सदस्य हैं",
+    memberText: "संगठन में आपका पंजीकरण स्वीकृत है, इसलिए वेबसाइट की सभी सदस्य सेवाएँ आपके लिए खुली हैं। अब कुछ और पंजीकरण नहीं करना है।",
+    memberCta: "मेरे पोर्टल पर जाएँ",
     none: "अभी पंजीकरण बंद है। कृपया बाद में देखें।",
   },
 };
@@ -50,7 +57,8 @@ const COPY = {
 export default function JoinSangathan() {
   const { lang } = useLang();
   const t = COPY[lang] || COPY.en;
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const member = isRegisteredMember(user);
   const { isPageVisible } = useSiteVisibility();
   // A visitor first makes a login account; the account page then opens the right registration form.
   const startFor = (form) => (isAuthenticated ? form : `/register-account?returnTo=${encodeURIComponent(form)}`);
@@ -77,7 +85,15 @@ export default function JoinSangathan() {
           </div>
         </section>
         <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-          {options.length === 0 ? <p className="rounded-2xl border border-border bg-card p-8 text-center text-muted-foreground">{t.none}</p> : (
+          {member ? (
+            <div role="status" className="mx-auto max-w-xl rounded-2xl border border-green-600/30 bg-green-50 p-6 text-center dark:bg-green-950/30">
+              <h2 className="font-display text-2xl font-semibold text-maroon">{t.memberTitle}</h2>
+              <p className="mt-2 text-sm text-muted-foreground">{t.memberText}</p>
+              <Link to="/portal" className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-maroon px-5 text-sm font-semibold text-cream hover:bg-maroon-dark">
+                {t.memberCta}<ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </div>
+          ) : options.length === 0 ? <p className="rounded-2xl border border-border bg-card p-8 text-center text-muted-foreground">{t.none}</p> : (
             <div className={`grid gap-5 ${options.length > 1 ? "md:grid-cols-2" : "max-w-xl"}`}>
               {options.map(({ key, Icon, title, text, fee, to, login }) => (
                 <article key={key} aria-labelledby={`join-${key}`} className="flex flex-col rounded-2xl border border-gold/40 bg-card p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
