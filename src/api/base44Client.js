@@ -219,6 +219,10 @@ const createLocalUsers = () => ({
 const API_PREFIX_SAFAR = API.safar;
 
 export const base44 = {
+  families: {
+    // { familyIds: [record ids], showOnHome } → { updated }
+    setHomeVisibility: (familyIds, showOnHome) => request(API.familyHomeVisibility, { method: 'PUT', body: JSON.stringify({ familyIds, showOnHome }) }),
+  },
   sagun: {
     schema: () => request(`${API.sagun}/schema`),
     mine: () => request(`${API.sagun}/me`),

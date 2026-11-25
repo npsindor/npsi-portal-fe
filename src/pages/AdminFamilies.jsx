@@ -13,6 +13,7 @@ import { useTableControls } from "@/lib/useTableControls";
 import TablePagination from "@/components/admin/TablePagination";
 import ExportMenu from "@/components/ExportMenu";
 import DateRangeFilter from "@/components/admin/DateRangeFilter";
+import { titleCase } from "@/lib/text-case";
 
 const STATUSES = ["PENDING", "ACTIVE", "SUSPENDED", "DEACTIVATED"];
 
@@ -32,13 +33,17 @@ const L = {
     thFamName: "Family Name",
     thHead: "Head",
     thMembers: "Members",
-    thCity: "City",
+    thVillage: "Village",
     thStatus: "Status",
     thActions: "Actions",
     thWebsite: "On website",
     websiteHint: "Registered families are shown in the home page carousel and birthday wishes; switch off to hide this family",
     websiteOn: "Shown on the home page",
     websiteOff: "Hidden from the home page",
+    websiteAll: "All listed families on the website",
+    websiteAllOn: "Show all {n} listed families on the home page?",
+    websiteAllOff: "Hide all {n} listed families from the home page?",
+    websiteAllDone: "{n} families updated",
     view: "View",
     empty: "No families found.",
     family: "Family",
@@ -97,13 +102,17 @@ const L = {
     thFamName: "परिवार का नाम",
     thHead: "मुखिया",
     thMembers: "सदस्य",
-    thCity: "शहर",
+    thVillage: "गाँव",
     thStatus: "स्थिति",
     thActions: "क्रियाएँ",
     thWebsite: "वेबसाइट पर",
     websiteHint: "पंजीकृत परिवार होमपेज कैरोसेल और जन्मदिन शुभकामनाओं में दिखते हैं; इस परिवार को छिपाने के लिए बंद करें",
     websiteOn: "होमपेज पर दिख रहा है",
     websiteOff: "होमपेज से छिपा है",
+    websiteAll: "सूची के सभी परिवार वेबसाइट पर",
+    websiteAllOn: "सूची के सभी {n} परिवार होमपेज पर दिखाएँ?",
+    websiteAllOff: "सूची के सभी {n} परिवार होमपेज से छिपाएँ?",
+    websiteAllDone: "{n} परिवार अपडेट हुए",
     view: "देखें",
     empty: "कोई परिवार नहीं मिला।",
     family: "परिवार",
@@ -178,6 +187,26 @@ export default function AdminFamilies() {
       toast({ title: err.message, variant: "destructive" });
     } finally {
       setTogglingId(null);
+    }
+  };
+  // The select-all box in the "On website" header: every family in the current list (search and dates applied,
+  // all pages) in one request. Shown at once; put back if the save fails.
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const toggleWebsiteAll = async (list, on) => {
+    if (!list.length || bulkBusy) return;
+    if (!window.confirm((on ? t.websiteAllOn : t.websiteAllOff).replace("{n}", list.length))) return;
+    const ids = new Set(list.map((family) => family.id));
+    const before = new Map(list.map((family) => [family.id, family.showOnHome]));
+    setFamilies((all) => all.map((item) => (ids.has(item.id) ? { ...item, showOnHome: on } : item)));
+    setBulkBusy(true);
+    try {
+      const { updated } = await base44.families.setHomeVisibility([...ids], on);
+      toast({ title: t.websiteAllDone.replace("{n}", updated ?? ids.size), description: on ? t.websiteOn : t.websiteOff });
+    } catch (err) {
+      setFamilies((all) => all.map((item) => (before.has(item.id) ? { ...item, showOnHome: before.get(item.id) } : item)));
+      toast({ title: err.message, variant: "destructive" });
+    } finally {
+      setBulkBusy(false);
     }
   };
   const [loading, setLoading] = useState(true);
@@ -301,7 +330,7 @@ export default function AdminFamilies() {
     { key: "familyName", label: t.thFamName },
     { key: "headName", label: t.thHead },
     { key: "memberCount", label: t.thMembers },
-    { key: "city", label: t.thCity },
+    { key: "village", label: t.thVillage },
     { key: "status", label: t.thStatus },
   ];
 
@@ -316,7 +345,7 @@ export default function AdminFamilies() {
           <p className="mt-1 text-sm text-muted-foreground">{t.sub}</p>
         </div>
         <div className="flex items-center gap-2">
-          <ExportMenu filename="families" title={t.title} columns={exportColumns} rows={filtered} />
+          <ExportMenu filename="families" title={t.title} columns={exportColumns} rows={filtered.map((f) => ({ ...f, village: f.village || f.nativePlace || "" }))} />
           {superAdmin && (
           <button onClick={openNew} className="inline-flex items-center gap-1.5 rounded-full bg-maroon px-5 py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark">
             <Plus className="h-4 w-4" /> {t.add}
@@ -339,9 +368,25 @@ export default function AdminFamilies() {
               <th className="px-4 py-3">{t.thFamName}</th>
               <th className="px-4 py-3">{t.thHead}</th>
               <th className="px-4 py-3">{t.thMembers}</th>
-              <th className="px-4 py-3">{t.thCity}</th>
+              <th className="px-4 py-3">{t.thVillage}</th>
               <th className="px-4 py-3">{t.thStatus}</th>
-              <th className="px-4 py-3" title={t.websiteHint}>{t.thWebsite}</th>
+              <th className="px-4 py-3" title={t.websiteHint}>
+                <label className="inline-flex items-center gap-2">
+                  {/* Select all: on when every listed family is shown, half-ticked when only some are. */}
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 accent-[#102A43]"
+                    checked={filtered.length > 0 && filtered.every((f) => f.showOnHome)}
+                    ref={(el) => {
+                      if (el) el.indeterminate = filtered.some((f) => f.showOnHome) && !filtered.every((f) => f.showOnHome);
+                    }}
+                    disabled={!superAdmin || bulkBusy || !filtered.length}
+                    aria-label={t.websiteAll}
+                    onChange={(event) => toggleWebsiteAll(filtered, event.target.checked)}
+                  />
+                  {t.thWebsite}
+                </label>
+              </th>
               <th className="px-4 py-3 text-right">{t.thActions}</th>
             </tr>
           </thead>
@@ -350,10 +395,10 @@ export default function AdminFamilies() {
               <tr key={f.id} className="border-b border-border last:border-0 hover:bg-muted/30">
                 <td className="px-4 py-3 text-muted-foreground">{startIndex + i + 1}</td>
                 <td className="px-4 py-3 font-semibold text-maroon">{f.familyId}</td>
-                <td className="px-4 py-3">{f.familyName}</td>
-                <td className="px-4 py-3">{f.headName}</td>
+                <td className="px-4 py-3">{titleCase(f.familyName)}</td>
+                <td className="px-4 py-3">{titleCase(f.headName)}</td>
                 <td className="px-4 py-3">{f.memberCount || 0}</td>
-                <td className="px-4 py-3 text-muted-foreground">{f.city}</td>
+                <td className="px-4 py-3 text-muted-foreground">{titleCase(f.village || f.nativePlace) || "—"}</td>
                 <td className="px-4 py-3"><StatusBadge status={f.status} /></td>
                 <td className="px-4 py-3">
                   {/* Only the super admin decides who appears on the public home page. */}
@@ -363,7 +408,7 @@ export default function AdminFamilies() {
                       role="switch"
                       className="h-4 w-4 accent-[#102A43]"
                       checked={Boolean(f.showOnHome)}
-                      disabled={!superAdmin || togglingId === f.id}
+                      disabled={!superAdmin || bulkBusy || togglingId === f.id}
                       aria-label={`${t.thWebsite}: ${f.headName || f.familyId}`}
                       onChange={(event) => toggleWebsite(f, event.target.checked)}
                     />
