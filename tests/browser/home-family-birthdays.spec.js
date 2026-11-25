@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { ADMIN, mockApi, NOT_LOGGED_IN } from './mock-api.js';
 
-// Home page: the "NPS Family Heads" carousel (48×48 round photos, slow endless strip) and the "Today Birthday"
+// Home page: the "NPS Family Heads" carousel (60×60 round photos, slow endless strip) and the "Today Birthday"
 // column beside "Get started"; Admin → Families decides which families appear.
 const en = (page) => page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
 const HEADS = [
@@ -10,7 +10,7 @@ const HEADS = [
 ];
 const BIRTHDAYS = [{ id: 'm1', name: 'Neha Patidar', place: 'Borawan', photoUrl: null }];
 
-test('family heads carousel: heading, 48px round photos (initials without a photo), a moving strip that pauses on hover', async ({ page }) => {
+test('family heads carousel: heading, 60px round photos (initials without a photo), a moving strip that pauses on hover', async ({ page }) => {
   await en(page);
   await page.setViewportSize({ width: 1280, height: 900 });
   await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN, 'GET /home-members/family-heads': HEADS, 'GET /home-members/birthdays': [] });
@@ -19,7 +19,7 @@ test('family heads carousel: heading, 48px round photos (initials without a phot
   await expect(section.getByRole('heading', { name: 'NPS Family Heads' })).toBeVisible();
   const list = section.getByRole('list', { name: 'NPS Family Heads' });
   const photo = list.getByRole('img', { name: 'Subhash Patidar' }).first();
-  expect(await photo.evaluate((el) => [el.offsetWidth, el.offsetHeight, getComputedStyle(el).borderRadius])).toEqual([48, 48, '9999px']);
+  expect(await photo.evaluate((el) => [el.offsetWidth, el.offsetHeight, getComputedStyle(el).borderRadius])).toEqual([60, 60, '9999px']);
   await expect(list.getByRole('img', { name: 'Ramesh Mukati' }).first()).toHaveText('RM');
   const track = section.locator('.family-heads-track');
   expect(await track.evaluate((el) => getComputedStyle(el).animationName)).toBe('family-heads-scroll');
