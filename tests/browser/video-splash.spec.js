@@ -9,7 +9,7 @@ const VIDEO = readFileSync(new URL('../../public/slider/npsi-logo.mp4', import.m
 const mount = async (page, options) => {
   await page.route('**/splash.mp4', (route) => route.fulfill({ contentType: 'video/mp4', body: VIDEO }));
   await page.route('**/broken.mp4', (route) => route.fulfill({ status: 404, body: '' }));
-  await page.route('http://splash.test/', (route) => route.fulfill({ contentType: 'text/html', body: '<!doctype html><body><main>App</main></body>' }));
+  await page.route('http://splash.test/', (route) => route.fulfill({ contentType: 'text/html', body: '<!doctype html><meta name="viewport" content="width=device-width, initial-scale=1"><body><main>App</main></body>' }));
   await page.goto('http://splash.test/');
   await page.addScriptTag({ content: `${source}\nwindow.mountVideoSplash = mountVideoSplash;` });
   return page.evaluate((opts) => {

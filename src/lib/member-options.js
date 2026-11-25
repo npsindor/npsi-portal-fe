@@ -8,6 +8,7 @@ export const EDUCATION_LEVELS = [
   { value: "LKG", en: "LKG", hi: "एलकेजी" },
   { value: "UKG", en: "UKG", hi: "यूकेजी" },
   ...Array.from({ length: 12 }, (_, i) => ({ value: ordinal(i + 1), en: ordinal(i + 1), hi: `कक्षा ${i + 1}` })),
+  { value: "Diploma", en: "Diploma", hi: "डिप्लोमा" },
   { value: "Graduate (Pursuing)", en: "Graduate (Pursuing)", hi: "स्नातक (अध्ययनरत)" },
   { value: "Graduate", en: "Graduate", hi: "स्नातक" },
   { value: "Post Graduate (Pursuing)", en: "Post Graduate (Pursuing)", hi: "स्नातकोत्तर (अध्ययनरत)" },
@@ -34,7 +35,7 @@ const course = (en, hi = en) => ({ value: en, en, hi });
 // Courses after 12th a student can pick in the registration form (they can also type one that isn't listed).
 // Student registration is for 18+ only, so school classes (LKG–12th) are not offered.
 export const STUDENT_COURSES = [
-  ...EDUCATION_LEVELS.filter((level) => level.value.includes("Graduate")),
+  ...EDUCATION_LEVELS.filter((level) => level.value === "Diploma" || level.value.includes("Graduate")),
   course("ITI"),
   course("Diploma / Polytechnic", "डिप्लोमा / पॉलिटेक्निक"),
   course("B.A."),
@@ -106,8 +107,22 @@ export const ageFrom = (dob, today = indiaToday()) => {
 // Marital status is asked for a son or daughter only once the birth date shows them 18 or older (no birth date: not
 // asked); for every other relationship it is always asked.
 export const CHILD_RELATIONSHIPS = ["Son", "Daughter"];
+// A spouse, father or mother is married by the relationship itself: not asked, saved as MARRIED (and never offered
+// Shagun Bandhan).
+export const MARRIED_RELATIONSHIPS = ["Spouse", "Father", "Mother"];
+export const impliesMarried = (relationship) => MARRIED_RELATIONSHIPS.includes(relationship);
+
+// Education: a son or daughter (and "Other") picks from the whole list (LKG onwards); an adult relative (the owner,
+// spouse, father, mother, brother, sister) from 8th onwards. The server applies the same rule.
+export const ADULT_EDUCATION_RELATIONSHIPS = ["Head", "Self", "Spouse", "Father", "Mother", "Brother", "Sister"];
+const FROM_8TH = EDUCATION_LEVELS.findIndex((level) => level.value === "8th");
+export const educationOptionsFor = (relationship) =>
+  ADULT_EDUCATION_RELATIONSHIPS.includes(relationship) ? EDUCATION_LEVELS.slice(FROM_8TH) : EDUCATION_LEVELS;
+// A listed class below 8th that this relationship can't have (values typed before the lists existed are left alone).
+export const educationNotAllowed = (relationship, education) =>
+  Boolean(education) && EDUCATION_LEVELS.slice(0, FROM_8TH).some((level) => level.value === education) && ADULT_EDUCATION_RELATIONSHIPS.includes(relationship);
 export const asksMaritalStatus = (relationship, dob, today = indiaToday()) =>
-  !CHILD_RELATIONSHIPS.includes(relationship) || (ageFrom(dob, today) ?? 0) >= 18;
+  !impliesMarried(relationship) && (!CHILD_RELATIONSHIPS.includes(relationship) || (ageFrom(dob, today) ?? 0) >= 18);
 
 // The "waiting for approval: no events or Shagun Bandhan yet" note matters only to an unmarried adult
 // (Shagun Bandhan is for them); it isn't shown on other members' cards.

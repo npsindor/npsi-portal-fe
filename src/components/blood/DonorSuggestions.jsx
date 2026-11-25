@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Loader2, Send, UserRound } from "lucide-react";
 import { bloodApi } from "@/api/bloodHelpApi";
-import WhatsAppButton from "@/components/blood/WhatsAppButton";
 import { bloodError, formatDay, useBloodCopy } from "@/lib/blood-help";
 
 // Eligible donors for one of the member's own requests: tick donors (or Select All) and send them the request as a
-// portal notification, or WhatsApp a donor directly. Donor numbers are never shown, only the WhatsApp button.
+// portal notification. A donor's number never reaches the requester; donors call the requester back.
 export default function DonorSuggestions({ requestId, suggestions }) {
   const { t, lang } = useBloodCopy();
   const [chosen, setChosen] = useState([]);
@@ -70,7 +69,6 @@ export default function DonorSuggestions({ requestId, suggestions }) {
                     {donor.lastDonationDate ? formatDay(donor.lastDonationDate, lang) : t.neverDonated}
                   </div>
                 </div>
-                <WhatsAppButton href={donor.whatsapp} name={donor.name} size="sm" />
               </li>
             ))}
           </ul>

@@ -102,8 +102,8 @@ test('a non-member sees why the network is closed to them', async ({ page }) => 
 test('request blood: validation, units stepper, then donor suggestions with Select All and Send', async ({ page }) => {
   await en(page);
   const suggestions = [
-    { donorId: 'd1', name: 'Ravi Patidar', bloodGroup: 'B+', lastDonationDate: '2026-01-02', whatsapp: 'https://wa.me/919100000001?text=x', exactMatch: true },
-    { donorId: 'd2', name: 'Neha Patidar', bloodGroup: 'O-', lastDonationDate: null, whatsapp: 'https://wa.me/919100000002?text=x', exactMatch: false },
+    { donorId: 'd1', name: 'Ravi Patidar', bloodGroup: 'B+', lastDonationDate: '2026-01-02', exactMatch: true },
+    { donorId: 'd2', name: 'Neha Patidar', bloodGroup: 'O-', lastDonationDate: null, exactMatch: false },
   ];
   const calls = await mockApi(page, {
     'GET /auth/me': MEMBER,
@@ -135,7 +135,8 @@ test('request blood: validation, units stepper, then donor suggestions with Sele
   await expect(list.getByText('Ravi Patidar')).toBeVisible();
   await expect(list.getByText(/Neha Patidar/)).toBeVisible();
   await expect(list.getByText(/Not donated before/)).toBeVisible();
-  await expect(list.getByRole('link', { name: 'WhatsApp Ravi Patidar' })).toHaveAttribute('href', /^https:\/\/wa\.me\/919100000001/);
+  // A donor's number never reaches the requester: no WhatsApp link per donor, only Send through the portal.
+  await expect(list.getByRole('link', { name: /WhatsApp/ })).toHaveCount(0);
   await expect(list.getByText(/\d{10}/)).toHaveCount(0);
   const send = list.getByRole('button', { name: /Send to Selected Donors/ });
   await expect(send).toBeDisabled();
@@ -184,7 +185,7 @@ test('my requests: the requester sees the contact number and can reopen donor su
   await mockApi(page, {
     'GET /auth/me': MEMBER,
     'GET /blood-help/requests': mine,
-    'GET /blood-help/requests/r1/suggestions': [{ donorId: 'd1', name: 'Ravi Patidar', bloodGroup: 'O-', lastDonationDate: null, whatsapp: 'https://wa.me/919100000001?text=x', exactMatch: false }],
+    'GET /blood-help/requests/r1/suggestions': [{ donorId: 'd1', name: 'Ravi Patidar', bloodGroup: 'O-', lastDonationDate: null, exactMatch: false }],
   });
   await page.goto('/community-services/blood-requests');
   await page.getByRole('tab', { name: /My Requests/ }).click();

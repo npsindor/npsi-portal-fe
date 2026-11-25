@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/use-toast";
 import LanguageToggle from "@/components/LanguageToggle";
 import MembershipPass from "@/components/MembershipPass";
 import VerifyMobileCard from "@/components/VerifyMobileCard";
+import ChangeEmailCard from "@/components/ChangeEmailCard";
 import { useLang, useT } from "@/lib/i18n";
 import { translateError } from "@/lib/registration-copy";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -139,6 +140,7 @@ export default function Settings() {
       </div>
 
       <VerifyMobileCard user={user} onVerified={checkUserAuth} />
+      <ChangeEmailCard user={user} onChanged={checkUserAuth} />
 
       {/* Family membership card */}
       <div>

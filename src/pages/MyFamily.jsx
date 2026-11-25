@@ -11,7 +11,7 @@ import { resolveMyFamily } from "@/lib/resolveMyFamily";
 import { sagunApi } from "@/api/sagunApi";
 import { isPastBirthDate, latestBirthDate } from "@/lib/dates";
 import { translateError } from "@/lib/registration-copy";
-import { asksMaritalStatus, EDUCATION_LEVELS, MARITAL_STATUSES, OCCUPATIONS, optionLabel, showsApprovalNote, withCurrent } from "@/lib/member-options";
+import { asksMaritalStatus, EDUCATION_LEVELS, educationNotAllowed, educationOptionsFor, impliesMarried, MARITAL_STATUSES, OCCUPATIONS, optionLabel, showsApprovalNote, withCurrent } from "@/lib/member-options";
 import { isValidMobile, sanitizeMobile } from "@/lib/utils";
 
 const relationships = ["Spouse", "Son", "Daughter", "Father", "Mother", "Brother", "Sister", "Other"];
@@ -26,8 +26,11 @@ const relLabels = {
   Brother: { en: "Brother", hi: "भाई" },
   Sister: { en: "Sister", hi: "बहन" },
   Other: { en: "Other", hi: "अन्य" },
-  Head: { en: "Head", hi: "मुखिया" },
+  // The account owner's own record (stored as "Head", the value the rest of the portal reads).
+  Head: { en: "Self (Head)", hi: "स्वयं (मुखिया)" },
+  Self: { en: "Self", hi: "स्वयं" },
 };
+const isOwnRelationship = (r) => ["head", "self"].includes(String(r || "").trim().toLowerCase());
 const genderLabels = {
   Male: { en: "Male", hi: "पुरुष" },
   Female: { en: "Female", hi: "महिला" },
@@ -47,6 +50,7 @@ const L = {
     addFamilyMember: "Add Family Member",
     editSub: "Update member details",
     addSub: "Fill in the member details",
+    prefilled: "Filled in from your own record; change it if this member's is different.",
     name: "Name",
     namePh: "Full name",
     relationship: "Relationship",
@@ -76,6 +80,7 @@ const L = {
     futureDob: "Date of birth must be before today.",
     invalidMobile: "Invalid mobile",
     mobile10: "Mobile number must be 10 digits.",
+    educationFrom8th: "For a spouse, father, mother, brother, sister or yourself, education starts from 8th.",
     updated: "Member updated",
     updatedDesc: "updated.",
     added: "Member added",
@@ -109,6 +114,7 @@ const L = {
     addFamilyMember: "परिवार सदस्य जोड़ें",
     editSub: "सदस्य विवरण अपडेट करें",
     addSub: "सदस्य विवरण भरें",
+    prefilled: "आपके अपने रिकॉर्ड से भरा गया है; इस सदस्य का अलग हो तो बदल दें।",
     name: "नाम",
     namePh: "पूरा नाम",
     relationship: "रिश्ता",
@@ -138,6 +144,7 @@ const L = {
     futureDob: "जन्म तिथि आज से पहले की होनी चाहिए।",
     invalidMobile: "अमान्य मोबाइल",
     mobile10: "मोबाइल नंबर 10 अंकों का होना चाहिए।",
+    educationFrom8th: "जीवनसाथी, पिता, माता, भाई, बहन या स्वयं के लिए शिक्षा 8वीं से शुरू होती है।",
     updated: "सदस्य अपडेट हुआ",
     updatedDesc: "अपडेट हुआ।",
     added: "सदस्य जोड़ा गया",
@@ -243,14 +250,31 @@ export default function MyFamily() {
     }
   };
 
+  // The owner's own record: the Head (or Self) member, else the member with the account's email.
+  const ownRecord = members.find((m) => isOwnRelationship(m.relationship))
+    || members.find((m) => m.email && user?.email && m.email.toLowerCase() === user.email.toLowerCase());
+  // "Self (Head)" is offered for the owner's own record, and when adding while the family has no such record yet.
+  const relationshipOptions = (() => {
+    const own = editing ? editing.id === ownRecord?.id || isOwnRelationship(editing.relationship) : !ownRecord;
+    const list = own ? ["Head", ...relationships] : relationships;
+    return form.relationship && !list.includes(form.relationship) ? [...list, form.relationship] : list;
+  })();
+  const [prefilled, setPrefilled] = useState({ address: false, mobile: false });
+
+  // A new member usually shares the family's address and (for children) the owner's mobile: both start filled in from
+  // the owner's record (else the family's), and stay editable.
   const openAdd = () => {
     setEditing(null);
-    setForm(emptyForm);
+    const address = ownRecord?.address || family?.address || "";
+    const mobile = sanitizeMobile(ownRecord?.mobile || family?.contactNumber || user?.phone || "");
+    setForm({ ...emptyForm, address, mobile });
+    setPrefilled({ address: Boolean(address), mobile: Boolean(mobile) });
     setShowForm(true);
   };
 
   const openEdit = (m) => {
     setEditing(m);
+    setPrefilled({ address: false, mobile: false });
     setForm({
       name: m.name || "", relationship: m.relationship || "", gender: m.gender || "",
       dob: m.dob || "", mobile: m.mobile || "", email: m.email || "",
@@ -267,6 +291,12 @@ export default function MyFamily() {
     }
     if (isDuplicateName(form.name, members, editing?.id)) {
       toast({ title: t.dupName, description: t.dupDesc, variant: "destructive" });
+      return;
+    }
+    // An adult relative's education starts from 8th (an older record keeps what it had until it is changed).
+    const educationChanged = !editing || editing.education !== form.education || editing.relationship !== form.relationship;
+    if (educationChanged && educationNotAllowed(form.relationship, form.education)) {
+      toast({ title: t.educationFrom8th, variant: "destructive" });
       return;
     }
     const dobCheck = validDob(form.dob, t);
@@ -291,7 +321,7 @@ export default function MyFamily() {
         education: form.education,
         occupation: form.occupation,
         // A son or daughter under 18 (or without a birth date) has no marital status.
-        maritalStatus: asksMaritalStatus(form.relationship, form.dob) ? form.maritalStatus || null : null,
+        maritalStatus: impliesMarried(form.relationship) ? "MARRIED" : asksMaritalStatus(form.relationship, form.dob) ? form.maritalStatus || null : null,
         address: form.address,
       };
       if (editing) {
@@ -434,9 +464,9 @@ export default function MyFamily() {
               </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.relationship} *</label>
-                <select value={form.relationship} onChange={(e) => setForm({ ...form, relationship: e.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">
+                <select id="member-relationship" aria-label={t.relationship} value={form.relationship} onChange={(e) => { const relationship = e.target.value; setForm({ ...form, relationship, education: educationNotAllowed(relationship, form.education) ? "" : form.education }); }} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">
                   <option value="">{t.select}</option>
-                  {relationships.map((r) => <option key={r} value={r}>{relLabel(r)}</option>)}
+                  {relationshipOptions.map((r) => <option key={r} value={r}>{relLabel(r)}</option>)}
                 </select>
               </div>
               <div>
@@ -453,14 +483,15 @@ export default function MyFamily() {
               </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.mobile}</label>
-                <input type="tel" inputMode="numeric" maxLength={16} value={form.mobile} onChange={(e) => setForm({ ...form, mobile: sanitizeMobile(e.target.value) })} placeholder="9876543210" className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
+                <input id="member-mobile" aria-label={t.mobile} type="tel" inputMode="numeric" maxLength={16} value={form.mobile} onChange={(e) => { setForm({ ...form, mobile: sanitizeMobile(e.target.value) }); setPrefilled((p) => ({ ...p, mobile: false })); }} placeholder="9876543210" className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
+                {prefilled.mobile && <p className="mt-1 text-[0.65rem] text-muted-foreground">{t.prefilled}</p>}
               </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.email}</label>
                 <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="name@example.com" className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
               </div>
               {[
-                ["education", t.education, EDUCATION_LEVELS],
+                ["education", t.education, educationOptionsFor(form.relationship)],
                 ["occupation", t.occupation, OCCUPATIONS],
                 ...(asksMaritalStatus(form.relationship, form.dob) ? [["maritalStatus", t.maritalStatus, MARITAL_STATUSES]] : []),
               ].map(([key, label, options]) => (
@@ -474,7 +505,8 @@ export default function MyFamily() {
               ))}
               <div className="sm:col-span-2">
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.address}</label>
-                <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
+                <input id="member-address" aria-label={t.address} value={form.address} onChange={(e) => { setForm({ ...form, address: e.target.value }); setPrefilled((p) => ({ ...p, address: false })); }} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
+                {prefilled.address && <p className="mt-1 text-[0.65rem] text-muted-foreground">{t.prefilled}</p>}
               </div>
             </div>
             <div className="sticky bottom-0 flex gap-2 border-t border-gold/20 bg-card px-6 py-4">
@@ -520,6 +552,8 @@ export default function MyFamily() {
 function SagunToggle({ member, info, t, busy, onToggle }) {
   if (!info) return null;
   const application = info.application;
+  // A spouse, father or mother is married by the relationship: no Shagun Bandhan box (the server refuses it too).
+  if (!application && impliesMarried(member.relationship)) return null;
   const active = Boolean(application) && !["INACTIVE", "REJECTED"].includes(application.status);
   if (!active && !info.eligible && !application) return null;
   const locked = Boolean(application) && !application.mine;

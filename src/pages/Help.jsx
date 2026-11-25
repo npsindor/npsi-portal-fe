@@ -39,7 +39,7 @@ export default function Help() {
     {
       icon: IdCard,
       title: "Step 4 — Approval & Member ID Generation",
-      desc: "Once approved, the system auto-generates a permanent Family ID (NPSI-FAM-000125) and Member IDs (NPSI-MEM-000125). A login invitation email is sent to you.",
+      desc: "Once approved, the system auto-generates a permanent Family ID (NPSI-FAM-000125) and Member IDs carrying the family number (NPSI-MEB-00012501, NPSI-MEB-00012502 …). A login invitation email is sent to you.",
       cta: "Check Application Status",
       to: "/application-status",
     },
@@ -103,7 +103,7 @@ export default function Help() {
     {
       icon: IdCard,
       title: "चरण 4 — स्वीकृति और सदस्य आईडी जनरेशन",
-      desc: "स्वीकृत होने पर सिस्टम स्वतः स्थायी परिवार आईडी (NPSI-FAM-000125) और सदस्य आईडी (NPSI-MEM-000125) बनाता है। आपको लॉगिन निमंत्रण ईमेल भेजा जाता है।",
+      desc: "स्वीकृत होने पर सिस्टम स्वतः स्थायी परिवार आईडी (NPSI-FAM-000125) और परिवार नंबर वाली सदस्य आईडी (NPSI-MEB-00012501, NPSI-MEB-00012502 …) बनाता है। आपको लॉगिन निमंत्रण ईमेल भेजा जाता है।",
       cta: "आवेदन स्थिति देखें",
       to: "/application-status",
     },
