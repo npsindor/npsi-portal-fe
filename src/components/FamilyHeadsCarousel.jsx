@@ -11,8 +11,8 @@ const COPY = {
 // A short list is repeated so the strip is always wider than the screen and loops without a gap.
 const MIN_ITEMS = 14;
 
-// Home page: a slow, endless carousel of 48×48 round photos of the family heads an administrator chose to show
-// (Admin → Families → "On website"). Hidden when nobody is chosen yet.
+// Home page: a slow, endless carousel of 60×60 round photos of the family heads an administrator chose to show
+// (Admin → Families → "On website"), A to Z by name as the API returns them. Hidden when nobody is shown.
 export default function FamilyHeadsCarousel() {
   const { lang } = useLang();
   const t = COPY[lang] || COPY.en;
@@ -26,7 +26,7 @@ export default function FamilyHeadsCarousel() {
   const duration = `${Math.max(40, loop.length * 4)}s`;
   const item = (head, key, hidden) => (
     <li key={key} aria-hidden={hidden || undefined} className="flex w-28 shrink-0 flex-col items-center gap-2 px-2 text-center">
-      <MemberAvatar name={head.name} photoUrl={head.photoUrl} size={48} />
+      <MemberAvatar name={head.name} photoUrl={head.photoUrl} size={60} />
       <span className="line-clamp-2 text-xs font-semibold leading-snug text-foreground">{head.name}</span>
       {head.place && <span className="-mt-1.5 line-clamp-1 text-[0.7rem] text-muted-foreground">{head.place}</span>}
     </li>

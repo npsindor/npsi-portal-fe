@@ -43,6 +43,8 @@ export const API = {
   bloodHelp: `${API_PREFIX}/blood-help`,
   // Home page: family heads carousel and today's birthdays (admin-chosen families only).
   homeMembers: `${API_PREFIX}/home-members`,
+  // Admin → Families → select-all "On website": show or hide many families on the home page in one request.
+  familyHomeVisibility: `${API_PREFIX}/families/home-visibility`,
   // Super admin: every deletion (who, when, what, a copy of the record). Read only.
   auditLogs: `${API_PREFIX}/audit-logs`,
   search: `${API_PREFIX}/search`,

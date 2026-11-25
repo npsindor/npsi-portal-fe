@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { ADMIN, mockApi, NOT_LOGGED_IN } from './mock-api.js';
 
-// Home page: the "NPS Family Heads" carousel (48×48 round photos, slow endless strip) and the "Today Birthday"
+// Home page: the "NPS Family Heads" carousel (60×60 round photos, slow endless strip) and the "Today Birthday"
 // column beside "Get started"; Admin → Families decides which families appear.
 const en = (page) => page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
 const HEADS = [
@@ -10,7 +10,7 @@ const HEADS = [
 ];
 const BIRTHDAYS = [{ id: 'm1', name: 'Neha Patidar', place: 'Borawan', photoUrl: null }];
 
-test('family heads carousel: heading, 48px round photos (initials without a photo), a moving strip that pauses on hover', async ({ page }) => {
+test('family heads carousel: heading, 60px round photos (initials without a photo), a moving strip that pauses on hover', async ({ page }) => {
   await en(page);
   await page.setViewportSize({ width: 1280, height: 900 });
   await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN, 'GET /home-members/family-heads': HEADS, 'GET /home-members/birthdays': [] });
@@ -19,7 +19,7 @@ test('family heads carousel: heading, 48px round photos (initials without a phot
   await expect(section.getByRole('heading', { name: 'NPS Family Heads' })).toBeVisible();
   const list = section.getByRole('list', { name: 'NPS Family Heads' });
   const photo = list.getByRole('img', { name: 'Subhash Patidar' }).first();
-  expect(await photo.evaluate((el) => [el.offsetWidth, el.offsetHeight, getComputedStyle(el).borderRadius])).toEqual([48, 48, '9999px']);
+  expect(await photo.evaluate((el) => [el.offsetWidth, el.offsetHeight, getComputedStyle(el).borderRadius])).toEqual([60, 60, '9999px']);
   await expect(list.getByRole('img', { name: 'Ramesh Mukati' }).first()).toHaveText('RM');
   const track = section.locator('.family-heads-track');
   expect(await track.evaluate((el) => getComputedStyle(el).animationName)).toBe('family-heads-scroll');
@@ -73,4 +73,30 @@ test('admin: the "On website" switch saves showOnHome for that family', async ({
   await toggle.check();
   await expect.poll(() => calls.find((call) => call.key === 'PATCH /families/fam-1')?.body).toEqual({ showOnHome: true });
   await expect(toggle).toBeChecked();
+});
+
+test('admin Families: village column in title case, and the select-all box sets "On website" for every listed family in one request', async ({ page }) => {
+  await en(page);
+  const families = [
+    { id: 'fam-1', familyId: 'NPSI-FAM-000001', familyName: 'PATIDAR', headName: 'deepa patidar', memberCount: 3, city: 'Indore', village: 'GHEGAON', status: 'ACTIVE', showOnHome: true },
+    { id: 'fam-2', familyId: 'NPSI-FAM-000002', familyName: 'Patidar', headName: 'Harish Patidar', memberCount: 1, city: 'Indore', village: null, nativePlace: 'pipri', status: 'ACTIVE', showOnHome: false },
+  ];
+  const calls = await mockApi(page, { 'GET /auth/me': ADMIN, 'GET /families': families, 'PUT /families/home-visibility': { status: 200, body: { updated: 2 } } });
+  await page.goto('/admin/families');
+  await expect(page.getByRole('columnheader', { name: /Village/ })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: /^City$/ })).toHaveCount(0);
+  await expect(page.getByRole('cell', { name: 'Ghegaon', exact: true })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'Pipri', exact: true })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'Deepa Patidar', exact: true })).toBeVisible();
+
+  const all = page.getByRole('checkbox', { name: 'All listed families on the website' });
+  await expect(all).not.toBeChecked(); // one of two is on: half-ticked, not ticked
+  expect(await all.evaluate((el) => el.indeterminate)).toBe(true);
+  page.once('dialog', (dialog) => dialog.accept());
+  await all.check();
+  await expect.poll(() => calls.filter((call) => call.key === 'PUT /families/home-visibility').length).toBe(1);
+  expect(calls.find((call) => call.key === 'PUT /families/home-visibility').body).toEqual({ familyIds: ['fam-1', 'fam-2'], showOnHome: true });
+  expect(calls.some((call) => call.key.startsWith('PATCH /families/'))).toBe(false);
+  await expect(page.getByRole('switch', { name: 'On website: Harish Patidar' })).toBeChecked();
+  await expect(all).toBeChecked();
 });

@@ -18,6 +18,7 @@ const has = (method, url) => {
 
 // The calls base44Client.js makes, by method.
 const CALLS = [
+  ['PUT', API.familyHomeVisibility],
   ['GET', API.eventFinance], ['GET', `${API.eventFinance}/NPSI-EVT-1`], ['GET', `${API.eventFinance}/admin/categories`],
   ['GET', `${API.eventFinance}/members?q=patidar`],
   ['POST', `${API.eventFinance}/admin/categories`], ['PATCH', `${API.eventFinance}/admin/categories/id`], ['DELETE', `${API.eventFinance}/admin/categories/id`],
