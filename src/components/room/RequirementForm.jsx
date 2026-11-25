@@ -7,6 +7,7 @@ import { indiaToday } from '@/lib/dates';
 import { BUDGETS, comboCopy, optionList, roomError, rupees } from '@/lib/room-copy';
 import { field, label, primary } from '@/components/room/room-ui';
 import ListingCard from '@/components/room/ListingCard';
+import { normalizeField } from "@/lib/utils";
 
 // Anyone may post what they need. Logged-in members/students are published and matched at once; visitors are checked first.
 export default function RequirementForm({ t, lang, user, isAuthenticated, options, onPosted }) {
@@ -16,7 +17,7 @@ export default function RequirementForm({ t, lang, user, isAuthenticated, option
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
   const requestId = useRef(crypto.randomUUID());
-  const set = (key, value) => { setForm((current) => ({ ...current, [key]: value })); setError(''); };
+  const set = (key, value) => { setForm((current) => ({ ...current, [key]: normalizeField(key, value) })); setError(''); };
   const preset = ([min, max]) => setForm((current) => ({ ...current, minBudget: String(min), maxBudget: max ? String(max) : String(Math.max(min * 2, 30000)) }));
 
   const submit = async (event) => {
@@ -43,7 +44,7 @@ export default function RequirementForm({ t, lang, user, isAuthenticated, option
     <form onSubmit={submit} noValidate className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className={label}>{t.name} *<input className={field} maxLength={150} autoComplete="name" value={form.name} onChange={(e) => set('name', e.target.value)} /></label>
-        <label className={label}>{t.mobile} *<input className={field} type="tel" inputMode="numeric" maxLength={10} autoComplete="tel-national" value={form.mobile} onChange={(e) => set('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} /></label>
+        <label className={label}>{t.mobile} *<input className={field} type="tel" inputMode="numeric" maxLength={16} pattern="[6-9][0-9]{9}" autoComplete="tel-national" value={form.mobile} onChange={(e) => set('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} /></label>
         <label className={label}>{t.emailOptional}<input className={field} type="email" maxLength={254} autoComplete="email" value={form.email} onChange={(e) => set('email', e.target.value)} /></label>
         <label className={label}>{t.tenantType}<select className={field} value={form.tenantType} onChange={(e) => set('tenantType', e.target.value)}>{['ANY', 'FAMILY', 'STUDENT'].map((value) => <option key={value} value={value}>{t[value]}</option>)}</select></label>
         <CreatableCombobox id="need-type" label={`${t.type} *`} value={form.propertyType} onChange={(value) => set('propertyType', value)} options={optionList(options?.propertyTypes)} lang={lang} t={combo} maxLength={60} />

@@ -165,6 +165,9 @@ const createLocalAuth = () => ({
   resetPasswordRequest: async (email) => request(API.auth.passwordResets, { method: 'POST', body: JSON.stringify({ email, recaptchaToken: await getRecaptchaToken('password_reset') }) }),
   resetPassword: (data) => request(API.auth.passwordResetConfirmations, { method: 'POST', body: JSON.stringify(data) }),
   changePassword: (data) => request(API.auth.password, { method: 'PUT', body: JSON.stringify(data) }),
+  // Email change: { email, currentPassword } sends a code to the new email; { code } then moves the account to it.
+  requestEmailChange: (data) => request(API.auth.emailChanges, { method: 'POST', body: JSON.stringify(data) }),
+  confirmEmailChange: (data) => request(API.auth.emailChangeConfirmations, { method: 'POST', body: JSON.stringify(data) }),
   me: () => request(API.auth.me),
   // The logged-in user or null, without a 401 in the browser console for visitors. An API that doesn't have this
   // route yet (404) falls back to /auth/me, where a 401 means "not logged in".

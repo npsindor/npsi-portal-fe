@@ -94,6 +94,11 @@ export default function PublicNav() {
     <nav id="public-navigation" aria-label={c("Main navigation")} className={`${open ? 'block' : 'hidden'} max-h-[70dvh] overflow-y-auto border-t border-border bg-background xl:block xl:max-h-none xl:overflow-visible xl:border-t-0 xl:bg-maroon`}>
       <div className="relative mx-auto flex max-w-7xl flex-col divide-y divide-border/60 px-4 py-2 sm:px-6 xl:flex-row xl:flex-nowrap xl:items-stretch xl:justify-between xl:divide-y-0 xl:py-0">
         <div className="py-3 xl:hidden"><GlobalSearch onNavigate={() => setOpen(false)} /></div>
+        {/* Phone and tablet: the two logins side by side, same size, right under the search (no scrolling to find them). */}
+        {!isAuthenticated && <div className="grid grid-cols-2 gap-2 py-3 xl:hidden">
+          <Link className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-maroon px-2 text-sm font-semibold text-cream shadow-sm transition-colors hover:bg-maroon-dark" to={loginTo}><LogIn className="h-4 w-4 shrink-0" aria-hidden="true" />{c('Member Login')}</Link>
+          <Link className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-maroon bg-card px-2 text-sm font-semibold text-maroon transition-colors hover:bg-maroon/10" to={studentLoginPath()}><GraduationCap className="h-4 w-4 shrink-0" aria-hidden="true" />{c('Student Login')}</Link>
+        </div>}
         {navigation.map(item => item.items ? <details key={item.label} className="group relative" onToggle={event => { if (event.currentTarget.open) closeDropdowns(event.currentTarget); }}>
           <summary aria-current={item.items.some(([, to]) => isCurrent(location.pathname, to)) ? 'page' : undefined} className={`${linkClass} cursor-pointer list-none [&::-webkit-details-marker]:hidden`}>
             {c(item.label)}<ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 opacity-70 transition-transform group-open:rotate-180" />
@@ -107,7 +112,7 @@ export default function PublicNav() {
           <GlobalSearch autoFocus className="flex-1" onNavigate={() => setSearching(false)} />
           <button type="button" aria-label={c('Close search')} onClick={() => { setSearching(false); requestAnimationFrame(() => searchButton.current?.focus()); }} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gold/60 text-cream transition-colors hover:bg-gold hover:text-maroon"><X className="h-5 w-5" aria-hidden="true" /></button>
         </div>}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3 xl:hidden"><span className="sm:hidden"><ThemeToggle /></span>{!isAuthenticated && <Link className="public-link gap-1.5 font-semibold text-maroon" to={loginTo}><LogIn className="h-4 w-4" aria-hidden="true" />{c('Member Login')}</Link>}{!isAuthenticated && <Link className="public-link gap-1.5 font-semibold text-maroon" to={studentLoginPath()}><GraduationCap className="h-4 w-4" aria-hidden="true" />{c('Student Login')}</Link>}</div>
+        <div className="flex items-center py-3 sm:hidden"><ThemeToggle /></div>
       </div>
     </nav>
   </header>;

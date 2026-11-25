@@ -52,3 +52,41 @@ test('a registration an admin switched off is not offered', async ({ page }) => 
   await expect(page.getByRole('article', { name: 'Register as a Family' })).toBeVisible();
   await expect(page.getByRole('article', { name: 'Register as a Student' })).toHaveCount(0);
 });
+
+test('a registered member or student is never asked to join or register again', async ({ page }) => {
+  await lang(page, 'en');
+  await desktop(page);
+  for (const type of ['FAMILY', 'STUDENT']) {
+    await mockApi(page, { 'GET /auth/me': { ...MEMBER, account: { type, status: 'ACTIVE' } }, 'GET /me/family': { family: null, members: [] } });
+    await page.goto('/join');
+    await expect(page.getByRole('status').filter({ hasText: 'You are already a registered member' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Go to My Portal' })).toHaveAttribute('href', '/portal');
+    await expect(page.getByRole('article')).toHaveCount(0);
+    await page.goto('/help');
+    await expect(page.getByRole('link', { name: 'Register Now' })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Join the Sangathan' })).toHaveCount(0);
+  }
+});
+
+test('phone menu: Member Login and Student Login sit side by side, same size, near the top', async ({ page }) => {
+  await lang(page, 'en');
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 760 });
+    await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN });
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Open navigation menu' }).click();
+    const nav = page.locator('#public-navigation');
+    const member = nav.getByRole('link', { name: 'Member Login' });
+    const student = nav.getByRole('link', { name: 'Student Login' });
+    await expect(member).toBeInViewport();
+    await expect(student).toBeInViewport();
+    const [a, b] = [await member.boundingBox(), await student.boundingBox()];
+    expect(Math.abs(a.y - b.y)).toBeLessThan(1);
+    expect(Math.abs(a.height - b.height)).toBeLessThan(1);
+    expect(Math.abs(a.width - b.width)).toBeLessThan(2);
+    expect(a.height).toBeGreaterThanOrEqual(44);
+    expect(b.x + b.width).toBeLessThanOrEqual(width);
+    await member.click();
+    await expect(page).toHaveURL(/\/login/);
+  }
+});

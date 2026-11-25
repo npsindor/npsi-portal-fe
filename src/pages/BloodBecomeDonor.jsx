@@ -8,11 +8,12 @@ import MembersOnly from "@/components/blood/MembersOnly";
 import PageHeading from "@/components/blood/PageHeading";
 import { bloodError, formatDay, useBloodCopy, validMobile } from "@/lib/blood-help";
 import { indiaToday } from "@/lib/dates";
+import { sanitizeMobile } from "@/lib/utils";
 
 // Same look as before (grey field), now editable.
 const contactField =
   "flex h-11 w-full items-center rounded-lg border border-transparent bg-muted px-3 text-sm text-foreground outline-none focus:border-[#C8102E] focus:ring-2 focus:ring-[#C8102E]/20 aria-[invalid=true]:border-destructive";
-const digits10 = (value) => String(value || "").replace(/\D/g, "").slice(-10);
+const digits10 = sanitizeMobile;
 
 // Page 2: register as a donor. Name, mobile and city start from the member's profile (or what they saved before) and
 // can be edited; they are saved with the blood group and last donation date.
@@ -88,7 +89,7 @@ export default function BloodBecomeDonor() {
         aria-invalid={Boolean(errors[key])}
         aria-describedby={errors[key] ? `donor-${key}-error` : undefined}
         onChange={(event) => {
-          const value = key === "mobile" ? event.target.value.replace(/[^\d+\s]/g, "") : event.target.value;
+          const value = key === "mobile" ? sanitizeMobile(event.target.value) : event.target.value;
           setForm((current) => ({ ...current, [key]: value }));
         }}
         {...props}
@@ -135,7 +136,7 @@ export default function BloodBecomeDonor() {
               </div>
               <div className="grid gap-4 p-5 sm:grid-cols-3">
                 {field("name", t.name, { maxLength: 150, autoComplete: "name" })}
-                {field("mobile", t.mobile, { type: "tel", inputMode: "numeric", maxLength: 14, autoComplete: "tel" })}
+                {field("mobile", t.mobile, { type: "tel", inputMode: "numeric", maxLength: 16, autoComplete: "tel" })}
                 {field("city", t.cityAddress, { maxLength: 150, autoComplete: "address-level2" })}
               </div>
               {(!profile.name || !profile.mobile) && (

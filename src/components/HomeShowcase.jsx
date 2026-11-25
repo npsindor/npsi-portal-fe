@@ -6,6 +6,8 @@ import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carouse
 import { localizedText } from '@/lib/utils';
 import logoImage from '@/images/logo.png';
 import ADVERTISING_IMAGES from 'virtual:advertising';
+import { useAuth } from '@/lib/AuthContext';
+import { isRegisteredMember } from '@/lib/membership';
 
 // Garba highlights video (also used by GarbaVideoPopup). Replace or remove the slide below if the file is deleted.
 const VIDEO_SRC = '/videos/maanagarba.mp4';
@@ -76,6 +78,7 @@ const copy = {
     textSlideTitle: 'Be part of a growing community',
     textSlideBody: 'Register your family to access member services, events, education support and community programmes.',
     textSlideCta: 'Join the Sangathan',
+    memberCta: 'Go to My Portal',
   },
   hi: {
     eyebrow: 'विज्ञापन और प्रायोजक',
@@ -109,6 +112,7 @@ const copy = {
     textSlideTitle: 'बढ़ते समाज का हिस्सा बनें',
     textSlideBody: 'सदस्य सेवाएँ, कार्यक्रम, शिक्षा सहयोग और सामुदायिक कार्यक्रमों के लिए अपने परिवार का पंजीकरण करें।',
     textSlideCta: 'संगठन से जुड़ें',
+    memberCta: 'मेरे पोर्टल पर जाएँ',
   },
 };
 
@@ -166,6 +170,7 @@ function Dots({ count, index, onSelect, label, tone = 'dark' }) {
 // "Explore community services" companion: a highlights text slider (3 cols) and a media slider (9 cols).
 export default function HomeShowcase({ lang, events = [] }) {
   const c = copy[lang] || copy.en;
+  const member = isRegisteredMember(useAuth().user);
   const [textApi, setTextApi] = useState(null);
   const [mediaApi, setMediaApi] = useState(null);
   const text = useSlides(textApi);
@@ -196,7 +201,7 @@ export default function HomeShowcase({ lang, events = [] }) {
     latestEvent
       ? { kind: 'image', key: 'event', src: latestEvent.bannerUrl, eyebrow: c.eventEyebrow, title: localizedText(latestEvent, 'title', lang), body: localizedText(latestEvent, 'venue', lang), to: '/events', cta: c.eventCta }
       : { kind: 'image', key: 'event', src: logoImage, contain: true, eyebrow: c.eventEyebrow, title: c.eventFallbackTitle, body: c.eventFallbackBody, to: '/events', cta: c.eventCta },
-    { kind: 'text', key: 'join', eyebrow: c.textSlideEyebrow, title: c.textSlideTitle, body: c.textSlideBody, to: '/join', cta: c.textSlideCta },
+    { kind: 'text', key: 'join', eyebrow: c.textSlideEyebrow, title: c.textSlideTitle, body: c.textSlideBody, to: member ? '/portal' : '/join', cta: member ? c.memberCta : c.textSlideCta },
   ];
   // The ads in public/advertising always run; admin media slides (Admin → Community highlights → Media) join them.
   // An admin slide that uses a folder image replaces that image's plain slide (it adds its text and link).

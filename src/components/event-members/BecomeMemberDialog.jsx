@@ -9,6 +9,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { getRecaptchaToken } from '@/lib/recaptcha';
 import { errorText, sectionLabel, useEventMemberCopy } from '@/lib/event-member-copy';
 import { INDORE_AREAS } from '@/lib/native-places';
+import { normalizeField } from "@/lib/utils";
 
 const OTHER = 'OTHER';
 const EMPTY = { sectionKey: '', customEventName: '', photoUrl: '', name: '', mobile: '', email: '', village: '', area: '', mobilePublic: false, emailPublic: false, consent: false };
@@ -61,7 +62,7 @@ export function BecomeMemberDialog({ open, onOpenChange, defaultSection = '', on
   // A registered family member or student does not fill the form again: one question, the event, and submit. Their
   // details come from their own registration on the server.
   const quick = isAuthenticated && !presetPerson && Boolean(person);
-  const set = (key) => (value) => setForm((current) => ({ ...current, [key]: value }));
+  const set = (key) => (value) => setForm((current) => ({ ...current, [key]: normalizeField(key, value) }));
   const choosePerson = (key) => { setPersonKey(key); fill(people.find((item) => `${item.kind}:${item.id}` === key) || null); };
 
   const upload = async (file) => {
@@ -164,7 +165,7 @@ export function BecomeMemberDialog({ open, onOpenChange, defaultSection = '', on
 
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block text-sm font-semibold sm:col-span-2">{t.name} *<input className={field} maxLength={120} autoComplete="name" value={form.name} onChange={(e) => set('name')(e.target.value)} /></label>
-            <label className="block text-sm font-semibold">{t.mobile} *<input className={field} inputMode="numeric" maxLength={14} autoComplete="tel" value={form.mobile} onChange={(e) => set('mobile')(e.target.value)} /></label>
+            <label className="block text-sm font-semibold">{t.mobile} *<input className={field} inputMode="numeric" maxLength={16} pattern="[6-9][0-9]{9}" autoComplete="tel" value={form.mobile} onChange={(e) => set('mobile')(e.target.value)} /></label>
             <label className="block text-sm font-semibold">{t.email} *<input className={field} type="email" maxLength={255} autoComplete="email" value={form.email} onChange={(e) => set('email')(e.target.value)} /></label>
             <VillageCombobox id="em-village" label={t.village} value={form.village} onChange={set('village')} lang={lang} required />
             <CreatableCombobox id="em-area" label={t.area} value={form.area} onChange={set('area')} options={INDORE_AREAS} lang={lang} t={t} />

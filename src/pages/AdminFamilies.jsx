@@ -36,7 +36,7 @@ const L = {
     thStatus: "Status",
     thActions: "Actions",
     thWebsite: "On website",
-    websiteHint: "Show the head's photo in the home page carousel and the family's birthday wishes",
+    websiteHint: "Registered families are shown in the home page carousel and birthday wishes; switch off to hide this family",
     websiteOn: "Shown on the home page",
     websiteOff: "Hidden from the home page",
     view: "View",
@@ -101,7 +101,7 @@ const L = {
     thStatus: "स्थिति",
     thActions: "क्रियाएँ",
     thWebsite: "वेबसाइट पर",
-    websiteHint: "मुखिया की फ़ोटो होमपेज कैरोसेल में और परिवार की जन्मदिन शुभकामनाएँ दिखाएँ",
+    websiteHint: "पंजीकृत परिवार होमपेज कैरोसेल और जन्मदिन शुभकामनाओं में दिखते हैं; इस परिवार को छिपाने के लिए बंद करें",
     websiteOn: "होमपेज पर दिख रहा है",
     websiteOff: "होमपेज से छिपा है",
     view: "देखें",
@@ -480,7 +480,7 @@ export default function AdminFamilies() {
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblGotra}</label><input value={editing.gotra} onChange={(e) => setEditing({ ...editing, gotra: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label htmlFor="fam-nativePlace" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblNativePlace}</label><VillageCombobox id="fam-nativePlace" hideLabel label={t.lblNativePlace} value={editing.nativePlace} onChange={(v) => setEditing((cur) => ({ ...cur, nativePlace: v }))} inputClassName="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label htmlFor="fam-village" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblVillage}</label><VillageCombobox id="fam-village" hideLabel label={t.lblVillage} value={editing.village} onChange={(v) => setEditing((cur) => ({ ...cur, village: v }))} inputClassName="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblContact}</label><input value={editing.contactNumber} onChange={(e) => setEditing({ ...editing, contactNumber: sanitizeMobile(e.target.value) })} inputMode="numeric" maxLength={10} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblContact}</label><input value={editing.contactNumber} onChange={(e) => setEditing({ ...editing, contactNumber: sanitizeMobile(e.target.value) })} inputMode="numeric" maxLength={16} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.lblEmail}</label><input value={editing.email} onChange={(e) => setEditing({ ...editing, email: e.target.value })} className="mt-1 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
             </div>
             <button onClick={save} disabled={saving} className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-maroon py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark disabled:opacity-60">

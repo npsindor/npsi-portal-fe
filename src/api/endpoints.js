@@ -57,6 +57,8 @@ export const API = {
     passwordResets: `${API_PREFIX}/auth/password-resets`,
     passwordResetConfirmations: `${API_PREFIX}/auth/password-resets/confirmations`,
     password: `${API_PREFIX}/auth/password`,
+    emailChanges: `${API_PREFIX}/auth/email-changes`,
+    emailChangeConfirmations: `${API_PREFIX}/auth/email-changes/confirmations`,
     me: `${API_PREFIX}/auth/me`,
     invitations: `${API_PREFIX}/auth/invitations`,
     mobileOtps: `${API_PREFIX}/auth/mobile-otps`,

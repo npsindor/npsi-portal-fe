@@ -389,7 +389,7 @@ export default function AdminSamiti() {
                   <option>Active</option><option>Inactive</option>
                 </select>
               </div>
-              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.mobile}</label><input value={memEditing.mobile} onChange={(e) => setMemEditing({ ...memEditing, mobile: sanitizeMobile(e.target.value) })} inputMode="numeric" maxLength={10} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
+              <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.mobile}</label><input value={memEditing.mobile} onChange={(e) => setMemEditing({ ...memEditing, mobile: sanitizeMobile(e.target.value) })} inputMode="numeric" maxLength={16} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
               <div><label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.email}</label><input value={memEditing.email} onChange={(e) => setMemEditing({ ...memEditing, email: e.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon" /></div>
             </div>
             <button onClick={saveMember} disabled={memSaving} className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-maroon py-2.5 text-sm font-semibold text-cream hover:bg-maroon-dark disabled:opacity-60">

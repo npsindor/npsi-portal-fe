@@ -20,6 +20,8 @@ describe('API endpoints', () => {
       passwordResets: '/api/v1/auth/password-resets',
       passwordResetConfirmations: '/api/v1/auth/password-resets/confirmations',
       password: '/api/v1/auth/password',
+      emailChanges: '/api/v1/auth/email-changes',
+      emailChangeConfirmations: '/api/v1/auth/email-changes/confirmations',
       me: '/api/v1/auth/me',
       invitations: '/api/v1/auth/invitations',
       mobileOtps: '/api/v1/auth/mobile-otps',

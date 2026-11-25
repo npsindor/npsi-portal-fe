@@ -5,6 +5,7 @@ import { API_BASE_URL } from '@/api/apiBaseUrl';
 import { getRecaptchaToken } from '@/lib/recaptcha';
 import { useLang } from '@/lib/i18n';
 import { apiFetch } from '@/api/base44Client';
+import { normalizeField } from "@/lib/utils";
 
 const copy = {
   en: {
@@ -35,7 +36,7 @@ export default function PublicMessageForm({ kind }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [reference, setReference] = useState('');
-  const set = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.type === 'checkbox' ? event.target.checked : event.target.value }));
+  const set = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.type === 'checkbox' ? event.target.checked : normalizeField(key, event.target.value) }));
   const submit = async (event) => {
     event.preventDefault();
     if (busy) return;
@@ -64,7 +65,7 @@ export default function PublicMessageForm({ kind }) {
         <label className="text-sm" htmlFor={`${kind}-name`}>{t.name}<input id={`${kind}-name`} className={field} maxLength={120} autoComplete="name" value={form.name} onChange={set('name')} /></label>
         <label className="text-sm" htmlFor={`${kind}-type`}>{t.type}<select id={`${kind}-type`} className={field} value={form.category} onChange={(e) => setForm((current) => ({ ...current, category: Number(e.target.value) }))}>{types.map((label, index) => <option key={label} value={index}>{label}</option>)}</select></label>
         <label className="text-sm" htmlFor={`${kind}-email`}>{t.email}<input id={`${kind}-email`} type="email" className={field} maxLength={254} autoComplete="email" value={form.email} onChange={set('email')} /></label>
-        <label className="text-sm" htmlFor={`${kind}-mobile`}>{t.mobile}<input id={`${kind}-mobile`} type="tel" inputMode="numeric" className={field} maxLength={16} autoComplete="tel" value={form.mobile} onChange={set('mobile')} /></label>
+        <label className="text-sm" htmlFor={`${kind}-mobile`}>{t.mobile}<input id={`${kind}-mobile`} type="tel" inputMode="numeric" pattern="[6-9][0-9]{9}" className={field} maxLength={16} autoComplete="tel" value={form.mobile} onChange={set('mobile')} /></label>
         {contact && <p className="-mt-2 text-xs text-muted-foreground sm:col-span-2">{t.replyHint}</p>}
         <label className="text-sm sm:col-span-2" htmlFor={`${kind}-subject`}>{t.subject}<input id={`${kind}-subject`} className={field} maxLength={150} value={form.subject} onChange={set('subject')} /></label>
         <label className="text-sm sm:col-span-2" htmlFor={`${kind}-message`}>{t.message}<textarea id={`${kind}-message`} className={field} rows={5} maxLength={2000} value={form.message} onChange={set('message')} /></label>

@@ -6,9 +6,12 @@ import {
 } from "lucide-react";
 import PublicNav from "@/components/PublicNav";
 import { useLang } from "@/lib/i18n";
+import { useAuth } from "@/lib/AuthContext";
+import { isRegisteredMember } from "@/lib/membership";
 
 export default function Help() {
   const { lang } = useLang();
+  const member = isRegisteredMember(useAuth().user);
   const en = lang === "en";
 
   const steps = en ? [
@@ -36,7 +39,7 @@ export default function Help() {
     {
       icon: IdCard,
       title: "Step 4 — Approval & Member ID Generation",
-      desc: "Once approved, the system auto-generates a permanent Family ID (NPSI-FAM-000125) and Member IDs (NPSI-MEM-000125). A login invitation email is sent to you.",
+      desc: "Once approved, the system auto-generates a permanent Family ID (NPSI-FAM-000125) and Member IDs carrying the family number (NPSI-MEB-00012501, NPSI-MEB-00012502 …). A login invitation email is sent to you.",
       cta: "Check Application Status",
       to: "/application-status",
     },
@@ -100,7 +103,7 @@ export default function Help() {
     {
       icon: IdCard,
       title: "चरण 4 — स्वीकृति और सदस्य आईडी जनरेशन",
-      desc: "स्वीकृत होने पर सिस्टम स्वतः स्थायी परिवार आईडी (NPSI-FAM-000125) और सदस्य आईडी (NPSI-MEM-000125) बनाता है। आपको लॉगिन निमंत्रण ईमेल भेजा जाता है।",
+      desc: "स्वीकृत होने पर सिस्टम स्वतः स्थायी परिवार आईडी (NPSI-FAM-000125) और परिवार नंबर वाली सदस्य आईडी (NPSI-MEB-00012501, NPSI-MEB-00012502 …) बनाता है। आपको लॉगिन निमंत्रण ईमेल भेजा जाता है।",
       cta: "आवेदन स्थिति देखें",
       to: "/application-status",
     },
@@ -262,8 +265,8 @@ export default function Help() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+      {/* CTA (not for a registered member) */}
+      {!member && <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
         <div className="rounded-2xl border border-gold/30 bg-card p-8 text-center">
           <h3 className="font-display text-xl font-semibold text-maroon">{en ? "Ready to begin?" : "शुरू करने के लिए तैयार?"}</h3>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{en ? "Register your family today and become part of the Nimar Patidar Sangathan, Indore community." : "आज ही अपना परिवार रजिस्टर करें और निमाड़ पाटीदार संगठन, इंदौर सामुदायिक परिवार का हिस्सा बनें।"}</p>
@@ -276,7 +279,7 @@ export default function Help() {
             </Link>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* Footer */}
       <footer className="bg-maroon text-cream">

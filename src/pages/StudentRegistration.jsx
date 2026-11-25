@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { useLang } from "@/lib/i18n";
 import { translateError } from "@/lib/registration-copy";
 import { isPastBirthDate, latestBirthDate } from "@/lib/dates";
+import { normalizeField } from "@/lib/utils";
 
 const COPY = {
   en: {
@@ -52,7 +53,7 @@ export default function StudentRegistration() {
     return () => { active = false; };
   }, [isAuthenticated]);
 
-  const update = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
+  const update = (key) => (event) => setForm((current) => ({ ...current, [key]: normalizeField(key, event.target.value) }));
   const applyMember = (id) => {
     const member = members.find((item) => item.id === id);
     if (!member) return;
@@ -113,9 +114,9 @@ export default function StudentRegistration() {
           {!isAuthenticated&&!isLoadingAuth&&<p className="mb-5 rounded-xl bg-muted p-3 text-sm text-muted-foreground">{t.loginHint} <Link className="text-primary underline" to={`/login?returnTo=${encodeURIComponent('/student-register')}`}>Login</Link></p>}
           <form onSubmit={submit} className="space-y-6">
             <fieldset className="grid gap-4 sm:grid-cols-2"><legend className="mb-3 text-lg font-semibold">{t.section}</legend>
-              {[["studentName",t.name,"text"],["mobile",t.mobile,"tel"],["email",t.email,"email"],["dob",t.dob,"date"],[["fatherName"],t.father,"text"]].map(([key,label,type])=>{const name=Array.isArray(key)?key[0]:key;return <div key={name} className="space-y-2"><Label htmlFor={`student-${name}`}>{label}{["studentName","mobile","email","fatherName"].includes(name)?" *":""}</Label><Input id={`student-${name}`} className="h-11" type={type} max={name==="dob"?latestBirthDate():undefined} value={form[name]} onChange={update(name)} required={["studentName","mobile","email","fatherName"].includes(name)} maxLength={name==="mobile"?10:255}/></div>;})}
+              {[["studentName",t.name,"text"],["mobile",t.mobile,"tel"],["email",t.email,"email"],["dob",t.dob,"date"],[["fatherName"],t.father,"text"]].map(([key,label,type])=>{const name=Array.isArray(key)?key[0]:key;return <div key={name} className="space-y-2"><Label htmlFor={`student-${name}`}>{label}{["studentName","mobile","email","fatherName"].includes(name)?" *":""}</Label><Input id={`student-${name}`} className="h-11" type={type} max={name==="dob"?latestBirthDate():undefined} value={form[name]} onChange={update(name)} required={["studentName","mobile","email","fatherName"].includes(name)} maxLength={name==="mobile"?16:255} inputMode={name==="mobile"?"numeric":undefined} pattern={name==="mobile"?"[6-9][0-9]{9}":undefined}/></div>;})}
               <div className="space-y-2"><Label htmlFor="student-gender">{t.gender} *</Label><select id="student-gender" className={field} value={form.gender} onChange={update("gender")} required><option value="">{t.select}</option>{[["Male",t.male],["Female",t.female],["Other",t.other]].map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></div>
-              <div className="space-y-2"><Label htmlFor="student-guardian">{t.guardian}</Label><Input id="student-guardian" className="h-11" value={form.guardianName} onChange={update("guardianName")}/></div><div className="space-y-2"><Label htmlFor="student-guardian-mobile">{t.guardianMobile}</Label><Input id="student-guardian-mobile" className="h-11" type="tel" value={form.guardianMobile} onChange={update("guardianMobile")}/></div>
+              <div className="space-y-2"><Label htmlFor="student-guardian">{t.guardian}</Label><Input id="student-guardian" className="h-11" value={form.guardianName} onChange={update("guardianName")}/></div><div className="space-y-2"><Label htmlFor="student-guardian-mobile">{t.guardianMobile}</Label><Input id="student-guardian-mobile" className="h-11" type="tel" inputMode="numeric" maxLength={16} pattern="[6-9][0-9]{9}" value={form.guardianMobile} onChange={update("guardianMobile")}/></div>
               {[["address",t.address], ["city",t.city], ["district",t.district], ["state",t.state], ["pincode",t.pincode]].map(([key,label])=><div key={key} className="space-y-2"><Label htmlFor={`student-${key}`}>{label}</Label><Input id={`student-${key}`} className="h-11" value={form[key]} onChange={update(key)} maxLength={key==="pincode"?6:255}/></div>)}
             </fieldset>
             <fieldset className="grid gap-4 sm:grid-cols-2"><legend className="mb-3 text-lg font-semibold">{t.education}</legend><div className="space-y-2 sm:col-span-2"><Label htmlFor="education-level">{t.education} *</Label><select id="education-level" className={field} value={level} onChange={(e)=>setLevel(e.target.value)} required><option value="">{t.select}</option>{levels.map(item=><option value={item} key={item}>{levelLabel(item)}</option>)}</select></div>{level&&[["course",t.course],["institution",t.institution],["academicYear",t.year]].map(([key,label])=><div key={key} className="space-y-2"><Label htmlFor={`student-${key}`}>{label} *</Label><Input id={`student-${key}`} className="h-11" value={form[key]} onChange={update(key)} required maxLength={255}/></div>)}</fieldset>
