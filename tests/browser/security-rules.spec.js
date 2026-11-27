@@ -98,7 +98,12 @@ test('admin login: the password step asks for the emailed code, which finishes t
   await page.fill('#email', '+91 98765 43210');
   await page.fill('#password', 'Garba#2026');
   await page.locator('form button[type="submit"]').last().click();
-  await expect(page.getByRole('alert')).toContainText('Enter the sign-in code sent to your email');
+  // The code step is an information notice (not an error) and replaces the password form; a mobile login names no address.
+  await expect(page.getByRole('status')).toContainText('the email address on your account');
+  await expect(page.getByRole('status')).toContainText('not SMS');
+  await expect(page.getByRole('alert')).toHaveCount(0);
+  await expect(page.locator('#password')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Resend in \d+s/ })).toBeDisabled();
   await page.fill('#login-code', '123456');
   await page.getByRole('button', { name: 'Verify' }).click();
   await expect(page).toHaveURL(/\/admin$/);
