@@ -19,6 +19,8 @@ export const regCopy = {
     sendCode: 'Send code',
     sending: 'Sending…',
     codeSentTo: 'Code sent to {mobile} by {channel}.',
+    // MSG91's default SMS template (no DLT of our own): the sender and wording are our SMS provider's, not ours.
+    smsSenderNote: 'The SMS comes from "CP-CInfoS" and mentions "InfoT Portal" — that is our SMS provider. Enter the 6-digit code from it here.',
     resetCodeEmailCopy: 'If this number is registered and verified, the code is sent to it by WhatsApp or SMS. It is emailed only when it can’t be sent to the mobile.',
     WHATSAPP: 'WhatsApp',
     SMS: 'SMS',
@@ -217,6 +219,7 @@ export const regCopy = {
     sendCode: 'कोड भेजें',
     sending: 'भेजा जा रहा है…',
     codeSentTo: '{mobile} पर {channel} द्वारा कोड भेजा गया।',
+    smsSenderNote: 'SMS "CP-CInfoS" से आएगा और उसमें "InfoT Portal" लिखा होगा — यह हमारा SMS प्रदाता है। उसका 6 अंकों का कोड यहाँ दर्ज करें।',
     resetCodeEmailCopy: 'यदि यह नंबर पंजीकृत और सत्यापित है, तो कोड उस पर WhatsApp या SMS से भेजा जाता है। मोबाइल पर न भेजा जा सके तभी ईमेल किया जाता है।',
     WHATSAPP: 'WhatsApp',
     SMS: 'SMS',
