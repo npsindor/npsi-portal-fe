@@ -3,6 +3,7 @@ import { BlockLink, HeroBackdrop, useHeroText } from '@/components/PageContent';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Bell, Car, Clock, Handshake, Mail, MapPin, Package, Phone, Route, ShieldCheck, Siren, Users } from 'lucide-react';
 import SafarHeroArt from '@/components/safar/SafarHeroArt';
+import AvailableJourneys from '@/components/safar/AvailableJourneys';
 import '@/styles/safar-hero.css';
 import PublicNav from '@/components/PublicNav';
 import PublicFooter from '@/components/PublicFooter';
@@ -104,11 +105,12 @@ export default function SafarSaathi() {
         <span className="inline-flex items-center gap-1.5 rounded-full bg-maroon/10 px-2.5 py-1 text-maroon"><TypeIcon className="h-3.5 w-3.5" aria-hidden="true" />{t[`MATCH_${match.requestType}`] || t[match.requestType]}</span>
         <span className={`rounded-full px-2.5 py-1 ${match.status === 'CONFIRMED' ? 'bg-emerald-100 text-emerald-800' : active ? 'bg-gold/20 text-foreground' : 'bg-muted text-muted-foreground'}`}>{t[match.status]}</span>
       </div>
+      {match.direction && <p className="mt-3 text-xs font-semibold text-gold-dark">{t[`direct_${match.direction}`]}</p>}
       {match.otherKind && <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t[`their${match.otherKind}`]}</p>}
       <h4 className="mt-1 flex items-start gap-2 break-words font-semibold"><MapPin className="h-5 w-5 shrink-0" aria-hidden="true" />{match.origin} → {match.destination}</h4>
-      <p className="mt-2 text-sm">{dateText(match.travelDate)} · {match.preferredTime}</p>
-      {match.ownRoute && <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground"><Clock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />{t[`your${match.ownKind}`]}: {match.ownRoute.preferredTime} · {gapText(match.minutesApart)}</p>}
-      <p className="mt-2 text-xs text-muted-foreground">{t.timeHint}</p>
+      <p className="mt-2 text-sm">{t.theirTime}: {dateText(match.travelDate)} · {match.preferredTime}</p>
+      {match.ownRoute && <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground"><Clock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />{t[`your${match.ownKind}`]}: {match.ownRoute.travelDate.slice(0, 10) !== match.travelDate.slice(0, 10) && `${dateText(match.ownRoute.travelDate)} · `}{match.ownRoute.preferredTime} · {gapText(match.minutesApart)}</p>}
+      <p className="mt-2 text-xs text-muted-foreground">{t.withinWindow(data?.matchWindowHours || 12)} · {t.timeHint}</p>
       {match.contact ? <div className="mt-4 space-y-2 break-words rounded-lg bg-muted p-4 text-sm"><h5 className="font-semibold">{t.contact}</h5><p>{match.contact.name}</p>
         <div className="flex flex-wrap gap-2"><a className={primary} href={`tel:${match.contact.phone}`}><Phone className="h-4 w-4" aria-hidden="true" />{t.call} {match.contact.phone}</a>{match.contact.email && <a className={secondary} href={`mailto:${match.contact.email}`}><Mail className="mr-1.5 h-4 w-4" aria-hidden="true" />{t.emailAction}</a>}</div>
         {match.contact.itemDetails && <p>{t.item}: {match.contact.itemDetails}</p>}{match.contact.instructions && <p>{t.instructions}: {match.contact.instructions}</p>}</div> : <p className="mt-4 text-sm text-muted-foreground">{t.private}</p>}
@@ -145,10 +147,11 @@ export default function SafarSaathi() {
       {message && <div role="status" className="mt-5 break-words rounded-xl border border-gold/50 p-4 text-sm">{message.changed ? t.changed : <><p>{t.success} <strong>{message.id}</strong></p><p className="mt-2">{message.matches} {t.matchCount}</p></>}</div>}
       {data && isAuthenticated && <section className="mt-12" aria-label={t.dashboard}><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="section-title">{t.dashboard}</h2><button type="button" className={secondary} disabled={busy || loading} onClick={() => refresh()}>{t.refresh}</button></div><p className="mt-2 text-xs text-muted-foreground">{t.history}</p>
         <h3 className="mt-8 text-xl font-semibold">{t.entries}</h3><div className="mt-4 grid gap-4 sm:grid-cols-2">{data.entries.map(entry => <article className="min-w-0 rounded-xl border border-border bg-card p-5" key={entry.id}><p className="text-xs font-semibold text-muted-foreground">{t[entry.kind]} · {t[entry.requestType]} · {entry.status === 'OPEN' && entry.travelDate.slice(0, 10) < today() ? t.EXPIRED : t[entry.status]}</p><h4 className="mt-3 break-words font-semibold">{entry.origin} → {entry.destination}</h4><p className="mt-2 text-sm">{dateText(entry.travelDate)} · {entry.preferredTime}</p><p className="mt-2 break-all text-xs text-muted-foreground">{entry.id}</p>{entry.itemDetails && <p className="mt-3 break-words text-sm">{t.item}: {entry.itemDetails}</p>}{entry.instructions && <p className="mt-2 break-words text-sm">{t.instructions}: {entry.instructions}</p>}{entry.status === 'OPEN' && <button type="button" className={`${secondary} mt-4`} disabled={busy} onClick={() => action(() => base44.safar.cancel(entry.id))}>{t.cancel}</button>}</article>)}</div>{!data.entries.length && <p className="mt-4 text-sm text-muted-foreground">{t.emptyEntries}</p>}
-        <h3 className="mt-8 text-xl font-semibold">{t.matches}</h3>
+        <h3 id="safar-matches" className="mt-8 scroll-mt-32 text-xl font-semibold">{t.matches}</h3>
         {data.ownPairs > 0 && <p role="note" className="mt-3 rounded-xl border border-gold/50 bg-gold/10 p-4 text-sm leading-relaxed">{t.ownPairs}</p>}
         <div className="mt-4 grid gap-4 sm:grid-cols-2">{activeMatches.map(matchCard)}</div>{!activeMatches.length && <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{t.emptyMatches}</p>}
         {pastMatches.length > 0 && <details className="mt-6"><summary className="cursor-pointer text-sm font-semibold">{t.earlierMatches} ({pastMatches.length})</summary><div className="mt-4 grid gap-4 opacity-80 sm:grid-cols-2">{pastMatches.map(matchCard)}</div></details>}
+        <AvailableJourneys t={t} lang={lang} dateText={dateText} gapText={gapText} version={data} onConnected={() => refresh(true)} />
         <h3 className="mt-8 flex items-center gap-2 text-xl font-semibold"><Bell className="h-5 w-5" />{t.inbox}</h3><ul className="mt-4 space-y-3">{data.notices.map(notice => <li key={notice.id} className="rounded-xl border border-border bg-card p-4 text-sm"><p className="font-semibold">{t[notice.kind]}</p><p className="mt-2 break-all text-xs text-muted-foreground">{notice.matchId}</p><p className="mt-2 text-xs">{t.mailStatus}: {t[notice.emailStatus]}</p></li>)}</ul>{!data.notices.length && <p className="mt-4 text-sm text-muted-foreground">{t.emptyInbox}</p>}
       </section>}
     </section>

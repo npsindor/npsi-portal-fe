@@ -168,3 +168,106 @@ test('Potential Matches: no match keeps the empty message; own plan + own reques
   await expect(page.getByRole('note').filter({ hasText: 'आपस में मिलान नहीं हो सकता' })).toBeVisible();
   await expect(page.getByText('पिछले मिलान (1)')).toBeVisible();
 });
+
+// ---- Available Journeys & Requests ----
+const JOURNEY = (fields) => ({ id: 'plan-1', kind: 'OFFER', requestType: 'BOTH', origin: 'Indore', destination: 'Khargone', travelDate: '2099-11-29', preferredTime: '19:00', itemDetails: null, status: 'OPEN', minutesFromWanted: null, connection: null, ...fields });
+
+test('Available Journeys: a member who posted nothing browses plans and requests and sends a parcel request from a plan', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  let available = { matchWindowHours: 12, items: [
+    JOURNEY({}),
+    JOURNEY({ id: 'plan-2', requestType: 'TRAVEL', destination: 'Maheshwar', preferredTime: '08:00' }),
+    JOURNEY({ id: 'need-1', kind: 'REQUEST', requestType: 'DELIVERY', destination: 'Barwaha', itemDetails: 'Sweets box' }),
+  ] };
+  const calls = await mockApi(page, { 'GET /auth/me': MEMBER, 'GET /safar-saathi/capabilities': { email: false, sms: false, inApp: true }, 'GET /safar-saathi/me': SAFAR_ME({}) });
+  await page.route('**/api/v1/safar-saathi/available*', (route) => route.fulfill({ json: available }));
+  let sent;
+  await page.route('**/api/v1/safar-saathi/entries/plan-1/connections', async (route) => {
+    sent = route.request().postDataJSON();
+    available = { ...available, items: available.items.map((item) => (item.id === 'plan-1' ? { ...item, connection: { matchId: 'm9', status: 'PROPOSED' } } : item)) };
+    await route.fulfill({ status: 201, json: { entryId: 'mine-1', matchId: 'm9', existing: false } });
+  });
+  await page.goto('/travel-assistance');
+  const cards = page.getByTestId('safar-available');
+  await expect(cards).toHaveCount(3);
+  // Plan carrying both: both requests; travel-only plan: travel together only; a member's request: offer to help.
+  await expect(cards.nth(0).getByRole('button', { name: /Request Parcel Delivery/ })).toBeVisible();
+  await expect(cards.nth(0).getByRole('button', { name: /Request to Travel Together/ })).toBeVisible();
+  await expect(cards.nth(1).getByRole('button', { name: /Request Parcel Delivery/ })).toHaveCount(0);
+  await expect(cards.nth(1).getByRole('button', { name: /Request to Travel Together/ })).toBeVisible();
+  await expect(cards.nth(2)).toContainText('Parcel request');
+  await expect(cards.nth(2)).toContainText('Sweets box');
+  await expect(cards.nth(2).getByRole('button', { name: /Offer to Help/ })).toBeVisible();
+  await expect(cards.nth(0)).toContainText('29 November 2099 · Departure 19:00');
+  // No names or phone numbers in the list.
+  await expect(page.locator('#safar-available')).not.toContainText(/\d{10}/);
+  await cards.nth(0).getByRole('button', { name: /Request Parcel Delivery/ }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { name: 'Request Parcel Delivery' })).toBeVisible();
+  await expect(dialog.locator('#connect-time')).toHaveValue('19:00');
+  await dialog.locator('#connect-item').fill('Medicine box');
+  await dialog.locator('#connect-time').fill('17:30');
+  await dialog.getByRole('checkbox').check();
+  await dialog.getByRole('button', { name: 'Send Request' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Request sent.' })).toBeVisible();
+  expect(sent).toMatchObject({ requestType: 'DELIVERY', itemDetails: 'Medicine box', preferredTime: '17:30', lang: 'en', consent: true });
+  expect(sent.clientRequestId).toMatch(/^[0-9a-f-]{36}$/);
+  // After sending: the card shows the request instead of the buttons, so a second one is not sent.
+  await expect(cards.nth(0).getByRole('link', { name: 'Request sent' })).toHaveAttribute('href', '#safar-matches');
+  await expect(cards.nth(0).getByRole('button', { name: /Request Parcel Delivery/ })).toHaveCount(0);
+  expect(calls.filter((call) => call.key === 'GET /safar-saathi/me').length).toBeGreaterThan(1);
+});
+
+test('Available Journeys: route/date/time search ranks within the 12-hour window; travel-together and offer-to-help forms', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  await mockApi(page, { 'GET /auth/me': MEMBER, 'GET /safar-saathi/capabilities': { email: false, sms: false, inApp: true }, 'GET /safar-saathi/me': SAFAR_ME({}) });
+  const queries = [];
+  await page.route('**/api/v1/safar-saathi/available*', (route) => {
+    const url = new URL(route.request().url());
+    queries.push(url.search);
+    route.fulfill({ json: { matchWindowHours: 12, items: url.search ? [JOURNEY({ minutesFromWanted: 90 }), JOURNEY({ id: 'need-2', kind: 'REQUEST', requestType: 'TRAVEL', minutesFromWanted: 360 })] : [] } });
+  });
+  const posted = {};
+  await page.route('**/api/v1/safar-saathi/entries/*/connections', async (route) => {
+    posted[route.request().url().split('/').at(-2)] = route.request().postDataJSON();
+    await route.fulfill({ status: 201, json: { entryId: 'x', matchId: 'y', existing: false } });
+  });
+  await page.goto('/travel-assistance');
+  await expect(page.getByText('No open journeys or requests from other members right now.')).toBeVisible();
+  await page.locator('#available-origin').fill('Indore');
+  await page.locator('#available-destination').fill('Khargone');
+  await page.locator('#available-date').fill('2099-11-29');
+  await page.locator('#available-time').fill('17:30');
+  await page.locator('#safar-available').getByRole('button', { name: 'Search' }).click();
+  await expect.poll(() => queries.at(-1)).toBe('?origin=Indore&destination=Khargone&date=2099-11-29&time=17%3A30');
+  await expect(page.getByText('Showing this route within the 12-hour matching window, closest first.')).toBeVisible();
+  const cards = page.getByTestId('safar-available');
+  await expect(cards.nth(0)).toContainText('1 h 30 min apart from your time · Within 12-hour matching window');
+  await cards.nth(0).getByRole('button', { name: /Request to Travel Together/ }).click();
+  await page.getByRole('dialog').getByRole('checkbox').check();
+  await page.getByRole('dialog').getByRole('button', { name: 'Send Request' }).click();
+  await expect.poll(() => posted['plan-1']).toMatchObject({ requestType: 'TRAVEL', preferredTime: '19:00' });
+  await cards.nth(1).getByRole('button', { name: /Offer to Help/ }).click();
+  await expect(page.getByRole('dialog').locator('#connect-item')).toHaveCount(0);
+  await page.getByRole('dialog').getByRole('checkbox').check();
+  await page.getByRole('dialog').getByRole('button', { name: 'Send Request' }).click();
+  await expect.poll(() => posted['need-2']).toBeTruthy();
+  expect(posted['need-2'].requestType).toBeUndefined();
+  await page.getByRole('button', { name: 'Show all' }).click();
+  await expect.poll(() => queries.at(-1)).toBe('');
+});
+
+test('Potential Matches: a direct request is marked, with their time and your time shown separately', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  await mockApi(page, {
+    'GET /auth/me': MEMBER,
+    'GET /safar-saathi/capabilities': { email: false, sms: false, inApp: true },
+    'GET /safar-saathi/me': SAFAR_ME({ matchWindowHours: 12, matches: [match({ direction: 'RECEIVED', requestType: 'TRAVEL', travelDate: '2099-11-30T00:00:00.000Z', preferredTime: '05:00', minutesApart: 360, ownRoute: { origin: 'Indore', destination: 'Khargone', travelDate: '2099-11-29T00:00:00.000Z', preferredTime: '23:00' } })] }),
+  });
+  await page.goto('/travel-assistance');
+  const card = page.getByTestId('safar-match');
+  await expect(card).toContainText('Direct request · for your entry');
+  await expect(card).toContainText('Their time: 30 November 2099 · 05:00');
+  await expect(card).toContainText('Your travel plan: 29 November 2099 · 23:00 · 6 h apart');
+  await expect(card).toContainText('Within 12-hour matching window · Approximate timing — confirm with the traveller.');
+});
