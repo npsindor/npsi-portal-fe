@@ -265,7 +265,7 @@
     color: #0a1f33;
     background: linear-gradient(135deg, #f3dc8c 0%, #e6c86e 35%, #c49a43 100%);
     box-shadow: 0 0 0 1px rgba(184, 144, 31, 0.55), 0 6px 18px -4px rgba(196, 154, 67, 0.65);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    transition: box-shadow 0.2s ease, filter 0.2s ease;
     animation: join-cta-glow 2.8s ease-in-out infinite;
   }
   .join-cta::after {
@@ -277,8 +277,8 @@
     transform: translateX(-120%);
     animation: join-cta-shine 3.6s ease-in-out infinite;
   }
+  /* No lift on hover: moving the button under the pointer dropped clicks near its bottom edge. */
   .join-cta:hover {
-    transform: translateY(-1px);
     filter: brightness(1.05);
     box-shadow: 0 0 0 1px rgba(184, 144, 31, 0.8), 0 10px 24px -6px rgba(196, 154, 67, 0.85);
   }
