@@ -77,6 +77,7 @@ const L = {
     removeConfirm2: "from your family? This cannot be undone.",
     removing: "Removing...",
     reqNameRel: "Name and relationship are required",
+    headLocked: "The head of the family stays the head. Ask an administrator if the head needs to change.",
     dupName: "Duplicate name",
     dupDesc: "A member with this name already exists in your family.",
     invalidDob: "Invalid date of birth",
@@ -143,6 +144,7 @@ const L = {
     removeConfirm2: "को अपने परिवार से हटाना चाहते हैं? यह वापस नहीं हो सकता।",
     removing: "हटाया जा रहा है...",
     reqNameRel: "नाम और रिश्ता आवश्यक है",
+    headLocked: "परिवार के मुखिया का रिश्ता नहीं बदला जा सकता। मुखिया बदलना हो तो प्रशासक से संपर्क करें।",
     dupName: "नाम दोहराया गया",
     dupDesc: "इस नाम का सदस्य आपके परिवार में पहले से मौजूद है।",
     invalidDob: "अमान्य जन्म तिथि",
@@ -261,7 +263,10 @@ export default function MyFamily() {
   const ownRecord = members.find((m) => isOwnRelationship(m.relationship))
     || members.find((m) => m.email && user?.email && m.email.toLowerCase() === user.email.toLowerCase());
   // "Self (Head)" is offered for the owner's own record, and when adding while the family has no such record yet.
+  // The head's own card stays the head (the server refuses a change): no other relationship to pick, and no Remove.
+  const editingHead = Boolean(editing && isOwnRelationship(editing.relationship));
   const relationshipOptions = (() => {
+    if (editingHead) return [editing.relationship];
     const own = editing ? editing.id === ownRecord?.id || isOwnRelationship(editing.relationship) : !ownRecord;
     const list = own ? ["Head", ...relationships] : relationships;
     return form.relationship && !list.includes(form.relationship) ? [...list, form.relationship] : list;
@@ -435,9 +440,11 @@ export default function MyFamily() {
               <button onClick={() => openEdit(m)} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-gold/40 px-3 py-1.5 text-xs font-semibold text-maroon transition hover:bg-gold/10">
                 <Pencil className="h-3 w-3" /> {t.edit}
               </button>
-              <button onClick={() => setConfirmRemove(m)} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-destructive/30 px-3 py-1.5 text-xs font-semibold text-destructive transition hover:bg-destructive/5">
-                <Trash2 className="h-3 w-3" /> {t.remove}
-              </button>
+              {!isOwnRelationship(m.relationship) && (
+                <button onClick={() => setConfirmRemove(m)} className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-destructive/30 px-3 py-1.5 text-xs font-semibold text-destructive transition hover:bg-destructive/5">
+                  <Trash2 className="h-3 w-3" /> {t.remove}
+                </button>
+              )}
             </div>
           </div>
         ))}
@@ -475,10 +482,11 @@ export default function MyFamily() {
               </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.relationship} *</label>
-                <select id="member-relationship" aria-label={t.relationship} value={form.relationship} onChange={(e) => { const relationship = e.target.value; setForm({ ...form, relationship, education: educationNotAllowed(relationship, form.education) ? "" : form.education }); }} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">
-                  <option value="">{t.select}</option>
+                <select id="member-relationship" aria-label={t.relationship} value={form.relationship} disabled={editingHead} onChange={(e) => { const relationship = e.target.value; setForm({ ...form, relationship, education: educationNotAllowed(relationship, form.education) ? "" : form.education }); }} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon disabled:opacity-70">
+                  {!editingHead && <option value="">{t.select}</option>}
                   {relationshipOptions.map((r) => <option key={r} value={r}>{relLabel(r)}</option>)}
                 </select>
+                {editingHead && <p className="mt-1 text-xs text-muted-foreground">{t.headLocked}</p>}
               </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.gender}</label>
