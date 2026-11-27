@@ -8,7 +8,7 @@
   # Only the app's own pages are served the app (HTTP 200). Keep this list in step with the routes in
   # src/App.jsx (src/routes.test.js checks it). Any other path is a real 404, still rendered by the app
   # through ErrorDocument below, so search engines and tools see the right status.
-  RewriteRule ^(about|admin|application-status|career-business|community-services|contact|core-team|events|forgot-password|help|join|login|medical|news|portal|principles|privacy|public-feedback|register|register-account|reset-password|room-hunting|rules|sagun|search|student-register|teams|terms|transportation|verify)(/.*)?$ /index.html [L]
+  RewriteRule ^(about|admin|application-status|career-business|community-services|contact|core-team|events|forgot-password|help|join|login|medical|news|portal|principles|privacy|public-feedback|register|register-account|reset-password|room-hunting|rules|sagun|search|student-register|teams|terms|transportation|travel-assistance|verify)(/.*)?$ /index.html [L]
 </IfModule>
 ErrorDocument 404 /index.html
 

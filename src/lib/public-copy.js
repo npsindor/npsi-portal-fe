@@ -10,7 +10,7 @@ export const publicHindi = {
   "Change Password": "पासवर्ड बदलें",
   "Logout": "लॉगआउट",
  "Register Matrimonial Profile": "वैवाहिक परिचय पंजीकरण",
-  "Transportation": "यातायात सहयोग",
+  "Travel & Assistance": "यात्रा एवं सहायता",
   "Medical": "स्वास्थ्य सहयोग",
   "Health Support": "स्वास्थ्य सहयोग",
   "Core Team": "कोर टीम",

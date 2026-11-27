@@ -32,7 +32,7 @@ export default function AdminLayout() {
     { label: lang === "hi" ? "शगुन बंधन" : "Shagun Bandhan", path: "/admin/sagun", icon: HeartHandshake },
     { label: lang === "hi" ? "शगुन डिजिटल कार्ड" : "Shagun Digital Cards", path: "/admin/sagun-cards", icon: IdCard },
     { label: lang === "hi" ? "आवास सहयोग" : "Room Hunting", path: "/admin/room-hunting", icon: House },
-    { label: lang === "hi" ? "यातायात सहयोग" : "Transportation", path: "/admin/transportation", icon: Route },
+    { label: lang === "hi" ? "यात्रा एवं सहायता" : "Travel & Assistance", path: "/admin/travel-assistance", icon: Route },
     { label: sehatLabel, path: "/admin/sehat-saathi", icon: Stethoscope },
     { label: t("admin.events"), path: "/admin/events", icon: CalendarDays },
     { label: lang === "hi" ? "कार्यक्रम वित्त एवं रोस्टर" : "Event Finance & Roster", path: "/admin/event-finance", icon: Wallet },

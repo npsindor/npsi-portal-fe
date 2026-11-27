@@ -15,7 +15,7 @@ const openSafar = async () => {
 };
 const words = {
   en: { title: "Services overview", sagun: "Shagun Bandhan applications", room: "Rental listings", roomNeeds: "Room requirements", transport: "Open transport requests", pending: "pending", total: "total", latest: "Latest Sandesh", none: "No Sandesh yet.", manage: "Manage" },
-  hi: { title: "सेवाओं का सारांश", sagun: "शगुन बंधन आवेदन", room: "किराए की लिस्टिंग", roomNeeds: "कमरे की आवश्यकताएँ", transport: "खुले परिवहन अनुरोध", pending: "लंबित", total: "कुल", latest: "नवीनतम संदेश", none: "अभी कोई संदेश नहीं।", manage: "प्रबंधित करें" },
+  hi: { title: "सेवाओं का सारांश", sagun: "शगुन बंधन आवेदन", room: "किराए की लिस्टिंग", roomNeeds: "कमरे की आवश्यकताएँ", transport: "खुले यात्रा एवं सहायता अनुरोध", pending: "लंबित", total: "कुल", latest: "नवीनतम संदेश", none: "अभी कोई संदेश नहीं।", manage: "प्रबंधित करें" },
 };
 const sum = (counts) => Object.entries(counts || {}).filter(([status]) => status !== "ARCHIVED").reduce((total, [, count]) => total + count, 0);
 
@@ -34,7 +34,7 @@ export default function ServicesOverview({ lang }) {
     { label: t.sagun, icon: HeartHandshake, to: "/admin/sagun", total: data.sagun?.total, pending: data.sagun?.pending },
     { label: t.room, icon: House, to: "/admin/room-hunting", total: sum(data.room?.listings), pending: data.room?.listings?.PENDING || 0 },
     { label: t.roomNeeds, icon: House, to: "/admin/room-hunting", total: sum(data.room?.requirements), pending: data.room?.requirements?.PENDING || 0 },
-    { label: t.transport, icon: Route, to: "/admin/transportation", total: data.safar },
+    { label: t.transport, icon: Route, to: "/admin/travel-assistance", total: data.safar },
   ];
   return <section className="rounded-2xl border border-gold/30 bg-card p-5">
     <h2 className="font-display text-lg font-semibold text-maroon">{t.title}</h2>

@@ -32,7 +32,7 @@ export const PAGE_CONTENT = {
   'community-services': { label: ['Community Services', 'सामुदायिक सेवाएँ'], path: '/community-services', sections: { hero: ['Page banner', 'पेज बैनर', 'intro'], 'blood-donation': ['Blood Donation', 'रक्तदान', 'intro'], 'emergency-help': ['Emergency Help', 'आपातकालीन सहायता', 'intro'], 'social-welfare': ['Social Welfare', 'समाज कल्याण', 'intro'] } },
   news: { label: ['Sandesh', 'संदेश'], path: '/news', sections: { hero: ['Page banner', 'पेज बैनर', 'intro'], notices: ['Important Notices', 'महत्वपूर्ण सूचनाएँ', 'intro'], community: ['Community News', 'सामुदायिक समाचार', 'intro'], greetings: ['Festival Greetings', 'त्योहार शुभकामनाएँ', 'intro'] } },
   sagun: { label: ['Shagun Bandhan', 'शगुन बंधन'], path: '/sagun', sections: { hero: ['Page banner', 'पेज बैनर', 'intro'] } },
-  transportation: { label: ['Transportation', 'यातायात सहयोग'], path: '/transportation', sections: { hero: ['Page banner', 'पेज बैनर', 'intro'] } },
+  transportation: { label: ['Travel & Assistance', 'यात्रा एवं सहायता'], path: '/travel-assistance', sections: { hero: ['Page banner', 'पेज बैनर', 'intro'] } },
   medical: { label: ['Health Support', 'स्वास्थ्य सहयोग'], path: '/medical', sections: { hero: ['Page banner', 'पेज बैनर', 'intro'] } },
   'room-hunting': { label: ['Room Hunting', 'आवास सहयोग'], path: '/room-hunting', sections: { hero: ['Page banner', 'पेज बैनर', 'intro'] } },
   feedback: { label: ['Feedback', 'सुझाव'], path: '/public-feedback', sections: { hero: ['Page banner', 'पेज बैनर', 'intro'], main: ['Page content', 'पेज सामग्री', 'items'] } },

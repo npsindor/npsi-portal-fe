@@ -39,7 +39,7 @@ for (const width of [390, 1280]) {
     const nav = page.locator('#public-navigation');
     if (width < 1280) await page.getByRole('button', { name: 'Open navigation menu' }).click();
     await expect(nav.locator('summary')).toHaveCount(2);
-    for (const label of ['Home', 'About Us', 'Events & Programs', 'Blood Donor', 'Career & Business', 'Sandesh', 'Shagun Bandhan', 'Transportation', 'Health Support', 'Room Hunting', 'Feedback', 'Contact Us']) await expect(await navLink(page, label)).toBeVisible();
+    for (const label of ['Home', 'About Us', 'Events & Programs', 'Blood Donor', 'Career & Business', 'Sandesh', 'Shagun Bandhan', 'Travel & Assistance', 'Health Support', 'Room Hunting', 'Feedback', 'Contact Us']) await expect(await navLink(page, label)).toBeVisible();
     await expect(nav.getByRole('link', { name: 'Home', exact: true })).toHaveAttribute('aria-current', 'page');
     await shot(page, `header-${width}`);
     await nav.getByRole('link', { name: 'Sandesh', exact: true }).click();

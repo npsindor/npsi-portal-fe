@@ -12,7 +12,7 @@ for (const lang of ['en', 'hi']) {
       await page.goto('/');
       const nav = page.locator('#public-navigation');
       for (const [english, hindi, path, heading] of [
-        ['Transportation', 'यातायात सहयोग', '/transportation', hi ? 'साथ सफ़र करें। एक-दूसरे की मदद करें।' : 'Travel Together. Help Each Other.'],
+        ['Travel & Assistance', 'यात्रा एवं सहायता', '/travel-assistance', hi ? 'साथ सफ़र करें। एक-दूसरे की मदद करें।' : 'Travel Together. Help Each Other.'],
         ['Health Support', 'स्वास्थ्य सहयोग', '/medical', hi ? 'विश्वसनीय जानकारी। ज़िम्मेदार सहायता।' : 'Trusted Resources. Responsible Assistance.'],
         ['Room Hunting', 'आवास सहयोग', '/room-hunting', hi ? 'अपनों के बीच अपना घर खोजें' : 'Find a home among your own people'],
       ]) {
