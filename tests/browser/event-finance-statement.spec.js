@@ -37,7 +37,7 @@ test('member: bilingual statement with totals from the records, section subtotal
   await expect(list.locator('tbody tr').first()).toContainText('Smt. Sonu Manish Patidar');
   await page.getByRole('tab', { name: 'Event expenses (Jaavak)' }).click();
   const exp = page.getByRole('region', { name: 'Event expenses (Jaavak)' });
-  await expect(exp.getByRole('columnheader', { name: 'Swajan Samaroh – Nimar Patidar Sangathan, Indore' })).toBeVisible();
+  await expect(exp.getByRole('columnheader', { name: 'Swajan Samaroh – Nimad Patidar Sangathan, Indore' })).toBeVisible();
   await expect(exp).toContainText('Subtotal: Maa Na Garba Mahotsav expenses');
   // Hindi: headings, the event's Hindi title and the Hindi expense heading.
   await page.evaluate(() => localStorage.setItem('pss_lang', 'hi'));

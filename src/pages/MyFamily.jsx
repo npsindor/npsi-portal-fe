@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Users, UserPlus, Pencil, Trash2, X, Mail, Phone, MapPin, GraduationCap, Briefcase, ArrowRightLeft } from "lucide-react";
+import { Users, UserPlus, Pencil, Trash2, X, Mail, Phone, MapPin, GraduationCap, Briefcase, ArrowRightLeft, School, Building2 } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
 import RequestTransferModal from "@/components/RequestTransferModal";
 import { base44 } from "@/api/base44Client";
@@ -14,7 +14,7 @@ import { translateError } from "@/lib/registration-copy";
 import { asksMaritalStatus, EDUCATION_LEVELS, educationNotAllowed, educationOptionsFor, impliesMarried, MARITAL_STATUSES, OCCUPATIONS, optionLabel, showsApprovalNote, withCurrent } from "@/lib/member-options";
 import { isValidMobile, sanitizeMobile } from "@/lib/utils";
 
-const relationships = ["Spouse", "Son", "Daughter", "Father", "Mother", "Brother", "Sister", "Other"];
+const relationships = ["Spouse", "Son", "Daughter", "Father", "Mother", "Brother", "Sister", "Younger Brother's Wife", "Daughter-in-law", "Sister-in-law", "Other"];
 const genders = ["Male", "Female", "Other"];
 
 const relLabels = {
@@ -25,6 +25,9 @@ const relLabels = {
   Mother: { en: "Mother", hi: "माता" },
   Brother: { en: "Brother", hi: "भाई" },
   Sister: { en: "Sister", hi: "बहन" },
+  "Younger Brother's Wife": { en: "Younger Brother's Wife", hi: "छोटे भाई की पत्नी" },
+  "Daughter-in-law": { en: "Daughter-in-law", hi: "पुत्रवधू (बहू)" },
+  "Sister-in-law": { en: "Sister-in-law", hi: "भाभी / ननद / साली" },
   Other: { en: "Other", hi: "अन्य" },
   // The account owner's own record (stored as "Head", the value the rest of the portal reads).
   Head: { en: "Self (Head)", hi: "स्वयं (मुखिया)" },
@@ -61,6 +64,8 @@ const L = {
     email: "Email",
     education: "Education",
     occupation: "Occupation",
+    schoolCollege: "School / College name",
+    companyName: "Company name",
     maritalStatus: "Marital Status",
     address: "Address",
     select: "Select...",
@@ -80,7 +85,7 @@ const L = {
     futureDob: "Date of birth must be before today.",
     invalidMobile: "Invalid mobile",
     mobile10: "Mobile number must be 10 digits.",
-    educationFrom8th: "For a spouse, father, mother, brother, sister or yourself, education starts from 8th.",
+    educationFrom8th: "For a spouse, father, mother, brother, sister, sister-in-law, daughter-in-law, younger brother's wife or yourself, education starts from 8th.",
     updated: "Member updated",
     updatedDesc: "updated.",
     added: "Member added",
@@ -125,6 +130,8 @@ const L = {
     email: "ईमेल",
     education: "शिक्षा",
     occupation: "व्यवसाय",
+    schoolCollege: "स्कूल / कॉलेज का नाम",
+    companyName: "कंपनी का नाम",
     maritalStatus: "वैवाहिक स्थिति",
     address: "पता",
     select: "चुनें...",
@@ -144,7 +151,7 @@ const L = {
     futureDob: "जन्म तिथि आज से पहले की होनी चाहिए।",
     invalidMobile: "अमान्य मोबाइल",
     mobile10: "मोबाइल नंबर 10 अंकों का होना चाहिए।",
-    educationFrom8th: "जीवनसाथी, पिता, माता, भाई, बहन या स्वयं के लिए शिक्षा 8वीं से शुरू होती है।",
+    educationFrom8th: "जीवनसाथी, पिता, माता, भाई, बहन, भाभी/ननद/साली, पुत्रवधू, छोटे भाई की पत्नी या स्वयं के लिए शिक्षा 8वीं से शुरू होती है।",
     updated: "सदस्य अपडेट हुआ",
     updatedDesc: "अपडेट हुआ।",
     added: "सदस्य जोड़ा गया",
@@ -168,7 +175,7 @@ const L = {
   },
 };
 
-const emptyForm = { name: "", relationship: "", gender: "", dob: "", mobile: "", email: "", education: "", occupation: "", maritalStatus: "", address: "" };
+const emptyForm = { name: "", relationship: "", gender: "", dob: "", mobile: "", email: "", education: "", occupation: "", schoolCollege: "", companyName: "", maritalStatus: "", address: "" };
 
 function isDuplicateName(name, members, exceptId = null) {
   const key = name.trim().toLowerCase();
@@ -278,7 +285,7 @@ export default function MyFamily() {
     setForm({
       name: m.name || "", relationship: m.relationship || "", gender: m.gender || "",
       dob: m.dob || "", mobile: m.mobile || "", email: m.email || "",
-      education: m.education || "", occupation: m.occupation || "", maritalStatus: m.maritalStatus || "", address: m.address || "",
+      education: m.education || "", occupation: m.occupation || "", schoolCollege: m.schoolCollege || "", companyName: m.companyName || "", maritalStatus: m.maritalStatus || "", address: m.address || "",
     });
     setShowForm(true);
   };
@@ -320,6 +327,8 @@ export default function MyFamily() {
         email: form.email.trim(),
         education: form.education,
         occupation: form.occupation,
+        schoolCollege: form.schoolCollege.trim(),
+        companyName: form.companyName.trim(),
         // A son or daughter under 18 (or without a birth date) has no marital status.
         maritalStatus: impliesMarried(form.relationship) ? "MARRIED" : asksMaritalStatus(form.relationship, form.dob) ? form.maritalStatus || null : null,
         address: form.address,
@@ -417,6 +426,8 @@ export default function MyFamily() {
               {m.email && <div className="flex items-center gap-1.5 truncate"><Mail className="h-3 w-3 shrink-0 text-gold" /> <span className="truncate">{m.email}</span></div>}
               {m.education && <div className="flex items-center gap-1.5"><GraduationCap className="h-3 w-3 text-gold" /> {optionLabel(EDUCATION_LEVELS, m.education, lang)}</div>}
               {m.occupation && <div className="flex items-center gap-1.5"><Briefcase className="h-3 w-3 text-gold" /> {optionLabel(OCCUPATIONS, m.occupation, lang)}</div>}
+              {m.schoolCollege && <div className="flex items-center gap-1.5"><School className="h-3 w-3 shrink-0 text-gold" /> <span className="truncate">{m.schoolCollege}</span></div>}
+              {m.companyName && <div className="flex items-center gap-1.5"><Building2 className="h-3 w-3 shrink-0 text-gold" /> <span className="truncate">{m.companyName}</span></div>}
               {m.address && <div className="flex items-center gap-1.5"><MapPin className="h-3 w-3 text-gold" /> {m.address}</div>}
             </div>
             <SagunToggle member={m} info={sagun[m.id]} t={t} busy={sagunBusy === m.id} onToggle={toggleSagun} />
@@ -493,6 +504,25 @@ export default function MyFamily() {
               {[
                 ["education", t.education, educationOptionsFor(form.relationship)],
                 ["occupation", t.occupation, OCCUPATIONS],
+              ].map(([key, label, options]) => (
+                <div key={key}>
+                  <label htmlFor={`member-${key}`} className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</label>
+                  <select id={`member-${key}`} value={form[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon">
+                    <option value="">{t.select}</option>
+                    {withCurrent(options, form[key]).map((o) => <option key={o.value} value={o.value}>{lang === "hi" ? o.hi : o.en}</option>)}
+                  </select>
+                </div>
+              ))}
+              {[
+                ["schoolCollege", t.schoolCollege],
+                ["companyName", t.companyName],
+              ].map(([key, label]) => (
+                <div key={key}>
+                  <label htmlFor={`member-${key}`} className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</label>
+                  <input id={`member-${key}`} maxLength={255} value={form[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })} className="mt-1.5 w-full rounded-xl border border-border bg-cream px-3 py-2 text-sm outline-none focus:border-maroon focus:ring-1 focus:ring-maroon" />
+                </div>
+              ))}
+              {[
                 ...(asksMaritalStatus(form.relationship, form.dob) ? [["maritalStatus", t.maritalStatus, MARITAL_STATUSES]] : []),
               ].map(([key, label, options]) => (
                 <div key={key}>

@@ -44,7 +44,7 @@ export default function Careers() {
   const t = copy[lang] || copy.en;
   const content = usePageContent("careers");
   useEffect(() => {
-    document.title = `${t.eyebrow} | ${lang === "hi" ? "निमाड़ पाटीदार संगठन, इंदौर" : "Nimar Patidar Sangathan, Indore"}`;
+    document.title = `${t.eyebrow} | ${lang === "hi" ? "निमाड़ पाटीदार संगठन, इंदौर" : "Nimad Patidar Sangathan, Indore"}`;
   }, [t, lang]);
   useSectionLanding({}, content.ready);
 

@@ -11,7 +11,7 @@ import { awaitingCount, revenueOf } from "@/lib/revenue";
 const L = {
   en: {
     title: "Dashboard",
-    sub: "Overview of the Nimar Patidar Sangathan, Indore platform.",
+    sub: "Overview of the Nimad Patidar Sangathan, Indore platform.",
     totalFamilies: "Total Families",
     totalMembers: "Total Members",
     pendingApps: "Pending Applications",

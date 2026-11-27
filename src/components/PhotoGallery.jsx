@@ -15,7 +15,7 @@ const DEFAULT_PHOTOS = [
   ...Array.from({ length: GARBA_PHOTO_COUNT }, (_, i) => ({ id: `maanagarba-${i + 1}`, src: `/gallery/${i + 1}maanagarba.jpg` })),
 ];
 const copy = {
-  en: { eyebrow: 'Photo Gallery', title: 'Moments from our community', intro: 'Celebrations, programmes and gatherings of the Nimar Patidar Sangathan, Indore.', default: 'Maa Na Garba — Nimar Patidar Sangathan, Indore', label: 'Photo gallery', prev: 'Previous photo', next: 'Next photo', pause: 'Pause slideshow', play: 'Play slideshow', open: 'View full size', of: 'of' },
+  en: { eyebrow: 'Photo Gallery', title: 'Moments from our community', intro: 'Celebrations, programmes and gatherings of the Nimad Patidar Sangathan, Indore.', default: 'Maa Na Garba — Nimad Patidar Sangathan, Indore', label: 'Photo gallery', prev: 'Previous photo', next: 'Next photo', pause: 'Pause slideshow', play: 'Play slideshow', open: 'View full size', of: 'of' },
   hi: { eyebrow: 'फोटो गैलरी', title: 'हमारे समाज के यादगार पल', intro: 'निमाड़ पाटीदार संगठन के उत्सव, कार्यक्रम और सम्मेलन।', default: 'माँ ना गरबा — निमाड़ पाटीदार संगठन, इंदौर', label: 'फोटो गैलरी', prev: 'पिछली फोटो', next: 'अगली फोटो', pause: 'स्लाइडशो रोकें', play: 'स्लाइडशो चलाएँ', open: 'बड़ा करके देखें', of: '/' },
 };
 

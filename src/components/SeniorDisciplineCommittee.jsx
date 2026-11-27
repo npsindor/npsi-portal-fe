@@ -29,7 +29,7 @@ export default function SeniorDisciplineCommittee() {
   return <section aria-labelledby="senior-discipline-title" className="mt-12 rounded-[2rem] border border-[#c6a45a]/35 bg-white px-4 py-8 shadow-[0_24px_70px_-48px_rgba(16,42,67,0.5)] sm:px-7 sm:py-10">
     <div className="mx-auto mb-8 max-w-2xl text-center">
       <span className="inline-flex items-center gap-2 rounded-full border border-[#c6a45a]/50 bg-[#c6a45a]/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-[#102A43]"><ShieldCheck className="h-4 w-4 text-[#ad8734]" aria-hidden="true"/> NPS Indore</span>
-      <h2 id="senior-discipline-title" className="mt-4 font-display text-2xl font-semibold leading-tight text-[#102A43] sm:text-3xl">{lang === "hi" ? "वरिष्ठजन एवं अनुशासन समिति" : "Senior Members & Discipline Committee"}</h2>
+      <h2 id="senior-discipline-title" className="mt-4 font-display text-2xl font-semibold leading-tight text-[#102A43] sm:text-3xl">{lang === "hi" ? "पीढ़ियों का मार्गदर्शन। भविष्य की प्रेरणा।" : "Guiding Generations. Inspiring Futures."}</h2>
       <div className="mx-auto mt-4 h-px w-20 bg-gradient-to-r from-transparent via-[#c6a45a] to-transparent" />
     </div>
     {members.length > 0 ? <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">{members.map((member) => {

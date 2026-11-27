@@ -124,9 +124,10 @@ test('live event details and news use authored Hindi content alongside separate 
     'GET /announcements': [{ id: 'real-news', status: 'Active', type: 'General', title: 'Published Notice', title_hi: 'प्रकाशित सूचना', body: 'Confirmed notice details', body_hi: 'पुष्ट सूचना का पूरा विवरण', date: '2026-10-27' }],
   });
   await page.goto('/events');
-  await expect(page.getByRole('heading', { name: 'प्रकाशित आयोजन' })).toBeVisible();
+  const programs = page.locator('#programs');
+  await expect(programs.getByRole('heading', { name: 'प्रकाशित आयोजन' })).toBeVisible();
   // Live actions are rendered before the clearly labelled demo workspace.
-  await page.locator('section').filter({ has: page.getByRole('heading', { name: 'प्रकाशित आयोजन' }) }).getByRole('button').first().click();
+  await programs.getByRole('button').first().click();
   await expect(page.getByRole('dialog')).toContainText('पुष्ट आयोजन का पूरा विवरण');
   await expect(page.getByRole('dialog')).toContainText('पुष्ट स्थान');
   await page.keyboard.press('Escape');

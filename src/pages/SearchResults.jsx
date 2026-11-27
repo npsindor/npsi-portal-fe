@@ -15,7 +15,7 @@ export default function SearchResults() {
   const [params] = useSearchParams();
   const q = (params.get('q') || '').trim();
   const [results, setResults] = useState(null);
-  useEffect(() => { document.title = `${hi ? 'खोज' : 'Search'} | ${hi ? 'निमाड़ पाटीदार संगठन, इंदौर' : 'Nimar Patidar Sangathan, Indore'}`; }, [hi]);
+  useEffect(() => { document.title = `${hi ? 'खोज' : 'Search'} | ${hi ? 'निमाड़ पाटीदार संगठन, इंदौर' : 'Nimad Patidar Sangathan, Indore'}`; }, [hi]);
   useEffect(() => {
     if (q.length < 2) { setResults({ groups: [] }); return undefined; }
     const controller = new AbortController();

@@ -614,21 +614,84 @@ section[id], article[id] { scroll-margin-top: 15rem; }
   .home-service-group[aria-hidden="true"] { display: none; }
 }
 
-/* Home page "NPS Family Heads": a slow, endless strip (two copies of the list, moved by half its width).
-   Pauses while hovered or focused; people who asked for less motion get a still, scrollable row instead. */
-@keyframes family-heads-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+/* Home page "NPS Family Heads": scrolled by FamilyHeadsCarousel.jsx (auto-move + arrow buttons); no scrollbar shown. */
+.family-heads-strip { scrollbar-width: none; overscroll-behavior-x: contain; }
+.family-heads-strip::-webkit-scrollbar { display: none; }
+
+/* Home page "Today Birthday": a greeting card (navy with gold) with the photo and name in the middle,
+   floating balloons and a soft confetti sparkle; several birthdays slide one after another. */
+.bday-card {
+  background:
+    radial-gradient(circle at 50% 38%, rgba(230, 200, 110, 0.28), transparent 55%),
+    linear-gradient(160deg, #13304d 0%, #0a1f33 55%, #241a3d 100%);
+  box-shadow: inset 0 0 0 1px rgba(230, 200, 110, 0.45), 0 12px 28px -12px rgba(10, 31, 51, 0.6);
 }
-.family-heads-track {
-  animation: family-heads-scroll var(--family-heads-duration, 60s) linear infinite;
+.bday-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, #e6c86e 1.5px, transparent 2px),
+    radial-gradient(circle, #f28aa8 1.5px, transparent 2px),
+    radial-gradient(circle, #7dd3fc 1.5px, transparent 2px);
+  background-size: 46px 46px, 62px 62px, 54px 54px;
+  background-position: 0 0, 20px 30px, 34px 10px;
+  opacity: 0.3;
+  animation: bday-confetti 9s linear infinite;
 }
-.family-heads-strip:hover .family-heads-track,
-.family-heads-strip:focus-within .family-heads-track {
-  animation-play-state: paused;
+@keyframes bday-confetti {
+  from { background-position: 0 0, 20px 30px, 34px 10px; }
+  to { background-position: 0 460px, 20px 650px, 34px 550px; }
 }
+.bday-float {
+  position: absolute;
+  font-size: 1.6rem;
+  opacity: 0.85;
+  pointer-events: none;
+  animation: bday-float 5s ease-in-out infinite;
+}
+.bday-float-1 { left: 0.6rem; top: 0.6rem; }
+.bday-float-2 { right: 0.6rem; top: 0.6rem; animation-delay: -1.5s; }
+.bday-float-3 { right: 0.7rem; bottom: 0.5rem; animation-delay: -3s; font-size: 1.2rem; }
+.bday-float-4 { left: 0.7rem; bottom: 0.5rem; animation-delay: -2.2s; font-size: 1rem; }
+@keyframes bday-float {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-10px) rotate(4deg); }
+}
+.bday-photo {
+  background: conic-gradient(from 0deg, #e6c86e, #f3dc8c, #c49a43, #e6c86e);
+  animation: bday-glow 2.6s ease-in-out infinite;
+}
+@keyframes bday-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(230, 200, 110, 0.55); }
+  50% { box-shadow: 0 0 0 10px rgba(230, 200, 110, 0); }
+}
+.bday-track { transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* Public pages: sections and cards fade up as they scroll into view (useScrollReveal in lib/scroll-reveal.js).
+   `backwards` fill: once done, the element's own hover lift and transitions work as before. A short rise (12px, about
+   half a second) so a button inside barely moves if someone taps it while it comes in. */
+[data-reveal="wait"], [data-reveal="wait-card"] { opacity: 0; }
+[data-reveal="in"] { animation: reveal-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: var(--reveal-delay, 0ms); }
+.premium-card[data-reveal="in"], article[data-reveal="in"], [data-reveal-card][data-reveal="in"] { animation-name: reveal-card; animation-duration: 0.5s; }
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes reveal-card {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Phone: a gentle press effect on tappable cards and buttons. */
+@media (hover: none) {
+  .tap-press { transition: transform 0.15s ease; }
+  .tap-press:active { transform: scale(0.97); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .family-heads-strip { overflow-x: auto; }
-  .family-heads-track { animation: none; }
-  .family-heads-track [data-copy="2"] { display: none; }
+  .bday-confetti, .bday-float, .bday-photo { animation: none; }
+  .bday-track { transition: none; }
+  [data-reveal] { opacity: 1 !important; animation: none !important; }
+  .tap-press:active { transform: none; }
 }

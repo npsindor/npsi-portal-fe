@@ -98,7 +98,7 @@ test('admin-managed slides come first, before the folder ads, in both languages,
   const shop = media.getByRole('link', { name: 'Visit shop' });
   await expect(shop).toHaveAttribute('target', '_blank');
   await expect(shop).toHaveAttribute('rel', /sponsored/);
-  await expect(media.getByRole('heading', { name: 'Nimar Patidar Sangathan, Indore' })).toHaveCount(0);
+  await expect(media.getByRole('heading', { name: 'Nimad Patidar Sangathan, Indore' })).toHaveCount(0);
   await media.getByRole('button', { name: 'Go to slide 2' }).click();
   await expect(media.locator('iframe[title="Sammelan highlights"]')).toHaveAttribute('src', /youtube-nocookie\.com\/embed\/dQw4w9WgXcQ\?autoplay=0/);
   await page.evaluate(() => localStorage.setItem('pss_lang', 'hi'));

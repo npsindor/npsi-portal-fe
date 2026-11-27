@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Bell, Shield, Globe, HelpCircle, FileText, Info, LogOut, ChevronRight, Camera, MessageSquare, KeyRound, Loader2 } from "lucide-react";
+import { Bell, Shield, Globe, HelpCircle, FileText, Info, LogOut, ChevronRight, Camera, MessageSquare, KeyRound, Loader2, Phone } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
@@ -100,12 +100,14 @@ export default function Settings() {
     .join("")
     .toUpperCase();
 
+  // Each row opens its page: the portal's notifications, or the public help, contact, terms, privacy and about pages.
   const sections = [
-    { icon: Bell, label: t("settings.notifications"), desc: t("settings.notificationsDesc") },
-    { icon: HelpCircle, label: t("settings.help"), desc: t("settings.helpDesc") },
-    { icon: FileText, label: t("settings.terms"), desc: t("settings.termsDesc") },
-    { icon: FileText, label: t("settings.privacy"), desc: t("settings.privacyDesc") },
-    { icon: Info, label: t("settings.about"), desc: t("settings.aboutDesc") },
+    { icon: Bell, label: t("settings.notifications"), desc: t("settings.notificationsDesc"), to: "/portal/notifications" },
+    { icon: HelpCircle, label: t("settings.help"), desc: t("settings.helpDesc"), to: "/help" },
+    { icon: Phone, label: t("settings.contact"), desc: t("settings.contactDesc"), to: "/contact" },
+    { icon: FileText, label: t("settings.terms"), desc: t("settings.termsDesc"), to: "/terms" },
+    { icon: FileText, label: t("settings.privacy"), desc: t("settings.privacyDesc"), to: "/privacy" },
+    { icon: Info, label: t("settings.about"), desc: t("settings.aboutDesc"), to: "/about" },
   ];
 
   return (
@@ -249,9 +251,10 @@ export default function Settings() {
           <LanguageToggle />
         </div>
         {sections.map((s, i) => (
-          <button
+          <Link
             key={s.label}
-            className={`flex w-full items-center gap-3 px-5 py-4 text-left hover:bg-muted ${
+            to={s.to}
+            className={`flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none ${
               i !== sections.length - 1 ? "border-b border-border" : ""
             }`}
           >
@@ -261,7 +264,7 @@ export default function Settings() {
               <div className="text-xs text-muted-foreground">{s.desc}</div>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
+          </Link>
         ))}
       </div>
 

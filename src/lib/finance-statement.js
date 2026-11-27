@@ -10,7 +10,7 @@ export const FINANCE_COPY = {
     formula: 'Remaining balance = total contributions received − total expenses. Totals are calculated from approved records.',
     pendingNote: '{n} contributions ({amount}) are waiting for review and are not included in the totals.',
     contributionsTab: 'Contributions received (Aavak)', expensesTab: 'Event expenses (Jaavak)',
-    groups: { GENERAL: 'Sahyog Rashi', BHOG_PRASAD: "Mataji's Bhog & Prasad Sahyog", EVENT: 'Maa Na Garba Mahotsav expenses', ORGANIZATION: 'Swajan Samaroh – Nimar Patidar Sangathan, Indore' },
+    groups: { GENERAL: 'Sahyog Rashi', BHOG_PRASAD: "Mataji's Bhog & Prasad Sahyog", EVENT: 'Maa Na Garba Mahotsav expenses', ORGANIZATION: 'Swajan Samaroh – Nimad Patidar Sangathan, Indore' },
     serial: 'S.No.', name: 'Contributor name', village: 'Village / location', amount: 'Amount', status: 'Status', actions: 'Actions', section: 'Section',
     expenseHeading: 'Expense heading', description: 'Description', reviewNote: 'Review note', check: 'Check',
     search: 'Search', searchPlaceholder: 'Search name, village or S.No.', searchExpenses: 'Search expenses', allVillages: 'All villages', allSections: 'All sections', allStatuses: 'All statuses',
@@ -23,7 +23,7 @@ export const FINANCE_COPY = {
     adminTotalsNote: 'Totals count approved records only; pending and rejected entries are listed but not added.',
     reportContributions: 'Contributions report', reportExpenses: 'Expenses report', reportSummary: 'Full financial summary',
     reportTitle: { contributions: 'Contributions Received Report', expenses: 'Event Expenses Report', summary: 'Complete Financial Summary' },
-    org: 'Nimar Patidar Sangathan, Indore', generated: 'Generated on', pageLabel: 'Page', item: 'Item', total: 'Total',
+    org: 'Nimad Patidar Sangathan, Indore', generated: 'Generated on', pageLabel: 'Page', item: 'Item', total: 'Total',
   },
   hi: {
     summary: 'वित्तीय सारांश', totalReceived: 'कुल सहयोग राशि (आवक)', totalExpenses: 'कुल खर्च (जावक)', balance: 'शेष राशि',

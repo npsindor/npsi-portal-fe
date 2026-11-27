@@ -107,14 +107,14 @@ export const ageFrom = (dob, today = indiaToday()) => {
 // Marital status is asked for a son or daughter only once the birth date shows them 18 or older (no birth date: not
 // asked); for every other relationship it is always asked.
 export const CHILD_RELATIONSHIPS = ["Son", "Daughter"];
-// A spouse, father or mother is married by the relationship itself: not asked, saved as MARRIED (and never offered
+// A spouse, father, mother, daughter-in-law or younger brother's wife is married by the relationship itself: not asked, saved as MARRIED (and never offered
 // Shagun Bandhan).
-export const MARRIED_RELATIONSHIPS = ["Spouse", "Father", "Mother"];
+export const MARRIED_RELATIONSHIPS = ["Spouse", "Father", "Mother", "Daughter-in-law", "Younger Brother's Wife"];
 export const impliesMarried = (relationship) => MARRIED_RELATIONSHIPS.includes(relationship);
 
 // Education: a son or daughter (and "Other") picks from the whole list (LKG onwards); an adult relative (the owner,
-// spouse, father, mother, brother, sister) from 8th onwards. The server applies the same rule.
-export const ADULT_EDUCATION_RELATIONSHIPS = ["Head", "Self", "Spouse", "Father", "Mother", "Brother", "Sister"];
+// spouse, father, mother, brother, sister, sister-in-law, daughter-in-law, younger brother's wife) from 8th onwards. The server applies the same rule.
+export const ADULT_EDUCATION_RELATIONSHIPS = ["Head", "Self", "Spouse", "Father", "Mother", "Brother", "Sister", "Sister-in-law", "Daughter-in-law", "Younger Brother's Wife"];
 const FROM_8TH = EDUCATION_LEVELS.findIndex((level) => level.value === "8th");
 export const educationOptionsFor = (relationship) =>
   ADULT_EDUCATION_RELATIONSHIPS.includes(relationship) ? EDUCATION_LEVELS.slice(FROM_8TH) : EDUCATION_LEVELS;

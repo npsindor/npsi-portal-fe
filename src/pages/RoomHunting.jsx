@@ -42,7 +42,7 @@ export default function RoomHunting() {
   const [enquiry, setEnquiry] = useState(null);
   const [notice, setNotice] = useState('');
 
-  useEffect(() => { document.title = `${t.title} | ${lang === 'hi' ? 'निमाड़ पाटीदार संगठन, इंदौर' : 'Nimar Patidar Sangathan, Indore'}`; }, [t, lang]);
+  useEffect(() => { document.title = `${t.title} | ${lang === 'hi' ? 'निमाड़ पाटीदार संगठन, इंदौर' : 'Nimad Patidar Sangathan, Indore'}`; }, [t, lang]);
   useEffect(() => { roomApi.options().then((value) => setOptions({ propertyTypes: value?.propertyTypes || [], areas: value?.areas || [] })).catch(() => setOptions({ propertyTypes: [], areas: [] })); }, []);
   // Whether this login may add a property. A failed check (network, server restart) is not "not registered": it shows a
   // retry instead of the registration message.

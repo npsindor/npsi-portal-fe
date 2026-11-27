@@ -1,6 +1,6 @@
 # nps-fe
 
-Frontend for the Nimar Patidar Sangathan, Indore portal (npsindore.org). React 18 + Vite, Tailwind CSS and shadcn/ui (Radix) components, React Router and TanStack Query.
+Frontend for the Nimad Patidar Sangathan, Indore portal (npsindore.org). React 18 + Vite, Tailwind CSS and shadcn/ui (Radix) components, React Router and TanStack Query.
 
 The backend API lives in the separate [`nps-be`](https://github.com/vpatidar94/nps-be) repo.
 

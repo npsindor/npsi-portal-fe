@@ -54,6 +54,8 @@ test('anonymous visitors see camelCase Hindi fields returned by the backend', as
     'GET /events': [{ id: 'event', title: 'Sneh Deepotsav 2026', titleHi: 'स्नेह दीपोत्सव 2026', description: 'A community celebration.', descriptionHi: 'समाज के साथ दीपोत्सव मनाएँ।', status: 'PUBLISHED', date: UPCOMING, venue: 'Test venue only' }],
   });
   await page.goto('/events');
-  await expect(page.getByRole('heading', { name: 'स्नेह दीपोत्सव 2026', exact: true })).toBeVisible();
-  await expect(page.getByText('समाज के साथ दीपोत्सव मनाएँ।', { exact: true })).toBeVisible();
+  // "All Programs" (latest first) lists every published event; the category sections below repeat their own.
+  const programs = page.locator('#programs');
+  await expect(programs.getByRole('heading', { name: 'स्नेह दीपोत्सव 2026', exact: true })).toBeVisible();
+  await expect(programs.getByText('समाज के साथ दीपोत्सव मनाएँ।', { exact: true })).toBeVisible();
 });

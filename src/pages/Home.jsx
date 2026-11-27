@@ -129,8 +129,8 @@ export default function Home() {
             <div className="min-w-0 lg:col-span-8">
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
               <div>
-                <span className="eyebrow">{lang === "hi" ? "एक ही जगह पर" : "One trusted place"}</span>
-                <h1 className="mt-3 section-title">{lang === "hi" ? "समुदाय की सेवाएँ" : "Explore community services"}</h1>
+                <span className="eyebrow">{lang === "hi" ? "एक समाज। अनंत जुड़ाव।" : "One Community. Endless Connections."}</span>
+                <h1 className="mt-3 section-title">{lang === "hi" ? "पाटीदार कनेक्ट" : "Patidar Connect"}</h1>
                 <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">{lang === "hi" ? "सदस्यता, शिक्षा, कार्यक्रम और सामुदायिक सहयोग के लिए जरूरी सेवाओं तक जल्दी पहुँचें।" : "Quick access to membership, education, events and practical community support."}</p>
               </div>
               <Link to="/help" className="inline-flex min-h-10 items-center gap-2 self-start text-sm font-semibold text-maroon hover:text-gold-dark sm:self-auto">
@@ -139,7 +139,7 @@ export default function Home() {
             </div>
             <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
               {menuServices.map((service) => (
-                <Link key={service.label} to={service.to} className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-sm transition hover:-translate-y-1 hover:border-gold/60 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold">
+                <Link key={service.label} to={service.to} data-reveal-card className="tap-press group flex flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-sm transition hover:-translate-y-1 hover:border-gold/60 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold">
                   <span className="service-thumb" style={{ "--c1": service.colors[0], "--c2": service.colors[1], borderRadius: 0 }} aria-hidden="true">
                     <span className="service-icon-3d">
                       <service.icon />
@@ -174,7 +174,7 @@ export default function Home() {
             </div>
             <div className={`mt-8 grid gap-4 sm:grid-cols-2 ${birthdays ? "" : "lg:grid-cols-4"}`}>
               {importantServices.filter((service) => isPageVisible(service.to)).slice(0, 4).map((service) => (
-                <Link key={service.to} to={service.to} className="group premium-card flex min-h-48 flex-col p-5 transition hover:-translate-y-1 hover:border-gold/60 hover:shadow-lg sm:p-6">
+                <Link key={service.to} to={service.to} className="tap-press group premium-card flex min-h-48 flex-col p-5 transition hover:-translate-y-1 hover:border-gold/60 hover:shadow-lg sm:p-6">
                   <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-maroon text-gold transition group-hover:bg-gold group-hover:text-maroon"><service.icon className="h-5 w-5" /></span>
                   <h3 className="mt-4 font-display text-base font-semibold text-foreground">{service.title}</h3>
                   <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{service.desc}</p>

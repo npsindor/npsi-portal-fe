@@ -17,7 +17,7 @@ for (const [width, columns] of [[390, 1], [768, 2], [1440, 3]]) {
     await page.goto('/about');
     const section = page.locator('section[aria-labelledby="senior-discipline-title"]');
     // The heading follows the chosen language (English by default).
-    await expect(page.getByRole('heading', { name: 'Senior Members & Discipline Committee' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Guiding Generations. Inspiring Futures.' })).toBeVisible();
     await expect(section.locator('article')).toHaveCount(6);
     expect(await section.locator('div.grid').evaluate((node) => getComputedStyle(node).gridTemplateColumns.split(' ').length)).toBe(columns);
     for (const { nameEn } of profiles) await expect(section.getByRole('heading', { name: nameEn })).toBeVisible();
