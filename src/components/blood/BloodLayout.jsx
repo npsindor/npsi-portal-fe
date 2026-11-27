@@ -8,7 +8,7 @@ import { useBloodCopy } from "@/lib/blood-help";
 export default function BloodLayout({ title, children, contained = true }) {
   const { t, lang } = useBloodCopy();
   useEffect(() => {
-    document.title = `${title || t.network} | ${lang === "hi" ? "निमाड़ पाटीदार संगठन, इंदौर" : "Nimar Patidar Sangathan, Indore"}`;
+    document.title = `${title || t.network} | ${lang === "hi" ? "निमाड़ पाटीदार संगठन, इंदौर" : "Nimad Patidar Sangathan, Indore"}`;
   }, [title, t, lang]);
   return (
     <div className="min-h-screen bg-[#F7F7F8] dark:bg-background">

@@ -49,7 +49,7 @@ export default function VerifyMember() {
             <div className="maroon-pass relative p-6 text-cream">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-[0.65rem] uppercase tracking-[0.2em] text-gold/80">Nimar Patidar Sangathan, Indore</div>
+                  <div className="text-[0.65rem] uppercase tracking-[0.2em] text-gold/80">Nimad Patidar Sangathan, Indore</div>
                   <div className="font-display text-lg font-semibold text-gold">Verified Family Membership</div>
                 </div>
                 <ShieldCheck className="h-8 w-8 text-gold" />

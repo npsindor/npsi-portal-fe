@@ -27,7 +27,7 @@ export default function EventPage() {
   useEffect(() => { eventMembersApi.teams({ event: slug }).then(setData).catch((cause) => setError(cause.status === 404 ? t.notFound : t.error)); }, [slug, t]);
   const event = data?.event;
   const sections = data?.sections || [];
-  useEffect(() => { if (event) document.title = `${localizedText(event, 'title', lang)} | ${lang === 'hi' ? 'निमाड़ पाटीदार संगठन, इंदौर' : 'Nimar Patidar Sangathan, Indore'}`; }, [event, lang]);
+  useEffect(() => { if (event) document.title = `${localizedText(event, 'title', lang)} | ${lang === 'hi' ? 'निमाड़ पाटीदार संगठन, इंदौर' : 'Nimad Patidar Sangathan, Indore'}`; }, [event, lang]);
   useEffect(() => { if (data && window.location.hash) document.getElementById(window.location.hash.slice(1))?.scrollIntoView({ block: 'start' }); }, [data]);
 
   return <div className="min-h-screen bg-background"><PublicNav />

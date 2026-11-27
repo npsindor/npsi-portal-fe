@@ -6,7 +6,7 @@ import { useLang } from '@/lib/i18n';
 const DELAY = 5000;
 // The home hero shows only these three logo videos, from public/slider. Each plays to its end, then the next one starts.
 const SLIDES = [
-  { id: 'npsi', video: '/slider/npsi-logo.mp4', en: 'Nimar Patidar Sangathan, Indore', hi: 'निमाड़ पाटीदार संगठन, इंदौर' },
+  { id: 'npsi', video: '/slider/npsi-logo.mp4', en: 'Nimad Patidar Sangathan, Indore', hi: 'निमाड़ पाटीदार संगठन, इंदौर' },
   { id: 'garba', video: '/slider/maa-na-garba-logo.mp4', en: 'Maa Na Garba', hi: 'माँ ना गरबा' },
   { id: 'deepotsav', video: '/slider/deepoutsav-logo.mp4', en: 'Sneh Deepotsav', hi: 'स्नेह दीपोत्सव' },
 ];

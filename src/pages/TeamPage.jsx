@@ -10,7 +10,7 @@ import { sectionHeading, useEventMemberCopy } from '@/lib/event-member-copy';
 import { localizedText } from '@/lib/utils';
 
 const copy = {
-  en: { core: 'The Core Team of Nimar Patidar Sangathan, Indore — the members who coordinate the Sangathan’s work and events.', team: 'Members of the samaj serving in this team.', notFound: 'This team was not found.', event: 'Event page' },
+  en: { core: 'The Core Team of Nimad Patidar Sangathan, Indore — the members who coordinate the Sangathan’s work and events.', team: 'Members of the samaj serving in this team.', notFound: 'This team was not found.', event: 'Event page' },
   hi: { core: 'निमाड़ पाटीदार संगठन, इंदौर की कोर टीम — संगठन के कार्य और कार्यक्रमों का समन्वय करने वाले सदस्य।', team: 'इस टीम में सेवा दे रहे समाज के सदस्य।', notFound: 'यह टीम नहीं मिली।', event: 'कार्यक्रम पेज' },
 };
 
@@ -25,7 +25,7 @@ export default function TeamPage({ sectionKey }) {
   useEffect(() => { setData(null); setMissing(false); eventMembersApi.teams({ section: key }).then(setData).catch(() => setMissing(true)); }, [key]);
   const section = data?.sections?.[0];
   const title = section ? sectionHeading(section, lang) : '';
-  useEffect(() => { if (title) document.title = `${title} | ${lang === 'hi' ? 'निमाड़ पाटीदार संगठन, इंदौर' : 'Nimar Patidar Sangathan, Indore'}`; }, [title, lang]);
+  useEffect(() => { if (title) document.title = `${title} | ${lang === 'hi' ? 'निमाड़ पाटीदार संगठन, इंदौर' : 'Nimad Patidar Sangathan, Indore'}`; }, [title, lang]);
   return <div className="min-h-screen bg-background"><PublicNav />
     <main id="main-content">
       <section className="hero-band text-cream"><div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">

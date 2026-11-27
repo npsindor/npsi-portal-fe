@@ -17,7 +17,7 @@ const COPY = {
     title: "How would you like to join?",
     sub: "Choose one. Both start with a login account (mobile + one-time code), then the registration form, the fee by UPI and approval by the Sangathan.",
     familyTitle: "Register as a Family",
-    familyText: "For a family of the Nimar Patidar community: the head registers the family and its members.",
+    familyText: "For a family of the Nimad Patidar community: the head registers the family and its members.",
     studentTitle: "Register as a Student",
     studentText: "For a student who wants an individual student membership. Family membership is not needed.",
     fee: (amount) => `Registration fee ₹${amount}`,

@@ -21,7 +21,7 @@ const copy = {
     eyebrow: "Sandesh", title: "News, notices and greetings from the samaj", intro: "Official notices from the committee, stories from our community and festival wishes — all in one place.",
     notices: "Important Notices", noticesSummary: "Official announcements and updates from the committee.", noticesIntro: "Please read these official announcements from the Sangathan carefully.",
     community: "Community News", communitySummary: "Stories, achievements and happenings in our community.", communityIntro: "What is happening across our families, programmes and initiatives.",
-    greetings: "Festival Greetings", greetingsSummary: "Wishes and messages for festivals and special occasions.", greetingsIntro: "Warm wishes from the Nimar Patidar Sangathan, Indore on festivals and special occasions.",
+    greetings: "Festival Greetings", greetingsSummary: "Wishes and messages for festivals and special occasions.", greetingsIntro: "Warm wishes from the Nimad Patidar Sangathan, Indore on festivals and special occasions.",
     noNotices: "There are no notices right now. Official announcements will appear here.", noCommunity: "No community news yet. Stories and updates will appear here.", noGreetings: "No festival greetings yet. Wishes for upcoming festivals will appear here.",
     urgent: "Urgent", readMore: "Read more", close: "Close", latest: "Latest", allCategories: "All categories", search: "Search Sandesh", noMatch: "No Sandesh matches your filter.", clear: "Clear",
   },
@@ -51,7 +51,7 @@ export default function News() {
   const [query, setQuery] = useState("");
 
   useEffect(() => {
-    document.title = `${t.eyebrow} | ${lang === "hi" ? "निमाड़ पाटीदार संगठन, इंदौर" : "Nimar Patidar Sangathan, Indore"}`;
+    document.title = `${t.eyebrow} | ${lang === "hi" ? "निमाड़ पाटीदार संगठन, इंदौर" : "Nimad Patidar Sangathan, Indore"}`;
   }, [t, lang]);
   useEffect(() => {
     base44.entities.Announcement.list("-date", 200)

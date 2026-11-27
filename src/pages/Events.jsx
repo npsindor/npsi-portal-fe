@@ -13,8 +13,9 @@ import { localizedText } from "@/lib/utils";
 const copy = {
   en: {
     eyebrow: "Events & Programs", title: "Celebrations that bring our samaj together", intro: "From Maa Na Garba to cultural evenings and community gatherings — every programme of the Sangathan in one place.",
+    programs: "All Programs", programsSummary: "Every programme of the Sangathan, the latest first.", programsIntro: "All our programmes in one list — the newest at the top.", noPrograms: "No programmes are published right now.",
     garba: "Maa Na Garba", garbaSummary: "Our signature Navratri celebration of devotion and dance.", garbaIntro: "Nine nights of devotion, music and togetherness — the Sangathan's biggest celebration of the year.",
-    cultural: "Cultural Programs", culturalSummary: "Music, traditions and family programmes through the year.", culturalIntro: "Programmes that keep our Nimar traditions, music and values alive for every generation.",
+    cultural: "Cultural Programs", culturalSummary: "Music, traditions and family programmes through the year.", culturalIntro: "Programmes that keep our Nimad traditions, music and values alive for every generation.",
     calendar: "Event Calendar", calendarSummary: "Every upcoming programme, month by month.", calendarIntro: "All upcoming programmes of the Sangathan, month by month.",
     noGarba: "Maa Na Garba details will be announced soon.", noCultural: "No cultural programmes are published right now.", noUpcoming: "No upcoming events are scheduled yet.",
     past: "Past events", details: "View details", teamPage: "Event page & team", register: "Register in member portal", free: "Free", fee: "Fee", time: "Time", venue: "Venue", organizer: "Organizer", featured: "Featured",
@@ -22,6 +23,7 @@ const copy = {
   },
   hi: {
     eyebrow: "कार्यक्रम एवं आयोजन", title: "समाज को एक साथ लाने वाले उत्सव", intro: "माँ ना गरबा से लेकर सांस्कृतिक संध्याओं और सामाजिक मिलन तक — संगठन के सभी कार्यक्रम एक ही जगह।",
+    programs: "सभी कार्यक्रम", programsSummary: "संगठन के सभी कार्यक्रम, सबसे नया सबसे पहले।", programsIntro: "हमारे सभी कार्यक्रम एक सूची में — सबसे नया सबसे ऊपर।", noPrograms: "अभी कोई कार्यक्रम प्रकाशित नहीं है।",
     garba: "माँ ना गरबा", garbaSummary: "भक्ति और नृत्य का हमारा प्रमुख नवरात्रि उत्सव।", garbaIntro: "भक्ति, संगीत और एकता की नौ रातें — संगठन का वर्ष का सबसे बड़ा उत्सव।",
     cultural: "सांस्कृतिक कार्यक्रम", culturalSummary: "पूरे वर्ष संगीत, परंपरा और पारिवारिक कार्यक्रम।", culturalIntro: "ऐसे कार्यक्रम जो हर पीढ़ी के लिए हमारी निमाड़ी परंपराओं, संगीत और मूल्यों को जीवित रखते हैं।",
     calendar: "कार्यक्रम कैलेंडर", calendarSummary: "सभी आगामी कार्यक्रम, महीनेवार।", calendarIntro: "संगठन के सभी आगामी कार्यक्रम, महीनेवार।",
@@ -32,6 +34,7 @@ const copy = {
 };
 
 const SECTIONS = {
+  programs: { icon: Sparkles, colors: ["#f59e0b", "#9a3412"] },
   garba: { icon: Music2, colors: ["#fb7185", "#9f1239"] },
   cultural: { icon: Drama, colors: ["#a78bfa", "#6d28d9"] },
   calendar: { icon: CalendarDays, colors: ["#fbbf24", "#c2410c"] },
@@ -39,6 +42,8 @@ const SECTIONS = {
 const today = () => new Date(Date.now() + 5.5 * 3600 * 1000).toISOString().slice(0, 10);
 const dayOf = (value) => String(value || "").slice(0, 10);
 const byDate = (a, b) => dayOf(a.date).localeCompare(dayOf(b.date));
+// Latest first: the newest event date at the top; on the same date, the one added last.
+const latestFirst = (a, b) => byDate(b, a) || String(b.createdAt || "").localeCompare(String(a.createdAt || "")) || Number(b.id || 0) - Number(a.id || 0);
 
 export default function Events() {
   const { lang } = useLang();
@@ -48,7 +53,7 @@ export default function Events() {
   const [selected, setSelected] = useState(null);
 
   useEffect(() => {
-    document.title = `${t.eyebrow} | ${lang === "hi" ? "निमाड़ पाटीदार संगठन, इंदौर" : "Nimar Patidar Sangathan, Indore"}`;
+    document.title = `${t.eyebrow} | ${lang === "hi" ? "निमाड़ पाटीदार संगठन, इंदौर" : "Nimad Patidar Sangathan, Indore"}`;
   }, [t, lang]);
   useEffect(() => {
     base44.entities.Event.list("-date", 200)
@@ -60,8 +65,9 @@ export default function Events() {
   const now = today();
   const all = events || [];
   const isUpcoming = (event) => dayOf(event.date) >= now;
-  // Upcoming first (soonest first), then past (most recent first).
-  const ordered = (list) => [...list.filter(isUpcoming).sort(byDate), ...list.filter((event) => !isUpcoming(event)).sort((a, b) => byDate(b, a))];
+  // Programme lists: the latest programme first (Sneh Deepotsav, then Maa Na Garba, then Swajan Samaroh).
+  const ordered = (list) => [...list].sort(latestFirst);
+  const programs = ordered(all);
   const garba = ordered(all.filter((event) => event.category === "GARBA"));
   const cultural = ordered(all.filter((event) => event.category === "CULTURAL"));
   const upcoming = all.filter(isUpcoming).sort(byDate);
@@ -85,6 +91,7 @@ export default function Events() {
       </div>
       <div className={`flex flex-1 flex-col p-5 ${large ? "lg:p-8" : ""}`}>
         {large && <span className="mb-2 inline-flex items-center gap-1.5 self-start rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-semibold text-gold-dark"><Sparkles className="h-3.5 w-3.5" aria-hidden="true" />{t.featured}</span>}
+        <span className="mb-2 self-start rounded-full bg-muted px-2 py-0.5 text-[0.7rem] font-semibold uppercase tracking-wide text-muted-foreground">{t[event.category] || t.GENERAL}</span>
         <h3 className={`font-display font-semibold leading-snug text-foreground ${large ? "text-2xl lg:text-3xl" : "text-lg"}`}>{title(event)}</h3>
         <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
           {event.startTime && <li className="flex items-center gap-2"><Clock className="h-4 w-4 shrink-0 text-gold-dark" aria-hidden="true" />{event.startTime}{event.endTime ? ` – ${event.endTime}` : ""}</li>}
@@ -125,13 +132,23 @@ export default function Events() {
         <SectionOverview
           lang={lang}
           sections={[
+            { id: "programs", title: t.programs, summary: t.programsSummary, count: events ? programs.length : undefined, ...SECTIONS.programs },
             { id: "garba", title: t.garba, summary: t.garbaSummary, count: events ? garba.length : undefined, ...SECTIONS.garba },
             { id: "cultural", title: t.cultural, summary: t.culturalSummary, count: events ? cultural.length : undefined, ...SECTIONS.cultural },
             { id: "calendar", title: t.calendar, summary: t.calendarSummary, count: events ? upcoming.length : undefined, ...SECTIONS.calendar },
           ]}
         />
 
-        <SectionBlock id="garba" block={content.intro("garba")} lang={lang} eyebrow="01" title={t.garba} intro={t.garbaIntro} {...SECTIONS.garba}>
+        <SectionBlock id="programs" block={content.intro("programs")} lang={lang} eyebrow="01" title={t.programs} intro={t.programsIntro} {...SECTIONS.programs}>
+          {events === null ? <CardSkeleton count={2} /> : programs.length === 0 ? <EmptyState>{t.noPrograms}</EmptyState> : (
+            <div className="grid gap-5">
+              <EventCard event={programs[0]} large />
+              {programs.length > 1 && <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{programs.slice(1).map((event) => <EventCard key={event.id} event={event} />)}</div>}
+            </div>
+          )}
+        </SectionBlock>
+
+        <SectionBlock id="garba" block={content.intro("garba")} lang={lang} eyebrow="02" title={t.garba} intro={t.garbaIntro} tone="muted" {...SECTIONS.garba}>
           {events === null ? <CardSkeleton count={2} /> : garba.length === 0 ? <EmptyState>{t.noGarba}</EmptyState> : (
             <div className="grid gap-5">
               <EventCard event={garba[0]} large />
@@ -140,13 +157,13 @@ export default function Events() {
           )}
         </SectionBlock>
 
-        <SectionBlock id="cultural" block={content.intro("cultural")} lang={lang} eyebrow="02" title={t.cultural} intro={t.culturalIntro} tone="muted" {...SECTIONS.cultural}>
+        <SectionBlock id="cultural" block={content.intro("cultural")} lang={lang} eyebrow="03" title={t.cultural} intro={t.culturalIntro} {...SECTIONS.cultural}>
           {events === null ? <CardSkeleton /> : cultural.length === 0 ? <EmptyState>{t.noCultural}</EmptyState> : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{cultural.map((event) => <EventCard key={event.id} event={event} />)}</div>
           )}
         </SectionBlock>
 
-        <SectionBlock id="calendar" block={content.intro("calendar")} lang={lang} eyebrow="03" title={t.calendar} intro={t.calendarIntro} {...SECTIONS.calendar}>
+        <SectionBlock id="calendar" block={content.intro("calendar")} lang={lang} eyebrow="04" title={t.calendar} intro={t.calendarIntro} tone="muted" {...SECTIONS.calendar}>
           {events === null ? <CardSkeleton count={2} /> : (
             <div className="space-y-8">
               {upcoming.length === 0 ? <EmptyState>{t.noUpcoming}</EmptyState> : Object.entries(months).map(([month, list]) => (

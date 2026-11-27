@@ -17,7 +17,7 @@ export default function SagunVerify() {
   const { lang } = useLang();
   const t = words[lang] || words.en;
   const [state, setState] = useState({ loading: true });
-  useEffect(() => { document.title = `${t.title} | ${lang === 'hi' ? 'निमाड़ पाटीदार संगठन, इंदौर' : 'Nimar Patidar Sangathan, Indore'}`; }, [t, lang]);
+  useEffect(() => { document.title = `${t.title} | ${lang === 'hi' ? 'निमाड़ पाटीदार संगठन, इंदौर' : 'Nimad Patidar Sangathan, Indore'}`; }, [t, lang]);
   useEffect(() => {
     let alive = true;
     sagunCardsApi.verify(token).then((result) => { if (alive) setState({ loading: false, result }); }).catch(() => { if (alive) setState({ loading: false, result: null }); });

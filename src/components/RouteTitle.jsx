@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useLang } from '@/lib/i18n';
 
-const SITE = { en: 'Nimar Patidar Sangathan, Indore', hi: 'निमाड़ पाटीदार संगठन, इंदौर' };
+const SITE = { en: 'Nimad Patidar Sangathan, Indore', hi: 'निमाड़ पाटीदार संगठन, इंदौर' };
 // The home page keeps the search-engine title from index.html.
 const HOME_TITLE = typeof document !== 'undefined' ? document.title : SITE.en;
 

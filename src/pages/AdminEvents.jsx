@@ -156,9 +156,9 @@ export default function AdminEvents() {
     setForm({
       ...EMPTY_FORM,
       title: "Sneh Deepotsav 2026", titleHi: "स्नेह दीपोत्सव 2026", category: "CULTURAL",
-      description: "Nimar Patidar Sangathan, Indore, welcomes community members and families to Sneh Deepotsav 2026, a celebration of light, togetherness, and cultural traditions.",
+      description: "Nimad Patidar Sangathan, Indore, welcomes community members and families to Sneh Deepotsav 2026, a celebration of light, togetherness, and cultural traditions.",
       descriptionHi: "निमाड़ पाटीदार संगठन, इंदौर द्वारा स्नेह दीपोत्सव 2026 में समाज के सदस्यों और परिवारों का स्वागत है। आइए प्रकाश, स्नेह, एकता और सांस्कृतिक परंपराओं का उत्सव साथ मनाएँ।",
-      organizer: "Nimar Patidar Sangathan, Indore",
+      organizer: "Nimad Patidar Sangathan, Indore",
     });
     setShowForm(true);
   };

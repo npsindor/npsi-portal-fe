@@ -31,7 +31,7 @@ export const INDORE_AREAS = toOptions([
   ['Mhow', 'महू'],
 ]);
 
-// The 62 native villages of the community in Nimar (Khargone).
+// The 62 native villages of the community in Nimad (Khargone).
 export const NATIVE_VILLAGES = toOptions([
   ['Aghawan (Temla)', 'अघावन (टेमला)'],
   ['Aghawan-Khedi', 'अघावन-खेड़ी'],

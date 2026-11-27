@@ -37,7 +37,7 @@ export default function SafarSaathi() {
   const dateText = value => new Date(value).toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' });
   const setField = (key, value) => setForm(current => ({ ...current, [key]: normalizeField(key, value) }));
 
-  useEffect(() => { document.title = `${t.title} | Nimar Patidar Sangathan, Indore`; }, [t]);
+  useEffect(() => { document.title = `${t.title} | Nimad Patidar Sangathan, Indore`; }, [t]);
   const refresh = useCallback(async (silent = false) => {
     const version = accountVersion.current;
     if (!silent) setLoading(true);

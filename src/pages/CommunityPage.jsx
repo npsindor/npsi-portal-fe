@@ -27,7 +27,7 @@ export default function CommunityPage({ kind }) {
   const content = usePageContent(kind === 'feedback' ? 'feedback' : 'contact');
   const managed = kind === 'contact' || kind === 'feedback';
   const items = managed ? content.items('main') : [];
-  useEffect(() => { document.title = `${c(page.eyebrow)} | ${c("Nimar Patidar Sangathan, Indore")}`; }, [page, c]);
+  useEffect(() => { document.title = `${c(page.eyebrow)} | ${c("Nimad Patidar Sangathan, Indore")}`; }, [page, c]);
   return <div className="min-h-screen bg-background"><PublicNav /><main id="main-content">
     <PageHero eyebrow={c(page.eyebrow)} title={c(page.title)} intro={c(page.intro)} icon={HeartHandshake} lang={lang} block={managed ? content.intro('hero') : null} overview={false} />
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">{items.length > 0 ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{items.map((block) => <BlockCard key={block.id} block={block} lang={lang} />)}</div> : <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{page.cards.map(([id, title, description]) => <article key={id} id={id} className="rounded-2xl border border-border bg-card p-6"><HeartHandshake className="h-7 w-7 text-gold" aria-hidden="true" /><h2 className="mt-5 font-display text-xl font-semibold">{c(title)}</h2><p className="mt-3 text-sm leading-relaxed text-muted-foreground">{c(description)}</p></article>)}</div>}

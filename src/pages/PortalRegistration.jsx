@@ -14,13 +14,14 @@ import { INDORE_AREAS, mergeOptions } from "@/lib/native-places";
 import VillageCombobox from "@/components/VillageCombobox";
 import { indiaToday } from "@/lib/dates";
 import { isSchoolClass, MARITAL_STATUSES, optionLabel, STUDENT_COURSES } from "@/lib/member-options";
+import BloodGroupSelect from "@/components/blood/BloodGroupSelect";
 
 const CITIES = ["Indore", "Ujjain", "Dewas", "Other"];
 // Student registration: the local address must be in Indore (district Indore), checked by the server too.
 const STUDENT_CITY = "Indore";
 const GENDERS = ["Male", "Female", "Other"];
 const OTHER = "__other__";
-const EMPTY = { firstName: "", lastName: "", gender: "", dob: "", maritalStatus: "", education: "", city: "Indore", area: "", address: "", pincode: "", nativeVillage: "" };
+const EMPTY = { firstName: "", lastName: "", gender: "", dob: "", maritalStatus: "", education: "", bloodGroup: "", city: "Indore", area: "", address: "", pincode: "", nativeVillage: "" };
 const STEP_KEYS = ["stepDetails", "stepAddress", "stepPayment", "stepReview"];
 const today = () => indiaToday();
 // Same rules as the server: before today, at most 120 years ago, at least 18 years old (member and student:
@@ -154,7 +155,7 @@ function Wizard({ initial, onDone, t, lang, regType = "FAMILY" }) {
     try {
       const { maritalStatus, education, ...rest } = form;
       const extra = type === "STUDENT" ? { education: education.trim() } : { maritalStatus };
-      const body = { type, ...rest, ...extra, screenshotFileId: screenshot?.fileId || undefined, utr: utr.trim() || undefined, lang };
+      const body = { type, ...rest, ...extra, bloodGroup: rest.bloodGroup || undefined, screenshotFileId: screenshot?.fileId || undefined, utr: utr.trim() || undefined, lang };
       const result = editing ? await base44.registrations.resubmit(initial.id, body) : await base44.registrations.submit(body);
       setDone(result);
       // The account is now a Student / Family Member account: reload it so the menu shows that portal's pages.
@@ -268,6 +269,11 @@ function Wizard({ initial, onDone, t, lang, regType = "FAMILY" }) {
                 </select>
               </div>
             )}
+            <div className="space-y-2">
+              <Label htmlFor="reg-blood">{t.bloodGroup}</Label>
+              <BloodGroupSelect id="reg-blood" value={form.bloodGroup || ""} onChange={set("bloodGroup")} placeholder={t.bloodGroupUnknown} aria-describedby="reg-blood-hint" className="rounded-xl" />
+              <p id="reg-blood-hint" className="text-xs text-muted-foreground">{t.bloodGroupHint}</p>
+            </div>
           </div>
         )}
 
@@ -383,6 +389,7 @@ function Wizard({ initial, onDone, t, lang, regType = "FAMILY" }) {
                 [t.gender, t[form.gender]],
                 [t.dob, form.dob],
                 type === "STUDENT" ? [t.education, form.education] : [t.maritalStatus, optionLabel(MARITAL_STATUSES, form.maritalStatus, lang)],
+                [t.bloodGroup, form.bloodGroup || t.bloodGroupUnknown],
                 [t.currentAddress, `${form.address}, ${form.area}, ${form.city === "Other" ? t.OtherCity : t[form.city]} - ${form.pincode}`],
                 [t.nativeVillage, form.nativeVillage],
                 [t.payment, `₹${amount}${utr ? ` · UTR ${utr}` : ""}`],

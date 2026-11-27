@@ -86,6 +86,7 @@ const AdminContactInfo = lazy(() => import('@/pages/AdminContactInfo'));
 const AdminFeedback = lazy(() => import('@/pages/AdminFeedback'));
 const AdminTransferRequests = lazy(() => import('@/pages/AdminTransferRequests'));
 const Help = lazy(() => import('@/pages/Help'));
+const LegalPage = lazy(() => import('@/pages/LegalPage'));
 const News = lazy(() => import('@/pages/News'));
 const AdminNews = lazy(() => import('@/pages/AdminNews'));
 
@@ -132,6 +133,8 @@ const AuthenticatedApp = () => {
       <Route path="/rules" element={<Navigate to="/about#rules" replace />} />
       <Route path="/principles" element={<Navigate to="/about#principles" replace />} />
       <Route path="/help" element={<Help />} />
+      <Route path="/terms" element={<LegalPage kind="terms" />} />
+      <Route path="/privacy" element={<LegalPage kind="privacy" />} />
       <Route path="/news" element={<News />} />
 
       <Route path="/transportation" element={<SafarSaathi />} />

@@ -29,14 +29,14 @@ const SECTIONS = {
 };
 const copy = {
   en: {
-    eyebrow: "About Us", title: "Nimar Patidar Sangathan, Indore", heroIntro: "A community organisation uniting Patidar families of Indore and the Nimar region — preserving our heritage and building a stronger future together.",
+    eyebrow: "About Us", title: "Nimad Patidar Sangathan, Indore", heroIntro: "A community organisation uniting Patidar families of Indore and the Nimad region — preserving our heritage and building a stronger future together.",
     organization: "About the Organization", organizationSummary: "Who we are and what we do.",
     vision: "Vision & Mission", visionSummary: "The future we are working towards.", visionIntro: "What guides every decision and programme of the Sangathan.",
     objectives: "Our Objectives", objectivesSummary: "Six goals that shape our work.", objectivesIntro: "The goals that shape the Sangathan's programmes and services.",
     committee: "Committee Members", committeeSummary: "The people who guide the Sangathan.", committeeIntro: "The organisation is guided by its office-bearers and committee members, who coordinate activities and encourage responsible participation.",
     rules: "Rules & Principles", rulesSummary: "How the Sangathan is governed.", rulesIntro: "The rules every office-bearer and member follows.",
     principles: "Guiding Principles", principlesSummary: "The values behind our work.", principlesIntro: "The principles that guide the Sangathan's work for the samaj.",
-    families: "Registered families", members: "Members", region: "Indore & Nimar, Madhya Pradesh",
+    families: "Registered families", members: "Members", region: "Indore & Nimad, Madhya Pradesh",
   },
   hi: {
     eyebrow: "हमारे बारे में", title: "निमाड़ पाटीदार संगठन, इंदौर", heroIntro: "इंदौर और निमाड़ क्षेत्र के पाटीदार परिवारों को जोड़ने वाला सामाजिक संगठन — अपनी विरासत को सँजोते हुए मिलकर बेहतर भविष्य का निर्माण।",

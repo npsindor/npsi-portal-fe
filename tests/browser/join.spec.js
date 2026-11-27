@@ -68,14 +68,13 @@ test('a registered member or student is never asked to join or register again', 
   }
 });
 
-test('phone menu: Member Login and Student Login sit side by side, same size, near the top', async ({ page }) => {
+test('phone header: Member Login and Student Login sit side by side, same size, without opening the menu', async ({ page }) => {
   await lang(page, 'en');
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 760 });
     await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN });
     await page.goto('/');
-    await page.getByRole('button', { name: 'Open navigation menu' }).click();
-    const nav = page.locator('#public-navigation');
+    const nav = page.getByTestId('mobile-entry');
     const member = nav.getByRole('link', { name: 'Member Login' });
     const student = nav.getByRole('link', { name: 'Student Login' });
     await expect(member).toBeInViewport();

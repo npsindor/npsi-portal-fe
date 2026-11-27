@@ -5,7 +5,7 @@ import { Shubh, Toran, WeddingArt } from '@/components/sagun/SagunDecor';
 
 const copy = {
   en: {
-    kicker: 'Nimar Patidar Sangathan, Indore',
+    kicker: 'Nimad Patidar Sangathan, Indore',
     shubh: 'Shubh Vivah',
     blessing: 'A sacred bond of two families, begun with blessings.',
     title: 'Shagun Bandhan Registration',
