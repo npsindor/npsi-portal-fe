@@ -30,9 +30,9 @@ test('admin creates Deepotsav through API; published event appears on public pag
   await page.getByRole('button', { name: 'Create Event', exact: true }).last().click();
   await expect.poll(() => events.length).toBe(1);
   expect(createdPayload).toMatchObject({ title: 'Sneh Deepotsav 2026', titleHi: 'स्नेह दीपोत्सव 2026', category: 'CULTURAL', status: 'PUBLISHED', date: UPCOMING, venue: 'Test venue only' });
-  // Old ?category= links land on the matching section of the single Events page.
+  // Old ?category= links land on the first section of the Events page.
   await page.goto('/events?category=cultural');
-  const cultural = page.locator('#cultural');
+  const cultural = page.locator('#upcoming');
   await expect(cultural.getByRole('heading', { name: 'Sneh Deepotsav 2026', exact: true })).toBeVisible();
   await expect(cultural).toBeInViewport();
   await expect(cultural.getByRole('img', { name: 'Sneh Deepotsav 2026', exact: true })).toHaveCSS('object-fit', 'contain');
@@ -54,8 +54,8 @@ test('anonymous visitors see camelCase Hindi fields returned by the backend', as
     'GET /events': [{ id: 'event', title: 'Sneh Deepotsav 2026', titleHi: 'स्नेह दीपोत्सव 2026', description: 'A community celebration.', descriptionHi: 'समाज के साथ दीपोत्सव मनाएँ।', status: 'PUBLISHED', date: UPCOMING, venue: 'Test venue only' }],
   });
   await page.goto('/events');
-  // "All Programs" (latest first) lists every published event; the category sections below repeat their own.
-  const programs = page.locator('#programs');
+  // "Current & Upcoming Events" lists every upcoming published event once.
+  const programs = page.locator('#upcoming');
   await expect(programs.getByRole('heading', { name: 'स्नेह दीपोत्सव 2026', exact: true })).toBeVisible();
   await expect(programs.getByText('समाज के साथ दीपोत्सव मनाएँ।', { exact: true })).toBeVisible();
 });

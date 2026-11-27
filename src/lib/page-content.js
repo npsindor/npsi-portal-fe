@@ -28,7 +28,7 @@ export const PAGE_CONTENT = {
       'business-promotion': ['Business Promotion', 'व्यवसाय प्रचार', 'items'],
     },
   },
-  events: { label: ['Events & Programs', 'कार्यक्रम और आयोजन'], path: '/events', sections: { hero: ['Page banner', 'पेज बैनर', 'intro'], programs: ['All Programs', 'सभी कार्यक्रम', 'intro'], garba: ['Maa Na Garba', 'माँ ना गरबा', 'intro'], cultural: ['Cultural Programs', 'सांस्कृतिक कार्यक्रम', 'intro'], calendar: ['Event Calendar', 'कार्यक्रम कैलेंडर', 'intro'] } },
+  events: { label: ['Events & Programs', 'कार्यक्रम और आयोजन'], path: '/events', sections: { hero: ['Page banner', 'पेज बैनर', 'intro'], upcoming: ['Current & Upcoming Events', 'वर्तमान एवं आगामी कार्यक्रम', 'intro'], calendar: ['Event Calendar', 'कार्यक्रम कैलेंडर', 'intro'], past: ['Past Events', 'पिछले कार्यक्रम', 'intro'] } },
   'community-services': { label: ['Community Services', 'सामुदायिक सेवाएँ'], path: '/community-services', sections: { hero: ['Page banner', 'पेज बैनर', 'intro'], 'blood-donation': ['Blood Donation', 'रक्तदान', 'intro'], 'emergency-help': ['Emergency Help', 'आपातकालीन सहायता', 'intro'], 'social-welfare': ['Social Welfare', 'समाज कल्याण', 'intro'] } },
   news: { label: ['Sandesh', 'संदेश'], path: '/news', sections: { hero: ['Page banner', 'पेज बैनर', 'intro'], notices: ['Important Notices', 'महत्वपूर्ण सूचनाएँ', 'intro'], community: ['Community News', 'सामुदायिक समाचार', 'intro'], greetings: ['Festival Greetings', 'त्योहार शुभकामनाएँ', 'intro'] } },
   sagun: { label: ['Shagun Bandhan', 'शगुन बंधन'], path: '/sagun', sections: { hero: ['Page banner', 'पेज बैनर', 'intro'] } },

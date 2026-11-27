@@ -75,29 +75,81 @@ test('Sandesh shows notices, community news and festival greetings as three sect
   await shot(page, 'sandesh-390');
 });
 
-test('Events & Programs shows Garba, Cultural and a month-by-month calendar of published events', async ({ page }) => {
+test('Events & Programs: current & upcoming cards, a month-by-month calendar and past events, each event once per section', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
-  await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN, 'GET /events': EVENTS });
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  // The API may send an event twice (paging); the page shows it once.
+  await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN, 'GET /events': [...EVENTS, { ...EVENTS[0], slug: 'maa-na-garba-2027' }].map((e, i) => (i === 0 ? { ...e, slug: 'maa-na-garba-2027' } : e)) });
   await page.goto('/events');
-  await expect(page.locator('#garba').getByRole('heading', { name: 'Maa Na Garba 2027' })).toBeVisible();
-  await expect(page.locator('#garba').getByText('Featured')).toBeVisible();
-  await expect(page.locator('#cultural').getByRole('heading', { level: 3 })).toHaveText(['Sneh Deepotsav', 'Holi Milan 2026']);
+  const upcoming = page.locator('#upcoming');
+  await expect(upcoming.getByRole('heading', { level: 2 })).toHaveText('Current & Upcoming Events');
+  await expect(upcoming).toContainText('Discover upcoming celebrations, cultural programmes and community gatherings.');
+  // Soonest first; drafts and past events are not here.
+  await expect(upcoming.getByRole('heading', { level: 3 })).toHaveText(['Sneh Deepotsav', 'Blood camp meeting', 'Maa Na Garba 2027']);
+  // One card width for all three (no wide "first" card), three in a row on desktop.
+  const widths = await upcoming.locator(':scope ul > li[id^="event-"]').evaluateAll((items) => items.map((li) => Math.round(li.getBoundingClientRect().width)));
+  expect(new Set(widths).size).toBe(1);
+  const tops = await upcoming.locator(':scope ul > li[id^="event-"]').evaluateAll((items) => items.map((li) => Math.round(li.getBoundingClientRect().top)));
+  expect(new Set(tops).size).toBe(1);
+  await expect(upcoming.getByText('Featured')).toHaveCount(0);
+  // "Free" only on free events; a paid one shows its fee.
+  await expect(upcoming.locator('#event-e2')).toContainText('Free');
+  await expect(upcoming.locator('#event-e1')).toContainText('₹200');
+  await expect(upcoming.locator('#event-e1')).not.toContainText('Free');
+  // Calendar: months in order, the date, category and place on each row.
   const calendar = page.locator('#calendar');
+  await expect(calendar).toContainText('Explore all upcoming programmes month by month.');
   const month = new Date(`${daysAhead(3)}T00:00:00`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
-  await expect(calendar.getByRole('heading', { level: 3, name: new RegExp(month) }).first()).toBeVisible();
-  await expect(calendar.getByRole('heading', { name: 'Blood camp meeting' })).toBeVisible();
+  await expect(calendar.getByRole('heading', { level: 3 }).first()).toContainText(new RegExp(month, 'i'));
+  await expect(calendar.getByRole('heading', { level: 3, name: /October 2027/i })).toBeVisible();
+  await expect(calendar.getByRole('heading', { name: 'Maa Na Garba 2027' })).toHaveCount(1);
+  await expect(calendar.getByRole('heading', { name: 'Holi Milan 2026' })).toHaveCount(0);
+  await expect(calendar.locator('#calendar-e1')).toContainText('Lalbagh Palace');
+  // Past events only in Past Events.
+  const past = page.locator('#past');
+  await expect(past.getByRole('heading', { level: 3 })).toHaveText(['Holi Milan 2026']);
+  await expect(past).toContainText('Completed');
+  await expect(past.getByRole('link', { name: /Register/ })).toHaveCount(0);
   await expect(page.getByText('Draft garba')).toHaveCount(0);
-  await calendar.getByText('Past events (1)').click();
-  await expect(calendar.getByRole('heading', { name: 'Holi Milan 2026' })).toBeVisible();
-  await page.locator('#garba').getByRole('button', { name: /View details.*Maa Na Garba 2027/ }).click();
-  await expect(page.getByRole('dialog')).toContainText('Lalbagh Palace');
-  await expect(page.getByRole('dialog')).toContainText('₹200');
+  // Every event id once on the page (global search links /events#event-<id>).
+  const ids = await page.locator('[id^="event-"]').evaluateAll((nodes) => nodes.map((n) => n.id));
+  expect(ids.sort()).toEqual(['event-e1', 'event-e2', 'event-e3', 'event-e4']);
+  // View Details: the event's own page when it has one, otherwise the details window.
+  await expect(upcoming.locator('#event-e1').getByRole('link', { name: /View Details/ })).toHaveAttribute('href', '/events/maa-na-garba-2027');
+  await upcoming.locator('#event-e2').getByRole('button', { name: /View Details/ }).click();
+  await expect(page.getByRole('dialog')).toContainText('Patidar Bhawan');
+  await page.keyboard.press('Escape');
+  await past.getByRole('button', { name: /View Details.*Holi Milan/ }).click();
+  await expect(page.getByRole('dialog')).toContainText('Past event.');
+  await expect(page.getByRole('dialog').getByRole('link', { name: /Register/ })).toHaveCount(0);
   await page.keyboard.press('Escape');
   await shot(page, 'events-1280');
+  // Tablet: two per row; phone: one per row, no sideways scrolling.
+  await page.setViewportSize({ width: 820, height: 1100 });
+  const tabletTops = await upcoming.locator(':scope ul > li[id^="event-"]').evaluateAll((items) => items.map((li) => Math.round(li.getBoundingClientRect().top)));
+  expect(tabletTops[0]).toBe(tabletTops[1]);
+  expect(tabletTops[2]).toBeGreaterThan(tabletTops[0]);
   await page.setViewportSize({ width: 390, height: 844 });
+  const phoneTops = await upcoming.locator(':scope ul > li[id^="event-"]').evaluateAll((items) => items.map((li) => Math.round(li.getBoundingClientRect().top)));
+  expect(phoneTops[1]).toBeGreaterThan(phoneTops[0]);
   await noOverflow(page);
   await shot(page, 'events-390');
+  expect(errors).toEqual([]);
+});
+
+test('Events & Programs: empty sections show a message; old /events#garba links open the first section', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
+  await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN, 'GET /events': [EVENTS[1]] });
+  await page.goto('/events#garba');
+  await expect(page.locator('#upcoming')).toBeInViewport();
+  await expect(page.locator('#past')).toContainText('No past events yet.');
+  await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN, 'GET /events': [EVENTS[3]] });
+  await page.goto('/events');
+  await expect(page.locator('#upcoming')).toContainText('No upcoming events are scheduled yet.');
+  await expect(page.locator('#calendar')).toContainText('No upcoming events are scheduled yet.');
+  await expect(page.locator('#past').getByRole('heading', { level: 3 })).toHaveText(['Holi Milan 2026']);
 });
 
 test('Community Services shows blood donation, emergency help and social welfare posts', async ({ page }) => {
