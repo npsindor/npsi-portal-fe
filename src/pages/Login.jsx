@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, GraduationCap, Info, LogIn, Mail, MailCheck, Lock, Loader2, ShieldCheck } from "lucide-react";
+import { ArrowLeft, GraduationCap, Info, LogIn, Mail, MailCheck, Lock, Loader2, ShieldCheck, Smartphone } from "lucide-react";
 import { isFamilyOnlyPath, isStudentReturn, STUDENT_REGISTRATION_PATH, USE_FAMILY_LOGIN, USE_STUDENT_LOGIN } from "@/lib/student-flow";
 import AuthLayout from "@/components/AuthLayout";
 import { safeReturnTo } from "@/lib/authReturnTo";
@@ -15,6 +15,8 @@ import { fill, regCopy, translateError } from "@/lib/registration-copy";
 const NOT_VERIFIED = "Please verify your account before logging in.";
 // Administrators: after the password, a sign-in code is emailed; the same code step finishes the login.
 const ADMIN_CODE_REQUIRED = "Enter the sign-in code sent to your email to finish logging in.";
+// …or by SMS to the verified mobile on the account (email when the SMS could not be sent).
+const ADMIN_CODE_SMS = "Enter the sign-in code sent by SMS to the mobile number on your account to finish logging in.";
 // Seconds before another code can be requested.
 const RESEND_WAIT = 30;
 // "vinay.patidar@gmail.com" → "v•••••@gmail.com": enough to recognise the inbox without showing the whole address.
@@ -43,6 +45,8 @@ export default function Login() {
   const [code, setCode] = useState("");
   const [wait, setWait] = useState(0);
   const [resent, setResent] = useState(false);
+  // The code went by SMS to the account's mobile (administrators with a verified mobile), not by email.
+  const [codeBySms, setCodeBySms] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -85,7 +89,9 @@ export default function Login() {
     setError(message === NOT_VERIFIED ? rt.notVerified : translateError(message, lang));
   };
   // The password step answered "a code was emailed" (403): show the code step, not an error.
-  const codeSent = (err) => err.status === 403 && (err.message === ADMIN_CODE_REQUIRED || (err.message === NOT_VERIFIED && email.includes("@")));
+  const codeSent = (err) =>
+    err.status === 403 &&
+    (err.message === ADMIN_CODE_REQUIRED || err.message === ADMIN_CODE_SMS || (err.message === NOT_VERIFIED && email.includes("@")));
   const openCodeStep = () => {
     setCode("");
     setError("");
@@ -110,8 +116,10 @@ export default function Login() {
       goOn(await base44.auth.loginViaEmailPassword(toLoginId(email), password, portal));
     } catch (err) {
       // Only an administrator or an unverified account gets the emailed-code step; other 403s are portal or status messages.
-      if (codeSent(err)) openCodeStep();
-      else showError(err);
+      if (codeSent(err)) {
+        setCodeBySms(err.message === ADMIN_CODE_SMS);
+        openCodeStep();
+      } else showError(err);
     } finally {
       setLoading(false);
     }
@@ -146,6 +154,8 @@ export default function Login() {
       goOn(await base44.auth.loginViaEmailPassword(toLoginId(email), password, portal));
     } catch (err) {
       if (codeSent(err)) {
+        // A resend may go another way (SMS, or email when the SMS could not be sent).
+        setCodeBySms(err.message === ADMIN_CODE_SMS);
         setCode("");
         setResent(true);
         setWait(RESEND_WAIT);
@@ -217,15 +227,23 @@ export default function Login() {
       {needsCode ? (
         <form onSubmit={verifyCode} className="space-y-4">
           <div role="status" className="flex gap-3 rounded-lg border border-sky-200 bg-sky-50 p-3 text-sm text-sky-950 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-100">
-            <MailCheck className="mt-0.5 h-5 w-5 shrink-0 text-sky-600 dark:text-sky-400" aria-hidden="true" />
+            {codeBySms ? (
+              <Smartphone className="mt-0.5 h-5 w-5 shrink-0 text-sky-600 dark:text-sky-400" aria-hidden="true" />
+            ) : (
+              <MailCheck className="mt-0.5 h-5 w-5 shrink-0 text-sky-600 dark:text-sky-400" aria-hidden="true" />
+            )}
             <div className="space-y-1">
-              <p className="font-semibold">{rt.loginCodeTitle}</p>
+              <p className="font-semibold">{codeBySms ? rt.loginCodeSmsTitle : rt.loginCodeTitle}</p>
               <p>
-                {email.includes("@") ? fill(rt.loginCodeSentTo, { email: maskEmail(email.trim()) }) : rt.loginCodeSentRegistered}
+                {codeBySms
+                  ? rt.loginCodeSentSms
+                  : email.includes("@")
+                    ? fill(rt.loginCodeSentTo, { email: maskEmail(email.trim()) })
+                    : rt.loginCodeSentRegistered}
               </p>
               <p className="flex gap-1.5 text-sky-800/90 dark:text-sky-200/80">
                 <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                <span>{rt.loginCodeHint}</span>
+                <span>{codeBySms ? rt.loginCodeSmsHint : rt.loginCodeHint}</span>
               </p>
               {resent && <p className="font-medium text-sky-700 dark:text-sky-300">{rt.loginCodeResent}</p>}
             </div>

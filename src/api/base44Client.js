@@ -287,6 +287,13 @@ export const base44 = {
     mine: () => request(`${API_PREFIX_SAFAR}/me`),
     create: data => request(`${API_PREFIX_SAFAR}/entries`, { method: 'POST', body: JSON.stringify(data) }),
     cancel: id => request(`${API_PREFIX_SAFAR}/entries/${encodeURIComponent(id)}/cancellation`, { method: 'PATCH' }),
+    // Available Journeys & Requests: other members' open entries; { origin, destination, date, time } rank and filter.
+    available: (filters = {}) => {
+      const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value)).toString();
+      return request(`${API_PREFIX_SAFAR}/available${query ? `?${query}` : ''}`);
+    },
+    // Direct request to another member's entry (parcel / travel together / offer to help).
+    connect: (id, data) => request(`${API_PREFIX_SAFAR}/entries/${encodeURIComponent(id)}/connections`, { method: 'POST', body: JSON.stringify(data) }),
     decide: (id, decision) => request(`${API_PREFIX_SAFAR}/matches/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ decision }) }),
   },
   contactInfo: { list: ({ limit = 25, offset = 0 } = {}) => request(`${API.contactInfo}?${new URLSearchParams({ limit, offset })}`), create: (data) => request(API.contactInfo, { method: 'POST', body: JSON.stringify(data) }) },

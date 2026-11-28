@@ -44,19 +44,19 @@ test('homepage first section: "Blood Donor" is one of the services and opens its
 test('a page an admin switched off leaves the menu, footer, homepage and search; its link says "not available"', async ({ page }) => {
   await en(page);
   await desktop(page);
-  await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN, 'GET /site-visibility': { hidden: ['page:/transportation', 'page:/core-team', 'section:home.gallery', 'section:home.updates'] } });
+  await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN, 'GET /site-visibility': { hidden: ['page:/travel-assistance', 'page:/core-team', 'section:home.gallery', 'section:home.updates'] } });
   await page.goto('/');
   const nav = page.locator('#public-navigation');
   await nav.locator('summary', { hasText: 'Services' }).click();
   await expect(nav.getByRole('link', { name: 'Room Hunting', exact: true })).toBeVisible();
-  await expect(nav.getByRole('link', { name: 'Transportation', exact: true })).toHaveCount(0);
-  await expect(page.locator('#services').getByRole('link', { name: /Transportation/ })).toHaveCount(0);
-  await expect(page.locator('footer').getByRole('link', { name: 'Transportation' })).toHaveCount(0);
+  await expect(nav.getByRole('link', { name: 'Travel & Assistance', exact: true })).toHaveCount(0);
+  await expect(page.locator('#services').getByRole('link', { name: /Travel & Assistance/ })).toHaveCount(0);
+  await expect(page.locator('footer').getByRole('link', { name: 'Travel & Assistance' })).toHaveCount(0);
   await expect(page.locator('footer').getByRole('link', { name: 'Core Team' })).toHaveCount(0);
   await expect(page.locator('#updates')).toHaveCount(0);
   await expect(page.getByRole('heading', { name: /Photo Gallery/i })).toHaveCount(0);
   await expect(page.locator('#events')).toHaveCount(1);
-  await page.goto('/transportation');
+  await page.goto('/travel-assistance');
   await expect(page.getByRole('heading', { level: 1, name: 'This page is not available right now' })).toBeVisible();
   await page.goto('/core-team');
   await expect(page.getByRole('heading', { level: 1, name: 'This page is not available right now' })).toBeVisible();
@@ -84,13 +84,13 @@ test('admin: Page visibility switches pages and sections and saves only the chan
   const calls = await mockApi(page, {
     'GET /auth/me': ADMIN,
     'GET /site-visibility': { hidden: ['page:/help'] },
-    'PUT /site-visibility': { hidden: ['page:/transportation', 'section:home.gallery'] },
+    'PUT /site-visibility': { hidden: ['page:/travel-assistance', 'section:home.gallery'] },
   });
   await page.goto('/admin');
   await page.getByRole('link', { name: 'Page visibility (on / off)' }).first().click();
   await expect(page).toHaveURL(/\/admin\/site-visibility$/);
   await expect(page.getByRole('switch', { name: 'Help' })).toHaveAttribute('aria-checked', 'false');
-  await page.getByRole('switch', { name: 'Transportation' }).click();
+  await page.getByRole('switch', { name: 'Travel & Assistance' }).click();
   await page.getByRole('switch', { name: 'Photo gallery' }).click();
   await page.getByRole('switch', { name: 'Help' }).click();
   await expect(page.getByRole('status').filter({ hasText: '3 unsaved changes' })).toBeVisible();
@@ -98,11 +98,11 @@ test('admin: Page visibility switches pages and sections and saves only the chan
   await expect.poll(() => calls.find((call) => call.key === 'PUT /site-visibility')?.body).toEqual({
     items: expect.arrayContaining([
       { key: 'page:/help', visible: true },
-      { key: 'page:/transportation', visible: false },
+      { key: 'page:/travel-assistance', visible: false },
       { key: 'section:home.gallery', visible: false },
     ]),
   });
-  await expect(page.getByRole('switch', { name: 'Transportation' })).toHaveAttribute('aria-checked', 'false');
+  await expect(page.getByRole('switch', { name: 'Travel & Assistance' })).toHaveAttribute('aria-checked', 'false');
 });
 
 test('admin "Add to team": typing a name suggests registered people; picking one fills the form and links the record', async ({ page }) => {

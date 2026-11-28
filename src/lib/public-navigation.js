@@ -5,7 +5,7 @@ export const publicNavigation = [
   { label: 'About Us', to: '/about' },
   { label: 'Events & Programs', to: '/events' },
   { label: 'Sandesh', to: '/news' },
-  { label: 'Services', items: [['Shagun Bandhan', '/sagun'], ['Transportation', '/transportation'], ['Room Hunting', '/room-hunting'], ['Health Support', '/medical']] },
+  { label: 'Services', items: [['Shagun Bandhan', '/sagun'], ['Travel & Assistance', '/travel-assistance'], ['Room Hunting', '/room-hunting'], ['Health Support', '/medical']] },
   { label: 'Blood Donor', to: '/community-services' },
   { label: 'Career & Business', to: '/career-business' },
   { label: 'Contact', items: [['Contact Us', '/contact'], ['Feedback', '/public-feedback']] },

@@ -100,7 +100,7 @@ test('admin login: the password step asks for the emailed code, which finishes t
   await page.locator('form button[type="submit"]').last().click();
   // The code step is an information notice (not an error) and replaces the password form; a mobile login names no address.
   await expect(page.getByRole('status')).toContainText('the email address on your account');
-  await expect(page.getByRole('status')).toContainText('not SMS');
+  await expect(page.getByRole('status')).toContainText('spam folder');
   await expect(page.getByRole('alert')).toHaveCount(0);
   await expect(page.locator('#password')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /Resend in \d+s/ })).toBeDisabled();
@@ -108,6 +108,40 @@ test('admin login: the password step asks for the emailed code, which finishes t
   await page.getByRole('button', { name: 'Verify' }).click();
   await expect(page).toHaveURL(/\/admin$/);
   expect(sent[0]).toMatchObject({ email: '9876543210', otpCode: '123456', recaptchaToken: 'test-recaptcha-token' });
+});
+
+test('admin login: a code sent by SMS says so (phone, SMS provider name), and a resend that fell back to email switches the notice', async ({ page }) => {
+  let logins = 0;
+  await mockApi(page);
+  await page.route('**/api/v1/auth/**', async (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    if (path.endsWith('/auth/sessions') && request.method() === 'POST') {
+      logins += 1;
+      const error =
+        logins === 1
+          ? 'Enter the sign-in code sent by SMS to the mobile number on your account to finish logging in.'
+          : 'Enter the sign-in code sent to your email to finish logging in.';
+      return route.fulfill({ status: 403, json: { error } });
+    }
+    if (path.endsWith('/auth/me')) return route.fulfill({ status: 401, json: { error: 'Authentication required.' } });
+    return route.fallback();
+  });
+  await page.clock.install();
+  await page.goto('/login');
+  await page.fill('#email', 'admin@example.com');
+  await page.fill('#password', 'Garba#2026');
+  await page.locator('form button[type="submit"]').last().click();
+  const notice = page.getByRole('status');
+  await expect(notice).toContainText('Check your phone');
+  await expect(notice).toContainText('by SMS to the mobile number on your account');
+  await expect(notice).toContainText('CP-CInfoS');
+  await expect(page.getByRole('alert')).toHaveCount(0);
+  await page.clock.runFor(31_000);
+  await page.getByRole('button', { name: 'Resend code' }).click();
+  await expect(notice).toContainText('Check your email');
+  await expect(notice).toContainText('a••••@example.com');
+  await expect(notice).toContainText('A new code has been sent');
 });
 
 test('reset link: the token travels after "#", is used for the reset and is removed from the address bar', async ({ page }) => {

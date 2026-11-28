@@ -137,7 +137,9 @@ const AuthenticatedApp = () => {
       <Route path="/privacy" element={<LegalPage kind="privacy" />} />
       <Route path="/news" element={<News />} />
 
-      <Route path="/transportation" element={<SafarSaathi />} />
+      <Route path="/travel-assistance" element={<SafarSaathi />} />
+      {/* Old address (emails, bookmarks, the app): same page, keeps ?query and #section. */}
+      <Route path="/transportation" element={<MovedTo path="/travel-assistance" />} />
       <Route path="/medical" element={<SehatSaathi />} />
       <Route path="/room-hunting" element={<RoomHunting />} />
       <Route path="/search" element={<SearchResults />} />
@@ -215,7 +217,8 @@ const AuthenticatedApp = () => {
           <Route path="/admin/event-members" element={<AdminEventMembers />} />
           {/* The old Core Team admin page: Core Team members are managed with every other team now. */}
           <Route path="/admin/core-team" element={<Navigate to="/admin/event-members?section=CORE_TEAM" replace />} />
-          <Route path="/admin/transportation" element={<AdminTransportation />} />
+          <Route path="/admin/travel-assistance" element={<AdminTransportation />} />
+          <Route path="/admin/transportation" element={<MovedTo path="/admin/travel-assistance" />} />
         </Route>
       </Route>
 
@@ -232,6 +235,12 @@ const AuthenticatedApp = () => {
 function FamilyOnly({ children }) {
   const { user } = useAuth();
   return user?.account?.type === 'STUDENT' ? <Navigate to="/portal" replace /> : children;
+}
+
+// A page that moved: the same query string and #section on the new address (e.g. /transportation#safar-form).
+function MovedTo({ path }) {
+  const { search, hash } = useLocation();
+  return <Navigate to={`${path}${search}${hash}`} replace />;
 }
 
 // Protected pages send logged-out visitors to /login and bring them back afterwards.

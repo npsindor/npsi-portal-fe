@@ -89,21 +89,24 @@ test('registration: the chosen blood group is on the review step and sent with t
   expect(calls.find((call) => call.key === 'POST /me/registrations').body).toMatchObject({ type: 'FAMILY', bloodGroup: 'B+' });
 });
 
-test('events: "All Programs" lists the latest programme first', async ({ page }) => {
+test('events: upcoming programmes soonest first, past ones latest first, each in one section', async ({ page }) => {
   await en(page);
+  const day = (offset) => new Date(Date.now() + 5.5 * 3600e3 + offset * 86400e3).toISOString().slice(0, 10);
   const event = (id, title, category, date) => ({ id, title, category, date, status: 'PUBLISHED', venue: 'Indore', fee: 0 });
   await mockApi(page, {
     'GET /auth/me': NOT_LOGGED_IN,
     'GET /events': [
-      event('e1', 'Swajan Samaroh', 'CULTURAL', '2026-05-10'),
-      event('e3', 'Sneh Deepotsav', 'CULTURAL', '2026-11-08'),
-      event('e2', 'Maa Na Garba', 'GARBA', '2026-10-01'),
+      event('e1', 'Swajan Samaroh', 'GENERAL', day(40)),
+      event('e3', 'Sneh Deepotsav', 'CULTURAL', day(0)),
+      event('e2', 'Maa Na Garba', 'GARBA', day(10)),
+      event('e4', 'Holi Milan', 'CULTURAL', day(-30)),
+      event('e5', 'Diwali Milan', 'CULTURAL', day(-5)),
     ],
   });
   await page.goto('/events');
-  const titles = page.locator('#programs').getByRole('heading', { level: 3 });
-  await expect(titles).toHaveText(['Sneh Deepotsav', 'Maa Na Garba', 'Swajan Samaroh']);
-  await expect(page.locator('#cultural').getByRole('heading', { level: 3 })).toHaveText(['Sneh Deepotsav', 'Swajan Samaroh']);
+  await expect(page.locator('#upcoming').getByRole('heading', { level: 3 })).toHaveText(['Sneh Deepotsav', 'Maa Na Garba', 'Swajan Samaroh']);
+  await expect(page.locator('#upcoming #event-e3')).toContainText('Today');
+  await expect(page.locator('#past').getByRole('heading', { level: 3 })).toHaveText(['Diwali Milan', 'Holi Milan']);
 });
 
 test('home page wording: "One Community. Endless Connections.", "Patidar Connect" and Nimad', async ({ page }) => {

@@ -31,7 +31,7 @@ const serviceIcons = {
   "Career & Business": [Briefcase, "#818cf8", "#3730a3"],
   Sandesh: [Newspaper, "#38bdf8", "#0369a1"],
   "Shagun Bandhan": [UsersRound, "#fb7185", "#9f1239"],
-  Transportation: [Bus, "#facc15", "#b45309"],
+  "Travel & Assistance": [Bus, "#facc15", "#b45309"],
   "Health Support": [Stethoscope, "#34d399", "#047857"],
   "Room Hunting": [House, "#a78bfa", "#6d28d9"],
   Feedback: [MessageSquare, "#2dd4bf", "#0f766e"],

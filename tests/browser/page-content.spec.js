@@ -108,12 +108,12 @@ test('an expired session in the admin panel goes to login and back instead of fa
   await expect(page).toHaveURL(/\/login\?returnTo=%2Fadmin%2Fpage-content$/);
 });
 
-test('a banner photo set in Admin → Page Content shows on Transportation, Health Support, Room Hunting and Shagun', async ({ page }) => {
+test('a banner photo set in Admin → Page Content shows on Travel & Assistance, Health Support, Room Hunting and Shagun', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('pss_lang', 'en'));
   await page.route('**/admin-banner.png', (route) => route.fulfill({ contentType: 'image/png', body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/l9kAAAAASUVORK5CYII=', 'base64') }));
   const hero = (pageKey) => ({ id: `hero-${pageKey}`, page: pageKey, section: 'hero', role: 'INTRO', title: `Banner ${pageKey}`, titleHi: null, subtitle: null, subtitleHi: null, body: null, bodyHi: null, mediaType: 'IMAGE', mediaUrl: '/admin-banner.png', linkUrl: null, ctaLabel: null, ctaLabelHi: null, sortOrder: 0, active: true });
   await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN, 'GET /page-blocks': ['transportation', 'medical', 'room-hunting', 'sagun'].map(hero) });
-  for (const [key, path] of [['transportation', '/transportation'], ['medical', '/medical'], ['room-hunting', '/room-hunting'], ['sagun', '/sagun']]) {
+  for (const [key, path] of [['transportation', '/travel-assistance'], ['medical', '/medical'], ['room-hunting', '/room-hunting'], ['sagun', '/sagun']]) {
     await page.goto(path);
     await expect(page.getByRole('heading', { level: 1, name: `Banner ${key}` })).toBeVisible();
     await expect(page.locator('img[src="/admin-banner.png"]').first()).toBeAttached();

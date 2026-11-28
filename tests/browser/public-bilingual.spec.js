@@ -30,11 +30,15 @@ for (const lang of ['en', 'hi']) {
           const details = nav.locator('details').nth(publicNavigation.slice(0, index).filter((other) => other.items).length);
           // The previous navigation closes every dropdown; wait for that before opening this one.
           await expect(details).not.toHaveAttribute('open');
-          await details.locator('summary').click();
-          await expect(details).toHaveAttribute('open', '');
+          // Right after a navigation the next page may still be replacing the menu (a fresh one starts closed): open
+          // it again until it stays open.
+          await expect(async () => {
+            if ((await details.getAttribute('open')) === null) await details.locator('summary').click();
+            await expect(details).toHaveAttribute('open', '', { timeout: 1000 });
+          }).toPass({ timeout: 15000 });
           await details.getByRole('link').nth(childIndex).click();
         } else {
-          await nav.getByRole('link', { name: lang === 'hi' ? ({ Feedback: 'सुझाव', 'Contact Us': 'संपर्क करें', 'Room Hunting': 'आवास सहयोग', Transportation: 'यातायात सहयोग', 'Health Support': 'स्वास्थ्य सहयोग', 'Shagun Bandhan': 'शगुन बंधन' }[item.label] || publicHindi[item.label]) : item.label, exact: true }).click();
+          await nav.getByRole('link', { name: lang === 'hi' ? ({ Feedback: 'सुझाव', 'Contact Us': 'संपर्क करें', 'Room Hunting': 'आवास सहयोग', 'Travel & Assistance': 'यात्रा एवं सहायता', 'Health Support': 'स्वास्थ्य सहयोग', 'Shagun Bandhan': 'शगुन बंधन' }[item.label] || publicHindi[item.label]) : item.label, exact: true }).click();
         }
         await expect(page).toHaveURL(new URL(to, new URL(page.url()).origin).href);
         await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
@@ -124,7 +128,7 @@ test('live event details and news use authored Hindi content alongside separate 
     'GET /announcements': [{ id: 'real-news', status: 'Active', type: 'General', title: 'Published Notice', title_hi: 'प्रकाशित सूचना', body: 'Confirmed notice details', body_hi: 'पुष्ट सूचना का पूरा विवरण', date: '2026-10-27' }],
   });
   await page.goto('/events');
-  const programs = page.locator('#programs');
+  const programs = page.locator('#upcoming');
   await expect(programs.getByRole('heading', { name: 'प्रकाशित आयोजन' })).toBeVisible();
   // Live actions are rendered before the clearly labelled demo workspace.
   await programs.getByRole('button').first().click();

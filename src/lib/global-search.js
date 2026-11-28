@@ -23,7 +23,7 @@ const PAGES = [
   ['/events', 'Events & Programs', 'कार्यक्रम', 'events programs garba milan कार्यक्रम'],
   ['/news', 'Sandesh / News', 'संदेश / समाचार', 'news sandesh announcements notice समाचार सूचना'],
   ['/sagun', 'Shagun Bandhan Registration', 'शगुन बंधन पंजीकरण', 'sagun marriage vivah शगुन विवाह'],
-  ['/transportation', 'Transportation', 'यातायात सहयोग', 'transport travel safar saathi yatra परिवहन यात्रा यातायात सहयोग सफ़र'],
+  ['/travel-assistance', 'Travel & Assistance', 'यात्रा एवं सहायता', 'travel assistance transport transportation parcel delivery safar saathi yatra परिवहन यात्रा सहायता यातायात सहयोग सफ़र'],
   ['/room-hunting', 'Room Hunting', 'आवास सहयोग', 'room rent rental house flat bhk pg hostel कमरा किराया मकान आवास साथी'],
   ['/medical', 'Health Support', 'स्वास्थ्य सहयोग', 'medical health hospital doctor sehat saathi health support स्वास्थ्य चिकित्सा सेहत साथी'],
   ['/community-services', 'Community Services', 'सामुदायिक सेवाएँ', 'community services social education सेवा'],

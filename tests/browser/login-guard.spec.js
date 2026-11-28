@@ -19,7 +19,7 @@ for (const path of ['/portal', '/portal/room-hunting', '/admin/families', '/veri
 test('public pages with member features stay open to visitors', async ({ page }) => {
   await en(page);
   await mockApi(page, { 'GET /auth/me': NOT_LOGGED_IN });
-  for (const path of ['/sagun', '/transportation', '/medical', '/room-hunting', '/join']) {
+  for (const path of ['/sagun', '/travel-assistance', '/medical', '/room-hunting', '/join']) {
     await page.goto(path);
     await expect(page).toHaveURL(new RegExp(`${path}$`));
   }

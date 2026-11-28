@@ -1,6 +1,6 @@
 import { useId } from 'react';
 
-// Transportation hero scene: a member drives from the city to their home village with a neighbour's parcel on the roof;
+// Travel & Assistance hero scene: a member drives from the city to their home village with a neighbour's parcel on the roof;
 // one person hands the parcel over in the city, a family receives it at home. Decorative only (aria-hidden).
 
 const Person = ({ x, y, body, skin = '#e0a87a', flip = false, children }) => (

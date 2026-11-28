@@ -130,6 +130,7 @@ export default function MobileOtpForm({ purpose = "REGISTER", askEmail = false, 
             {fill(t.codeSentTo, { mobile: `+91 ${digits}`, channel: t[sent.channel] || sent.channel })}
             {purpose === "RESET" && sent.channel !== "EMAIL" && <span className="mt-1 block">{t.resetCodeEmailCopy}</span>}
             {purpose === "REGISTER" && sent.channel === "EMAIL" && <span className="mt-1 block">{t.emailedMobileUnverified}</span>}
+            {sent.channel === "SMS" && <span className="mt-1 block">{t.smsSenderNote}</span>}
           </p>
           <div className="space-y-2">
             <Label htmlFor="otp-code">{t.enterCode}</Label>

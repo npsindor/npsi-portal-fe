@@ -14,7 +14,7 @@ export const SITE_PAGES = [
   { path: '/events', en: 'Events & Programs', hi: 'कार्यक्रम और आयोजन' },
   { path: '/news', en: 'Sandesh / News', hi: 'संदेश / समाचार' },
   { path: '/sagun', en: 'Shagun Bandhan', hi: 'शगुन बंधन' },
-  { path: '/transportation', en: 'Transportation', hi: 'यातायात सहयोग' },
+  { path: '/travel-assistance', en: 'Travel & Assistance', hi: 'यात्रा एवं सहायता' },
   { path: '/room-hunting', en: 'Room Hunting', hi: 'आवास सहयोग' },
   { path: '/medical', en: 'Health Support', hi: 'स्वास्थ्य सहयोग' },
   { path: '/community-services', en: 'Blood Donor (Community Services)', hi: 'रक्तदाता (सामुदायिक सेवाएँ)' },

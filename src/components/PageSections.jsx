@@ -78,14 +78,15 @@ export function SectionOverview({ sections, lang }) {
   );
 }
 
-export function SectionBlock({ id, icon: Icon, colors, eyebrow, title, intro, action, tone = 'plain', block, lang, children }) {
+// `compact`: less space above and below (pages with several short sections, e.g. Events).
+export function SectionBlock({ id, icon: Icon, colors, eyebrow, title, intro, action, tone = 'plain', block, lang, compact = false, children }) {
   const heading = blockText(block, 'title', lang) || title;
   const text = blockText(block, 'body', lang) || intro;
   const media = block && block.mediaType !== 'NONE' && block.mediaUrl;
   return (
     <section id={id} aria-labelledby={`${id}-title`} className={`scroll-mt-32 border-b border-border xl:scroll-mt-40 ${tone === 'muted' ? 'bg-muted/40' : 'bg-background'}`}>
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20">
-        <div className={`mb-8 sm:mb-10 ${media ? 'grid items-center gap-8 lg:grid-cols-12' : 'flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between'}`}>
+      <div className={`mx-auto max-w-7xl px-4 sm:px-6 ${compact ? 'py-10 sm:py-14' : 'py-14 sm:py-20'}`}>
+        <div className={`${compact ? 'mb-6 sm:mb-8' : 'mb-8 sm:mb-10'} ${media ? 'grid items-center gap-8 lg:grid-cols-12' : 'flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between'}`}>
           <div className={`flex items-start gap-4 ${media ? 'lg:col-span-7' : ''}`}>
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-md" style={{ background: `linear-gradient(145deg, ${colors[0]}, ${colors[1]})` }}>
               <Icon className="h-6 w-6" aria-hidden="true" />

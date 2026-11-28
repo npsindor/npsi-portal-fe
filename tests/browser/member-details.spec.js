@@ -224,6 +224,23 @@ test('editing the owner\'s own record offers "Self (Head)" as the relationship',
   await expect(page.locator('#member-relationship option[value="Head"]')).toHaveCount(0);
 });
 
+test('the head\'s card has no Remove, and its relationship is locked to Head (other members keep both)', async ({ page }) => {
+  await en(page);
+  await mockApi(page, { 'GET /auth/me': MEMBER, 'GET /me/family': { family: FAMILY, members: MEMBERS } });
+  await page.goto('/portal/family');
+  await expect(card(page, 'Subhash Patidar').getByRole('button', { name: 'Remove' })).toHaveCount(0);
+  await expect(card(page, 'Young Child').getByRole('button', { name: 'Remove' })).toHaveCount(1);
+  await card(page, 'Subhash Patidar').getByRole('button', { name: 'Edit' }).click();
+  const relationship = page.locator('#member-relationship');
+  await expect(relationship).toBeDisabled();
+  await expect(relationship).toHaveValue('Head');
+  await expect(relationship.locator('option')).toHaveCount(1);
+  await expect(page.getByText('The head of the family stays the head.')).toBeVisible();
+  await page.reload();
+  await card(page, 'Young Child').getByRole('button', { name: 'Edit' }).click();
+  await expect(page.locator('#member-relationship')).toBeEnabled();
+});
+
 test('Settings: the account email is shown and changed with the password and a code sent to the new address', async ({ page }) => {
   await en(page);
   const calls = await mockApi(page, {

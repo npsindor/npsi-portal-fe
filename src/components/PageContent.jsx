@@ -22,7 +22,7 @@ export function usePageContent(page) {
   };
 }
 
-// Banner title/text override for pages that keep their own hero design (Sagun, Transportation, Medical, Room Hunting).
+// Banner title/text override for pages that keep their own hero design (Sagun, Travel & Assistance, Medical, Room Hunting).
 export function useHeroText(page, lang) {
   const content = usePageContent(page);
   const block = content.intro('hero');
